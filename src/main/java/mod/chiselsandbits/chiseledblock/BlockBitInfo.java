@@ -245,16 +245,15 @@ public class BlockBitInfo
 			Method method;
 			// custom dropping behavior?
 //			pb.getDrops(state, null);
-			method = ObfuscationReflectionHelper.findMethod(Block.class, "m_7381_", BlockState.class, LootContext.Builder.class);
+			method = ObfuscationReflectionHelper.findMethod(BlockBehaviour.class, "m_7381_", BlockState.class, LootContext.Builder.class);
 			final Class<?> wc = getDeclaringClass( blkClass, method.getName(), BlockState.class, LootContext.Builder.class );
 			final boolean quantityDroppedTest = wc == Block.class || wc == BlockBehaviour.class;
 
 			final boolean isNotSlab = Item.byBlock( blk ) != Items.AIR;
 			boolean itemExistsOrNotSpecialDrops = quantityDroppedTest || isNotSlab;
-
 			// ignore blocks with custom collision.
 //			pb.getShape( null, null, null, null );
-			method = ObfuscationReflectionHelper.findMethod(Block.class, "m_5940_", BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
+			method = ObfuscationReflectionHelper.findMethod(BlockBehaviour.class, "m_5940_", BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
 			Class<?> collisionClass = getDeclaringClass( blkClass, method.getName(), BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class );
 			boolean noCustomCollision = collisionClass == Block.class || collisionClass == BlockBehaviour.class || blk.getClass() == SlimeBlock.class;
 
@@ -454,9 +453,7 @@ public class BlockBitInfo
 		this.explosionResistance = explosionResistance;
 	}
 
-	public static BlockBitInfo createFromState(
-			final BlockState state )
-	{
+	public static BlockBitInfo createFromState(final BlockState state ) {
 		try
 		{
 			// require basic hardness behavior...
@@ -466,7 +463,7 @@ public class BlockBitInfo
 			Method method;
 
 //			reflectBlock.getDestroyProgress( null, null, null, null );
-			method = ObfuscationReflectionHelper.findMethod(Block.class, "m_5880_", BlockState.class, Player.class, BlockGetter.class, BlockPos.class);
+			method = ObfuscationReflectionHelper.findMethod(BlockBehaviour.class, "m_5880_", BlockState.class, Player.class, BlockGetter.class, BlockPos.class);
 			final Class<?> b_Class = getDeclaringClass( blkClass, method.getName(), BlockState.class, Player.class, BlockGetter.class, BlockPos.class );
 			final boolean test_b = b_Class == Block.class || b_Class == BlockBehaviour.class;
 
@@ -476,7 +473,7 @@ public class BlockBitInfo
 			final boolean test_c = exploResistanceClz == Block.class || exploResistanceClz == BlockBehaviour.class;
 
 //			reflectBlock.getExplosionResistance( null, null, null, null );
-			method = ObfuscationReflectionHelper.findMethod(Block.class, "getExplosionResistance", BlockState.class, BlockGetter.class, BlockPos.class, Explosion.class);
+			method = ObfuscationReflectionHelper.findMethod(IForgeBlock.class, "getExplosionResistance", BlockState.class, BlockGetter.class, BlockPos.class, Explosion.class);
 			exploResistanceClz = getDeclaringClass( blkClass, method.getName(), BlockState.class, BlockGetter.class, BlockPos.class, Explosion.class );
 			final boolean test_d = exploResistanceClz == Block.class || exploResistanceClz == BlockBehaviour.class || exploResistanceClz == null || exploResistanceClz == IForgeBlock.class;
 
