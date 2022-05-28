@@ -1,7 +1,7 @@
 package mod.chiselsandbits.api;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.AABB;
 
 import java.util.Collection;
 
@@ -32,8 +32,8 @@ public interface IChiseledBlockTileEntity
 	 * @param crossWorld
 	 * @return modified input tag.
 	 */
-	CompoundNBT writeTileEntityToTag(
-			final CompoundNBT tag,
+	CompoundTag writeTileEntityToTag(
+			final CompoundTag tag,
 			final boolean crossWorld );
 
 	/**
@@ -43,7 +43,7 @@ public interface IChiseledBlockTileEntity
 	 * @param type the type of boxes to return
 	 * @return a collection of the boxes for the tile entity
 	 */
-	Collection<AxisAlignedBB> getBoxes(
+	Collection<AABB> getBoxes(
 			final BoxType type );
 
 }

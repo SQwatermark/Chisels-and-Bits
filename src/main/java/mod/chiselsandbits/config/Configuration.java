@@ -1,6 +1,5 @@
 package mod.chiselsandbits.config;
 
-import net.minecraft.block.BlockState;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;

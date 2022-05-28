@@ -16,19 +16,19 @@ import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitSaw;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.block.BlockState;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 
-public class BitSawCrafting extends SpecialRecipe
+public class BitSawCrafting extends CustomRecipe
 {
 
 	public BitSawCrafting(
@@ -47,7 +47,7 @@ public class BitSawCrafting extends SpecialRecipe
 	};
 
 	private SawCraft getSawCraft(
-			final CraftingInventory inv )
+			final CraftingContainer inv )
 	{
 		final SawCraft r = new SawCraft();
 
@@ -55,7 +55,7 @@ public class BitSawCrafting extends SpecialRecipe
 		{
 			for ( int y = 0; y < inv.getHeight(); ++y )
 			{
-				final ItemStack is = inv.getStackInSlot(x + y * inv.getWidth());
+				final ItemStack is = inv.getItem(x + y * inv.getWidth());
 
 				if ( !ModUtil.isEmpty( is ) )
 				{
@@ -87,7 +87,7 @@ public class BitSawCrafting extends SpecialRecipe
 					if ( is != null && is.getItem() instanceof BlockItem )
 					{
 						final BlockItem blkItem = (BlockItem) is.getItem();
-						final BlockState state = blkItem.getBlock().getDefaultState();
+						final BlockState state = blkItem.getBlock().defaultBlockState();
 
 						if ( !BlockBitInfo.isSupported( state ) )
 						{
@@ -120,15 +120,15 @@ public class BitSawCrafting extends SpecialRecipe
 
 	@Override
 	public boolean matches(
-			final CraftingInventory inv,
-			final World worldIn )
+			final CraftingContainer inv,
+			final Level worldIn )
 	{
 		return getSawCraft( inv ) != null;
 	}
 
 	@Override
-	public ItemStack getCraftingResult(
-			final CraftingInventory inv )
+	public ItemStack assemble(
+			final CraftingContainer inv )
 	{
 		final SawCraft sc = getSawCraft( inv );
 
@@ -172,20 +172,20 @@ public class BitSawCrafting extends SpecialRecipe
 		switch ( direction )
 		{
 			case X:
-				split_pos = MathHelper.clamp( ( box.maxX + box.minX ) / 2, 0, 15 );
+				split_pos = Mth.clamp( ( box.maxX + box.minX ) / 2, 0, 15 );
 				scale = ( box.maxX - box.minX ) / 2;
 				break;
 			case Y:
-				split_pos = MathHelper.clamp( ( box.maxY + box.minY ) / 2, 0, 15 );
+				split_pos = Mth.clamp( ( box.maxY + box.minY ) / 2, 0, 15 );
 				scale = ( box.maxY - box.minY ) / 2;
 				break;
 			case Z:
-				split_pos = MathHelper.clamp( ( box.maxZ + box.minZ ) / 2, 0, 15 );
+				split_pos = Mth.clamp( ( box.maxZ + box.minZ ) / 2, 0, 15 );
 				scale = ( box.maxZ - box.minZ ) / 2;
 				break;
 		}
 
-		final int split_pos_plus_one = MathHelper.clamp( split_pos + 1, 0, 15 );
+		final int split_pos_plus_one = Mth.clamp( split_pos + 1, 0, 15 );
 
 		final BitIterator bi = new BitIterator();
 		while ( bi.hasNext() )
@@ -282,26 +282,26 @@ public class BitSawCrafting extends SpecialRecipe
 	}
 
     @Override
-    public boolean canFit(final int width, final int height)
+    public boolean canCraftInDimensions(final int width, final int height)
     {
         return false;
     }
 
     @Override
-	public ItemStack getRecipeOutput()
+	public ItemStack getResultItem()
 	{
 		return ModUtil.getEmptyStack();
 	}
 
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(
-			final CraftingInventory inv )
+			final CraftingContainer inv )
 	{
-		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( inv.getSizeInventory(), ItemStack.EMPTY );
+		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( inv.getContainerSize(), ItemStack.EMPTY );
 
 		for ( int i = 0; i < aitemstack.size(); ++i )
 		{
-			final ItemStack itemstack = inv.getStackInSlot( i );
+			final ItemStack itemstack = inv.getItem( i );
 			aitemstack.set( i, net.minecraftforge.common.ForgeHooks.getContainerItem( itemstack ) );
 		}
 
@@ -309,7 +309,7 @@ public class BitSawCrafting extends SpecialRecipe
 	}
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.BIT_SAW_CRAFTING.get();
     }

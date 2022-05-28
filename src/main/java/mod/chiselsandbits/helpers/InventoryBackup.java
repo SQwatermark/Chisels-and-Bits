@@ -1,23 +1,23 @@
 package mod.chiselsandbits.helpers;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class InventoryBackup
 {
 
-	IInventory original;
+	Container original;
 	ItemStack[] slots;
 
 	public InventoryBackup(
-			final IInventory inventory )
+			final Container inventory )
 	{
 		original = inventory;
-		slots = new ItemStack[original.getSizeInventory()];
+		slots = new ItemStack[original.getContainerSize()];
 
 		for ( int x = 0; x < slots.length; ++x )
 		{
-			slots[x] = original.getStackInSlot( x );
+			slots[x] = original.getItem( x );
 
 			if ( slots[x] != null )
 			{
@@ -30,7 +30,7 @@ public class InventoryBackup
 	{
 		for ( int x = 0; x < slots.length; ++x )
 		{
-			original.setInventorySlotContents( x, slots[x] );
+			original.setItem( x, slots[x] );
 		}
 	}
 }

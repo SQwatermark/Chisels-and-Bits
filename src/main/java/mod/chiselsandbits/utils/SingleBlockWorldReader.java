@@ -1,30 +1,32 @@
 package mod.chiselsandbits.utils;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeManager;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.lighting.WorldLightManager;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class SingleBlockWorldReader extends SingleBlockBlockReader implements IWorldReader
+public class SingleBlockWorldReader extends SingleBlockBlockReader implements LevelReader
 {
-    private final IWorldReader reader;
+    private final LevelReader reader;
 
-    public SingleBlockWorldReader(final BlockState state, final Block blk, final IWorldReader reader)
+    public SingleBlockWorldReader(final BlockState state, final Block blk, final LevelReader reader)
     {
         super(state, blk);
         this.reader = reader;
@@ -32,25 +34,25 @@ public class SingleBlockWorldReader extends SingleBlockBlockReader implements IW
 
     @Nullable
     @Override
-    public IChunk getChunk(final int x, final int z, final ChunkStatus requiredStatus, final boolean nonnull)
+    public ChunkAccess getChunk(final int x, final int z, final ChunkStatus requiredStatus, final boolean nonnull)
     {
         return this.reader.getChunk(x, z, requiredStatus, nonnull);
     }
 
     @Override
-    public boolean chunkExists(final int chunkX, final int chunkZ)
+    public boolean hasChunk(final int chunkX, final int chunkZ)
     {
-        return this.reader.chunkExists(chunkX, chunkZ);
+        return this.reader.hasChunk(chunkX, chunkZ);
     }
 
     @Override
-    public int getHeight(final Heightmap.Type heightmapType, final int x, final int z)
+    public int getHeight(final Heightmap.Types heightmapType, final int x, final int z)
     {
         return this.reader.getHeight(heightmapType, x, z);
     }
 
     @Override
-    public int getSkylightSubtracted()
+    public int getSkyDarken()
     {
         return 15;
     }
@@ -62,15 +64,15 @@ public class SingleBlockWorldReader extends SingleBlockBlockReader implements IW
     }
 
     @Override
-    public Biome getNoiseBiomeRaw(final int x, final int y, final int z)
+    public Holder<Biome> getUncachedNoiseBiome(final int x, final int y, final int z)
     {
-        return this.reader.getNoiseBiomeRaw(x, y, z);
+        return this.reader.getUncachedNoiseBiome(x, y, z);
     }
 
     @Override
-    public boolean isRemote()
+    public boolean isClientSide()
     {
-        return this.reader.isRemote();
+        return this.reader.isClientSide();
     }
 
     @Override
@@ -80,21 +82,21 @@ public class SingleBlockWorldReader extends SingleBlockBlockReader implements IW
     }
 
     @Override
-    public DimensionType getDimensionType()
+    public DimensionType dimensionType()
     {
-        return this.reader.getDimensionType();
+        return this.reader.dimensionType();
     }
 
     @Override
-    public float func_230487_a_(final Direction p_230487_1_, final boolean p_230487_2_)
+    public float getShade(final Direction p_230487_1_, final boolean p_230487_2_)
     {
-        return this.reader.func_230487_a_(p_230487_1_, p_230487_2_);
+        return this.reader.getShade(p_230487_1_, p_230487_2_);
     }
 
     @Override
-    public WorldLightManager getLightManager()
+    public LevelLightEngine getLightEngine()
     {
-        return this.reader.getLightManager();
+        return this.reader.getLightEngine();
     }
 
     @Override
@@ -104,9 +106,7 @@ public class SingleBlockWorldReader extends SingleBlockBlockReader implements IW
     }
 
     @Override
-    public Stream<VoxelShape> func_230318_c_(
-      @Nullable final Entity p_230318_1_, final AxisAlignedBB p_230318_2_, final Predicate<Entity> p_230318_3_)
-    {
-        return this.reader.func_230318_c_(p_230318_1_, p_230318_2_, p_230318_3_);
+    public List<VoxelShape> getEntityCollisions(@Nullable Entity p_186427_, AABB p_186428_) {
+        return this.reader.getEntityCollisions(p_186427_, p_186428_);
     }
 }

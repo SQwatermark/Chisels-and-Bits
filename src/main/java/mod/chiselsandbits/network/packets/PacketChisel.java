@@ -2,7 +2,7 @@ package mod.chiselsandbits.network.packets;
 
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.BlockChiseled.ReplaceWithChiseledValue;
-import mod.chiselsandbits.chiseledblock.TileEntityBlockChiseled;
+import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.BitLocation;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.iterators.ChiselIterator;
@@ -15,23 +15,23 @@ import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.modes.ChiselMode;
 import mod.chiselsandbits.network.ModPacket;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +44,9 @@ public class PacketChisel extends ModPacket
 	BitOperation place;
 	Direction    side;
 	ChiselMode   mode;
-	Hand         hand;
+	InteractionHand         hand;
 
-	public PacketChisel(PacketBuffer buffer)
+	public PacketChisel(FriendlyByteBuf buffer)
 	{
 	    readPayload(buffer);
 	}
@@ -57,7 +57,7 @@ public class PacketChisel extends ModPacket
 			final BitLocation to,
 			final Direction side,
 			final ChiselMode mode,
-			final Hand hand )
+			final InteractionHand hand )
 	{
 		this.place = place;
 		this.from = BitLocation.min( from, to );
@@ -72,7 +72,7 @@ public class PacketChisel extends ModPacket
 			final BitLocation location,
 			final Direction side,
 			final ChiselMode mode,
-			final Hand hand )
+			final InteractionHand hand )
 	{
 		this.place = place;
 		from = to = location;
@@ -83,15 +83,15 @@ public class PacketChisel extends ModPacket
 
 	@Override
 	public void server(
-			final ServerPlayerEntity playerEntity )
+			final ServerPlayer playerEntity )
 	{
 		doAction( playerEntity );
 	}
 
 	public int doAction(
-			final PlayerEntity who )
+			final Player who )
 	{
-		final World world = who.getEntityWorld();
+		final Level world = who.getCommandSenderWorld();
 		final ActingPlayer player = ActingPlayer.actingAs( who, hand );
 
 		final int minX = Math.min( from.blockPos.getX(), to.blockPos.getX() );
@@ -121,7 +121,7 @@ public class PacketChisel extends ModPacket
 					{
 						final BlockPos pos = new BlockPos( xOff, yOff, zOff );
 
-						final int placeStateID = place.usesBits() ? ItemChiseledBit.getStackState( who.getHeldItem( hand ) ) : 0;
+						final int placeStateID = place.usesBits() ? ItemChiseledBit.getStackState( who.getItemInHand( hand ) ) : 0;
 						final IContinuousInventory chisels = new ContinousChisels( player, pos, side );
 						final IContinuousInventory bits = new ContinousBits( player, pos, placeStateID );
 
@@ -144,19 +144,19 @@ public class PacketChisel extends ModPacket
 							}
 						}
 
-						if (world instanceof ServerWorld && world.getServer() != null && world.getServer().isBlockProtected((ServerWorld) world, pos, player.getPlayer() ) )
+						if (world instanceof ServerLevel && world.getServer() != null && world.getServer().isUnderSpawnProtection((ServerLevel) world, pos, player.getPlayer() ) )
 						{
 							continue;
 						}
 
-						if ( !world.isBlockModifiable( player.getPlayer(), pos ) )
+						if ( !world.mayInteract( player.getPlayer(), pos ) )
 						{
 							continue;
 						}
 
-						if ( world.getBlockState( pos ).isReplaceable(new BlockItemUseContext(who, hand, ItemStack.EMPTY, new BlockRayTraceResult(Vector3d.ZERO, Direction.NORTH, pos, false))) && place.usesBits() )
+						if ( world.getBlockState( pos ).canBeReplaced(new BlockPlaceContext(who, hand, ItemStack.EMPTY, new BlockHitResult(Vec3.ZERO, Direction.NORTH, pos, false))) && place.usesBits() )
 						{
-							world.setBlockState(pos, Blocks.AIR.getDefaultState());
+							world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 						}
 
 						ReplaceWithChiseledValue rv = null;
@@ -166,10 +166,10 @@ public class PacketChisel extends ModPacket
 							blkObj = blkstate.getBlock();
 						}
 
-						final TileEntity te = rv.te != null ? rv.te : ModUtil.getChiseledTileEntity( world, pos, place.usesBits() );
-						if ( te instanceof TileEntityBlockChiseled )
+						final BlockEntity te = rv.te != null ? rv.te : ModUtil.getChiseledTileEntity( world, pos, place.usesBits() );
+						if ( te instanceof BlockEntityChiseledBlock)
 						{
-							final TileEntityBlockChiseled tec = (TileEntityBlockChiseled) te;
+							final BlockEntityChiseledBlock tec = (BlockEntityChiseledBlock) te;
 
 							final VoxelBlob mask = new VoxelBlob();
 
@@ -258,39 +258,39 @@ public class PacketChisel extends ModPacket
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		from = readBitLoc( buffer );
 		to = readBitLoc( buffer );
 
-		place = buffer.readEnumValue( BitOperation.class );
+		place = buffer.readEnum( BitOperation.class );
 		side = Direction.values()[buffer.readInt()];
 		mode = ChiselMode.values()[buffer.readInt()];
-		hand = Hand.values()[buffer.readInt()];
+		hand = InteractionHand.values()[buffer.readInt()];
 	}
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		writeBitLoc( from, buffer );
 		writeBitLoc( to, buffer );
 
-		buffer.writeEnumValue( place );
+		buffer.writeEnum( place );
 		buffer.writeInt( side.ordinal() );
 		buffer.writeInt( mode.ordinal() );
 		buffer.writeInt( hand.ordinal() );
 	}
 
 	private BitLocation readBitLoc(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		return new BitLocation( buffer.readBlockPos(), buffer.readByte(), buffer.readByte(), buffer.readByte() );
 	}
 
 	private void writeBitLoc(
 			final BitLocation from2,
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		buffer.writeBlockPos( from2.blockPos );
 		buffer.writeByte( from2.bitX );

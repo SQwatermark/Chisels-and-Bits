@@ -5,7 +5,7 @@ import mod.chiselsandbits.api.*;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.BlockChiseled.ReplaceWithChiseledValue;
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
-import mod.chiselsandbits.chiseledblock.TileEntityBlockChiseled;
+import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.BitIterator;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
@@ -13,13 +13,13 @@ import mod.chiselsandbits.client.UndoTracker;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class BitAccess implements IBitAccess
 {
 
-	private final World world;
+	private final Level world;
 	private final BlockPos pos;
 	private final VoxelBlob blob;
 	private final VoxelBlob filler;
@@ -42,7 +42,7 @@ public class BitAccess implements IBitAccess
 	}
 
 	public BitAccess(
-			final World worldIn,
+			final Level worldIn,
 			final BlockPos pos,
 			final VoxelBlob blob,
 			final VoxelBlob filler )
@@ -108,12 +108,12 @@ public class BitAccess implements IBitAccess
 	public void commitChanges(
 			final boolean triggerUpdates )
 	{
-		final World w = world;
+		final Level w = world;
 		final BlockPos p = pos;
 
 		if ( w != null && p != null )
 		{
-			TileEntityBlockChiseled tile = ModUtil.getChiseledTileEntity( w, p, true );
+			BlockEntityChiseledBlock tile = ModUtil.getChiseledTileEntity( w, p, true );
 			final VoxelStats cb = blob.getVoxelStats();
 			ReplaceWithChiseledValue rv = null;
 
@@ -153,7 +153,7 @@ public class BitAccess implements IBitAccess
 		final NBTBlobConverter c = new NBTBlobConverter();
 		c.setBlob( blob );
 
-		final CompoundNBT nbttagcompound = new CompoundNBT();
+		final CompoundTag nbttagcompound = new CompoundTag();
 		c.writeChisleData( nbttagcompound, crossWorld );
 
 		final ItemStack stack;
@@ -169,7 +169,7 @@ public class BitAccess implements IBitAccess
 			}
 
 			stack = new ItemStack( blk, 1 );
-			stack.setTagInfo( ModUtil.NBT_BLOCKENTITYTAG, nbttagcompound );
+			stack.addTagElement( ModUtil.NBT_BLOCKENTITYTAG, nbttagcompound );
 		}
 		else
 		{

@@ -6,9 +6,9 @@ import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
@@ -28,10 +28,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class EventPlayerInteract
 {
 
-	private static WeakHashMap<PlayerEntity, Boolean> serverSuppressEvent = new WeakHashMap<PlayerEntity, Boolean>();
+	private static WeakHashMap<Player, Boolean> serverSuppressEvent = new WeakHashMap<Player, Boolean>();
 
 	public static void setPlayerSuppressionState(
-			final PlayerEntity player,
+			final Player player,
 			final boolean state )
 	{
 		if ( state )
@@ -57,7 +57,7 @@ public class EventPlayerInteract
 				final BlockState state = event.getWorld().getBlockState( event.getPos() );
 				if ( BlockBitInfo.canChisel( state ) )
 				{
-					if ( event.getWorld().isRemote )
+					if ( event.getWorld().isClientSide )
 					{
 						// this is called when the player is survival -
 						// client side.
@@ -86,7 +86,7 @@ public class EventPlayerInteract
 			final Event.Result useItem )
 	{
 		// client is dragging...
-		if ( event.getWorld().isRemote )
+		if ( event.getWorld().isClientSide )
 		{
 			if ( ClientSide.instance.getStartPos() != null )
 			{
@@ -95,7 +95,7 @@ public class EventPlayerInteract
 		}
 
 		// server is supressed.
-		if ( !event.getWorld().isRemote && event.getEntity() != null && useItem != Event.Result.DENY )
+		if ( !event.getWorld().isClientSide && event.getEntity() != null && useItem != Event.Result.DENY )
 		{
 			if ( serverSuppressEvent.containsKey( event.getPlayer() ) )
 			{

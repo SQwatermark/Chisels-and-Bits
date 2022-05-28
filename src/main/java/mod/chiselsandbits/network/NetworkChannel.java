@@ -1,19 +1,19 @@
 package mod.chiselsandbits.network;
 
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
+
 import java.util.function.Function;
 
 /**
@@ -26,7 +26,7 @@ public class NetworkChannel
     /**
      * Forge network channel
      */
-    private final        SimpleChannel rawChannel;
+    private final SimpleChannel rawChannel;
 
     /**
      * Creates a new instance of network channel.
@@ -56,10 +56,10 @@ public class NetworkChannel
      * @param msgClazz   message class
      * @param msgCreator supplier with new instance of msgClazz
      */
-    public <MSG extends ModPacket> void registerMessage(final int id, final Class<MSG> msgClazz, final Function<PacketBuffer, MSG> msgCreator)
+    public <MSG extends ModPacket> void registerMessage(final int id, final Class<MSG> msgClazz, final Function<FriendlyByteBuf, MSG> msgCreator)
     {
         rawChannel.registerMessage(id, msgClazz, ModPacket::getPayload, msgCreator, (msg, ctxIn) -> {
-            final Context ctx = ctxIn.get();
+            final NetworkEvent.Context ctx = ctxIn.get();
             final LogicalSide packetOrigin = ctx.getDirection().getOriginationSide();
             ctx.setPacketHandled(true);
             // boolean param MUST equals true if packet arrived at logical server
@@ -83,7 +83,7 @@ public class NetworkChannel
      * @param msg    message to send
      * @param player target player
      */
-    public void sendToPlayer(final ModPacket msg, final ServerPlayerEntity player)
+    public void sendToPlayer(final ModPacket msg, final ServerPlayer player)
     {
         rawChannel.send(PacketDistributor.PLAYER.with(() -> player), msg);
     }
@@ -94,9 +94,9 @@ public class NetworkChannel
      * @param msg message to send
      * @param ctx network context
      */
-    public void sendToOrigin(final ModPacket msg, final Context ctx)
+    public void sendToOrigin(final ModPacket msg, final NetworkEvent.Context ctx)
     {
-        final ServerPlayerEntity player = ctx.getSender();
+        final ServerPlayer player = ctx.getSender();
         if (player != null) // side check
         {
             sendToPlayer(msg, player);
@@ -115,7 +115,7 @@ public class NetworkChannel
      */
     public void sendToDimension(final ModPacket msg, final ResourceLocation dim)
     {
-        rawChannel.send(PacketDistributor.DIMENSION.with(() -> RegistryKey.getOrCreateKey(Registry.WORLD_KEY, dim)), msg);
+        rawChannel.send(PacketDistributor.DIMENSION.with(() -> ResourceKey.create(Registry.DIMENSION_REGISTRY, dim)), msg);
     }
 
     /**
@@ -123,9 +123,9 @@ public class NetworkChannel
      *
      * @param msg message to send
      * @param pos target position and radius
-     * @see TargetPoint
+     * @see PacketDistributor.TargetPoint
      */
-    public void sendToPosition(final ModPacket msg, final TargetPoint pos)
+    public void sendToPosition(final ModPacket msg, final PacketDistributor.TargetPoint pos)
     {
         rawChannel.send(PacketDistributor.NEAR.with(() -> pos), msg);
     }
@@ -180,7 +180,7 @@ public class NetworkChannel
      * @param msg   message to send
      * @param chunk target chunk to look at
      */
-    public void sendToTrackingChunk(final ModPacket msg, final Chunk chunk)
+    public void sendToTrackingChunk(final ModPacket msg, final LevelChunk chunk)
     {
         rawChannel.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), msg);
     }

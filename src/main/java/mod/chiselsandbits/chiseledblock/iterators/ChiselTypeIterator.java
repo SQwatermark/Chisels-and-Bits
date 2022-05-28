@@ -3,7 +3,7 @@ package mod.chiselsandbits.chiseledblock.iterators;
 import mod.chiselsandbits.chiseledblock.iterators.ChiselExtrudeIterator.ChiselExtrudeMaterialIterator;
 import mod.chiselsandbits.helpers.IVoxelSrc;
 import mod.chiselsandbits.modes.ChiselMode;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public class ChiselTypeIterator extends BaseChiselIterator implements ChiselIterator
 {

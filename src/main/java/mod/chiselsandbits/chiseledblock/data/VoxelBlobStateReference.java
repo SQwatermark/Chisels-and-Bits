@@ -2,8 +2,8 @@ package mod.chiselsandbits.chiseledblock.data;
 
 import mod.chiselsandbits.api.BoxType;
 import mod.chiselsandbits.helpers.IStateRef;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -172,7 +172,7 @@ public final class VoxelBlobStateReference implements Comparable<VoxelBlobStateR
 		return comp;
 	}
 
-	public Collection<AxisAlignedBB> getBoxes(
+	public Collection<AABB> getBoxes(
 			final BoxType type )
 	{
 		return data.getBoxes( type );

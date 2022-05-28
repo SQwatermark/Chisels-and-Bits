@@ -10,13 +10,13 @@ import java.security.InvalidParameterException;
 
 public enum ChiselRenderType
 {
-	SOLID( RenderType.getSolid(), VoxelType.SOLID ),
-	SOLID_FLUID( RenderType.getSolid(), VoxelType.FLUID ),
-	CUTOUT( RenderType.getCutout(), null ),
-	CUTOUT_MIPPED( RenderType.getCutoutMipped(), null ),
-    TRANSLUCENT( RenderType.getTranslucent(), null ),
-    TRANSLUCENT_FLUID( RenderType.getTranslucent(), VoxelType.FLUID ),
-	TRIPWIRE (RenderType.getTripwire(), null);
+	SOLID( RenderType.solid(), VoxelType.SOLID ),
+	SOLID_FLUID( RenderType.solid(), VoxelType.FLUID ),
+	CUTOUT( RenderType.cutout(), null ),
+	CUTOUT_MIPPED( RenderType.cutoutMipped(), null ),
+    TRANSLUCENT( RenderType.translucent(), null ),
+    TRANSLUCENT_FLUID( RenderType.translucent(), VoxelType.FLUID ),
+	TRIPWIRE (RenderType.tripwire(), null);
 
     public final RenderType layer;
 	public final VoxelType type;
@@ -54,7 +54,7 @@ public enum ChiselRenderType
 			final boolean isFluid )
 	{
 	    if (layerInfo == null)
-	        layerInfo = RenderType.getSolid();
+	        layerInfo = RenderType.solid();
 
         if (ChiselRenderType.CUTOUT.layer.equals(layerInfo))
         {

@@ -1,20 +1,23 @@
 package mod.chiselsandbits.chiseledblock;
 
 import com.google.common.collect.Lists;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
 
 import java.util.List;
 
+/**
+ * 不应使用，因为Block一经初始化便造成了一些奇怪的影响
+ */
 class ReflectionHelperBlock extends Block
 {
 	public String MethodName;
@@ -26,39 +29,39 @@ class ReflectionHelperBlock extends Block
 
 	protected ReflectionHelperBlock()
 	{
-		super( AbstractBlock.Properties.create(Material.AIR) );
+		super( BlockBehaviour.Properties.of(Material.AIR) );
 	}
 
     @Override
-    public VoxelShape getRenderShape(final BlockState state, final IBlockReader worldIn, final BlockPos pos)
+    public VoxelShape getOcclusionShape(final BlockState state, final BlockGetter worldIn, final BlockPos pos)
     {
         markMethod();
         return null;
     }
 
     @Override
-    public VoxelShape getCollisionShape(final BlockState state, final IBlockReader reader, final BlockPos pos)
+    public VoxelShape getBlockSupportShape(final BlockState state, final BlockGetter reader, final BlockPos pos)
     {
         markMethod();
         return null;
     }
 
     @Override
-    public VoxelShape getShape(final BlockState state, final IBlockReader worldIn, final BlockPos pos, final ISelectionContext context)
+    public VoxelShape getShape(final BlockState state, final BlockGetter worldIn, final BlockPos pos, final CollisionContext context)
     {
         markMethod();
         return null;
     }
 
     @Override
-    public VoxelShape getCollisionShape(final BlockState state, final IBlockReader worldIn, final BlockPos pos, final ISelectionContext context)
+    public VoxelShape getCollisionShape(final BlockState state, final BlockGetter worldIn, final BlockPos pos, final CollisionContext context)
     {
         markMethod();
         return null;
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(final BlockState state, final PlayerEntity player, final IBlockReader worldIn, final BlockPos pos)
+    public float getDestroyProgress(final BlockState state, final Player player, final BlockGetter worldIn, final BlockPos pos)
     {
         markMethod();
         return 0;

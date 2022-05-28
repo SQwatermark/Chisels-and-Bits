@@ -1,11 +1,10 @@
 package mod.chiselsandbits.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import mod.chiselsandbits.chiseledblock.data.BitLocation;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
@@ -13,26 +12,26 @@ import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
 import mod.chiselsandbits.registry.ModItems;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class TapeMeasures
 {
@@ -63,7 +62,7 @@ public class TapeMeasures
 		public final ResourceLocation DimensionId;
 		public       double           distance = 1;
 
-		public AxisAlignedBB getBoundingBox()
+		public AABB getBoundingBox()
 		{
 			if ( mode == TapeMeasureModes.BLOCK )
 			{
@@ -74,7 +73,7 @@ public class TapeMeasures
 				final double by = b.blockPos.getY();
 				final double bz = b.blockPos.getZ();
 
-				return new AxisAlignedBB(
+				return new AABB(
 						Math.min( ax, bx ),
 						Math.min( ay, by ),
 						Math.min( az, bz ),
@@ -90,7 +89,7 @@ public class TapeMeasures
 			final double by = b.blockPos.getY() + bitSize * b.bitY;
 			final double bz = b.blockPos.getZ() + bitSize * b.bitZ;
 
-			return new AxisAlignedBB(
+			return new AABB(
 					Math.min( ax, bx ),
 					Math.min( ay, by ),
 					Math.min( az, bz ),
@@ -99,20 +98,20 @@ public class TapeMeasures
 					Math.max( az, bz ) + bitSize );
 		}
 
-		public Vector3d getVecA()
+		public Vec3 getVecA()
 		{
 			final double ax = a.blockPos.getX() + bitSize * a.bitX + halfBit;
 			final double ay = a.blockPos.getY() + bitSize * a.bitY + halfBit;
 			final double az = a.blockPos.getZ() + bitSize * a.bitZ + halfBit;
-			return new Vector3d( ax, ay, az );
+			return new Vec3( ax, ay, az );
 		}
 
-		public Vector3d getVecB()
+		public Vec3 getVecB()
 		{
 			final double bx = b.blockPos.getX() + bitSize * b.bitX + halfBit;
 			final double by = b.blockPos.getY() + bitSize * b.bitY + halfBit;
 			final double bz = b.blockPos.getZ() + bitSize * b.bitZ + halfBit;
-			return new Vector3d( bx, by, bz );
+			return new Vec3( bx, by, bz );
 		}
 
 		public void calcDistance(
@@ -120,16 +119,16 @@ public class TapeMeasures
 		{
 			if ( mode == TapeMeasureModes.DISTANCE )
 			{
-				final Vector3d a = getVecA();
-				final Vector3d b = getVecB();
-				final PlayerEntity player = ClientSide.instance.getPlayer();
+				final Vec3 a = getVecA();
+				final Vec3 b = getVecB();
+				final Player player = ClientSide.instance.getPlayer();
 				distance = getLineDistance( a, b, player, partialTicks );
 			}
 			else
 			{
-				final PlayerEntity player = ClientSide.instance.getPlayer();
-				final Vector3d eyes = player.getEyePosition( partialTicks );
-				final AxisAlignedBB box = getBoundingBox();
+				final Player player = ClientSide.instance.getPlayer();
+				final Vec3 eyes = player.getEyePosition( partialTicks );
+				final AABB box = getBoundingBox();
 				if ( box.contains( eyes ) )
 				{
 					distance = 0.0;
@@ -157,7 +156,7 @@ public class TapeMeasures
 			final IToolMode chMode,
 			final ItemStack itemStack )
 	{
-		final PlayerEntity player = ClientSide.instance.getPlayer();
+		final Player player = ClientSide.instance.getPlayer();
 
 		if ( a == null || b == null )
 		{
@@ -175,7 +174,7 @@ public class TapeMeasures
 			final IToolMode chMode,
 			final ItemStack itemStack )
 	{
-		final PlayerEntity player = ClientSide.instance.getPlayer();
+		final Player player = ClientSide.instance.getPlayer();
 
 		while ( measures.size() > 0 && measures.size() >= ChiselsAndBits.getConfig().getClient().maxTapeMeasures.get() )
 		{
@@ -186,7 +185,7 @@ public class TapeMeasures
 
 		if ( ChiselsAndBits.getConfig().getClient().displayMeasuringTapeInChat.get() )
 		{
-			final AxisAlignedBB box = newMeasure.getBoundingBox();
+			final AABB box = newMeasure.getBoundingBox();
 
 			final double LenX = box.maxX - box.minX;
 			final double LenY = box.maxY - box.minY;
@@ -195,12 +194,12 @@ public class TapeMeasures
 
 			final String out = chMode == TapeMeasureModes.DISTANCE ? getSize( Len ) : DeprecationHelper.translateToLocal( "mod.chiselsandbits.tapemeasure.chatmsg", getSize( LenX ), getSize( LenY ), getSize( LenZ ) );
 
-			final StringTextComponent chatMsg = new StringTextComponent( out );
+			final TextComponent chatMsg = new TextComponent( out );
 
 			// NOT 100% Accurate, if anyone wants to try and resolve this, yay
-			chatMsg.setStyle( Style.EMPTY.setColor(Color.fromInt(newMeasure.color.getTextColor())) );
+			chatMsg.setStyle( Style.EMPTY.withColor(TextColor.fromRgb(newMeasure.color.getTextColor())) );
 
-			player.sendMessage( chatMsg, Util.DUMMY_UUID );
+			player.sendMessage( chatMsg, Util.NIL_UUID );
 		}
 
 		measures.add( newMeasure );
@@ -213,19 +212,19 @@ public class TapeMeasures
 	}
 
 	private ResourceLocation getDimension(
-			final PlayerEntity player )
+			final Player player )
 	{
-		return player.getEntityWorld().getDimensionKey().getRegistryName();
+		return player.getCommandSenderWorld().dimension().getRegistryName();
 	}
 
 	public void render(
-      final MatrixStack matrixStack, final float partialTicks)
+      final PoseStack matrixStack, final float partialTicks)
 	{
 		if ( !measures.isEmpty() || preview != null )
 		{
-			final PlayerEntity player = ClientSide.instance.getPlayer();
+			final Player player = ClientSide.instance.getPlayer();
 
-			if ( hasTapeMeasure( player.inventory ) )
+			if ( hasTapeMeasure( player.getInventory() ) )
 			{
 				final ArrayList<Measure> sortList = new ArrayList<Measure>( measures.size() + 1 );
 
@@ -262,11 +261,11 @@ public class TapeMeasures
 	}
 
 	private boolean hasTapeMeasure(
-			final PlayerInventory inventory )
+			final Inventory inventory )
 	{
-		for ( int x = 0; x < inventory.getSizeInventory(); x++ )
+		for ( int x = 0; x < inventory.getContainerSize(); x++ )
 		{
-			final ItemStack is = inventory.getStackInSlot( x );
+			final ItemStack is = inventory.getItem( x );
 			if ( !is.isEmpty() && is.getItem() == ModItems.ITEM_TAPE_MEASURE.get() )
 			{
 				return true;
@@ -279,10 +278,10 @@ public class TapeMeasures
 	private void renderMeasure(
       final Measure m,
       final double distance,
-      final MatrixStack matrixStack,
+      final PoseStack matrixStack,
       final float partialTicks)
 	{
-		final PlayerEntity player = ClientSide.instance.getPlayer();
+		final Player player = ClientSide.instance.getPlayer();
 
 		if ( m.DimensionId != getDimension( player ) )
 		{
@@ -301,8 +300,8 @@ public class TapeMeasures
 		final int blue = val & 0xff;
 		if ( m.mode == TapeMeasureModes.DISTANCE )
 		{
-			final Vector3d a = m.getVecA();
-			final Vector3d b = m.getVecB();
+			final Vec3 a = m.getVecA();
+			final Vec3 b = m.getVecB();
 
 			RenderHelper.drawLineWithColor(matrixStack, a, b, BlockPos.ZERO, player, partialTicks, false, red, green, blue, alpha, (int) ( alpha / 3.4 ) );
 
@@ -318,8 +317,8 @@ public class TapeMeasures
 			return;
 		}
 
-		final AxisAlignedBB box = m.getBoundingBox();
-		RenderHelper.drawSelectionBoundingBoxIfExistsWithColor(matrixStack, box.expand( -0.001, -0.001, -0.001 ), BlockPos.ZERO, player, partialTicks, false, red, green, blue, alpha, (int) ( alpha / 3.4 ) );
+		final AABB box = m.getBoundingBox();
+		RenderHelper.drawSelectionBoundingBoxIfExistsWithColor(matrixStack, box.expandTowards( -0.001, -0.001, -0.001 ), BlockPos.ZERO, player, partialTicks, false, red, green, blue, alpha, (int) ( alpha / 3.4 ) );
 
 		RenderSystem.disableDepthTest();
 		RenderSystem.disableCull();
@@ -352,8 +351,8 @@ public class TapeMeasures
 	}
 
 	private static double AABBDistnace(
-			final Vector3d eyes,
-			final AxisAlignedBB box )
+			final Vec3 eyes,
+			final AABB box )
 	{
 		// snap eyes into the box...
 		final double boxPointX = Math.min( box.maxX, Math.max( box.minX, eyes.x ) );
@@ -361,31 +360,31 @@ public class TapeMeasures
 		final double boxPointZ = Math.min( box.maxZ, Math.max( box.minZ, eyes.z ) );
 
 		// then get the distance to it.
-		return Math.sqrt( eyes.squareDistanceTo( boxPointX, boxPointY, boxPointZ ) );
+		return Math.sqrt( eyes.distanceToSqr( boxPointX, boxPointY, boxPointZ ) );
 	}
 
 	private static double getLineDistance(
-			final Vector3d v,
-			final Vector3d w,
-			final PlayerEntity player,
+			final Vec3 v,
+			final Vec3 w,
+			final Player player,
 			final float partialTicks )
 	{
-		final Vector3d p = player.getEyePosition( partialTicks );
-		final double segmentLength = v.squareDistanceTo( w );
+		final Vec3 p = player.getEyePosition( partialTicks );
+		final double segmentLength = v.distanceToSqr( w );
 
 		if ( segmentLength == 0.0 )
 		{
 			return p.distanceTo( v );
 		}
 
-		final double t = Math.max( 0, Math.min( 1, p.subtract( v ).dotProduct( w.subtract( v ) ) / segmentLength ) );
-		final Vector3d projection = v.add( w.subtract( v ).scale( t ) );
+		final double t = Math.max( 0, Math.min( 1, p.subtract( v ).dot( w.subtract( v ) ) / segmentLength ) );
+		final Vec3 projection = v.add( w.subtract( v ).scale( t ) );
 		return p.distanceTo( projection );
 	}
 
 	private void renderSize(
-      final MatrixStack matrixStack,
-      final PlayerEntity player,
+      final PoseStack matrixStack,
+      final Player player,
       final float partialTicks,
       final double x,
       final double y,
@@ -398,20 +397,20 @@ public class TapeMeasures
 		final double letterSize = 5.0;
 		final double zScale = 0.001;
 
-		final FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+		final Font fontRenderer = Minecraft.getInstance().font;
 		final String size = getSize( len );
 
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate( x, y + getScale( len ) * letterSize, z );
 		billBoard(matrixStack, player, partialTicks );
 		matrixStack.scale( getScale( len ), -getScale( len ), (float) zScale);
-		matrixStack.translate( -fontRenderer.getStringWidth( size ) * 0.5, 0, 0 );
+		matrixStack.translate( -fontRenderer.width( size ) * 0.5, 0, 0 );
         RenderSystem.disableDepthTest();
-        IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-		fontRenderer.renderString(size, 0, 0, red << 16 | green << 8 | blue,true, matrixStack.getLast().getMatrix(), buffer, true, 0, 15728880);
-		buffer.finish();
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+		fontRenderer.drawInBatch(size, 0, 0, red << 16 | green << 8 | blue,true, matrixStack.last().pose(), buffer, true, 0, 15728880);
+		buffer.endBatch();
         RenderSystem.enableDepthTest();
-        matrixStack.pop();
+        matrixStack.popPose();
 	}
 
 	private float getScale(
@@ -432,18 +431,18 @@ public class TapeMeasures
 	}
 
 	private void billBoard(
-	        final MatrixStack matrixStack,
-			final PlayerEntity player,
+	        final PoseStack matrixStack,
+			final Player player,
 			final float partialTicks )
 	{
-		final Entity view = Minecraft.getInstance().renderViewEntity;
+		final Entity view = Minecraft.getInstance().cameraEntity;
 		if ( view != null )
 		{
-			final float yaw = view.prevRotationYaw + ( view.rotationYaw - view.prevRotationYaw ) * partialTicks;
-			matrixStack.rotate(new Quaternion(Vector3f.YP, 180 + -yaw, true ));
+			final float yaw = view.yRotO + ( view.getYRot() - view.yRotO ) * partialTicks;
+			matrixStack.mulPose(new Quaternion(Vector3f.YP, 180 + -yaw, true ));
 
-			final float pitch = view.prevRotationPitch + ( view.rotationPitch - view.prevRotationPitch ) * partialTicks;
-			matrixStack.rotate(new Quaternion(Vector3f.XP, -pitch, true));
+			final float pitch = view.xRotO + ( view.getXRot() - view.xRotO ) * partialTicks;
+			matrixStack.mulPose(new Quaternion(Vector3f.XP, -pitch, true));
 		}
 	}
 

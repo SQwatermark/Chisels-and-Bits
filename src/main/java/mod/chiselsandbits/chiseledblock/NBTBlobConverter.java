@@ -4,15 +4,14 @@ import mod.chiselsandbits.api.VoxelStats;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.chiseledblock.serialization.StringStates;
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.registry.ModBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
 
 import java.io.IOException;
 
@@ -27,7 +26,7 @@ public class NBTBlobConverter
 	public static final String NBT_LEGACY_VOXEL = "v";
 	public static final String NBT_VERSIONED_VOXEL = "X";
 
-	TileEntityBlockChiseled tile;
+	BlockEntityChiseledBlock tile;
 
 	private int sideState;
 	private int lightValue;
@@ -84,7 +83,7 @@ public class NBTBlobConverter
 
 	public NBTBlobConverter(
 			final boolean triggerBlockUpdates,
-			final TileEntityBlockChiseled tile )
+			final BlockEntityChiseledBlock tile )
 	{
 		this.tile = tile;
 
@@ -113,7 +112,7 @@ public class NBTBlobConverter
 	}
 
 	public final void writeChisleData(
-			final CompoundNBT compound,
+			final CompoundTag compound,
 			final boolean crossWorld )
 	{
 		final VoxelBlobStateReference voxelRef = getRef();
@@ -143,7 +142,7 @@ public class NBTBlobConverter
 	}
 
 	public final boolean readChisleData(
-			final CompoundNBT compound,
+			final CompoundTag compound,
 			final int preferedFormat )
 	{
 		if ( compound == null )
@@ -161,7 +160,7 @@ public class NBTBlobConverter
 
 		sideState = compound.getInt( NBT_SIDE_FLAGS );
 
-		if ( compound.get( NBT_PRIMARY_STATE ) instanceof StringNBT)
+		if ( compound.get( NBT_PRIMARY_STATE ) instanceof StringTag)
 		{
 			primaryBlockState = StringStates.getStateIDFromName( compound.getString( NBT_PRIMARY_STATE ) );
 		}
@@ -196,7 +195,7 @@ public class NBTBlobConverter
 		if ( primaryBlockState == 0 )
 		{
 			// if load fails default to cobble stone...
-			primaryBlockState = ModUtil.getStateId( Blocks.COBBLESTONE.getDefaultState() );
+			primaryBlockState = ModUtil.getStateId( Blocks.COBBLESTONE.defaultBlockState() );
 		}
 
 		voxelBlobRef = new VoxelBlobStateReference( v, 0 );
@@ -218,7 +217,7 @@ public class NBTBlobConverter
 			{
 				// this only works on already loaded tiles, so i'm not sure
 				// there is much point in it.
-				tile.markDirty();
+				tile.setChanged();
 			}
 
 			return tile.updateBlob( this, triggerUpdates );
@@ -248,7 +247,7 @@ public class NBTBlobConverter
 		if ( blk != null )
 		{
 			final ItemStack is = new ItemStack( blk );
-			final CompoundNBT compound = ModUtil.getSubCompound( is, ModUtil.NBT_BLOCKENTITYTAG, true );
+			final CompoundTag compound = ModUtil.getSubCompound( is, ModUtil.NBT_BLOCKENTITYTAG, true );
 			writeChisleData( compound, crossWorld );
 
 			if ( compound.size() > 0 )

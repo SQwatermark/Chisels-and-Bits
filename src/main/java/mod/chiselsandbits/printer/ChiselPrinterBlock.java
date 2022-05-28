@@ -3,41 +3,44 @@ package mod.chiselsandbits.printer;
 import com.google.common.collect.ImmutableMap;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.block.*;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ChiselPrinterBlock extends ContainerBlock
+public class ChiselPrinterBlock extends BaseEntityBlock
 {
 
-    public static final  DirectionProperty FACING   = HorizontalBlock.HORIZONTAL_FACING;
+    public static final  DirectionProperty FACING   = HorizontalDirectionalBlock.FACING;
 
     private static final Map<Direction, VoxelShape> BUTTON_VS_MAP = ImmutableMap.<Direction, VoxelShape>builder()
-                                                                      .put(Direction.NORTH, Block.makeCuboidShape(7, 1, -0.5, 12, 4, 0))
-                                                                      .put(Direction.EAST, Block.makeCuboidShape(16,1,7,16.5,4,12))
-                                                                      .put(Direction.SOUTH, Block.makeCuboidShape(4, 1, 16, 9, 4, 16.5))
-                                                                      .put(Direction.WEST, Block.makeCuboidShape(-0.5, 1, 4, 0, 4, 9))
+                                                                      .put(Direction.NORTH, Block.box(7, 1, -0.5, 12, 4, 0))
+                                                                      .put(Direction.EAST, Block.box(16,1,7,16.5,4,12))
+                                                                      .put(Direction.SOUTH, Block.box(4, 1, 16, 9, 4, 16.5))
+                                                                      .put(Direction.WEST, Block.box(-0.5, 1, 4, 0, 4, 9))
                                                                       .build();
 
     private static final VoxelShape        VS_NORTH = createForDirection(Direction.NORTH);
@@ -54,89 +57,88 @@ public class ChiselPrinterBlock extends ContainerBlock
 
     private static VoxelShape createForDirection(final Direction direction)
     {
-        return VoxelShapes.combineAndSimplify(VoxelShapes.combineAndSimplify(Stream.of(
-          Block.makeCuboidShape(0, 5, 0, 2, 16, 2),
-          Block.makeCuboidShape(14, 5, 0, 16, 16, 2),
-          Block.makeCuboidShape(0, 5, 14, 2, 16, 16),
-          Block.makeCuboidShape(14, 5, 14, 16, 16, 16)
-          ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, IBooleanFunction.OR)).orElse(VoxelShapes.empty()), Stream.of(
-          Block.makeCuboidShape(2, 14, 0, 14, 16, 2),
-          Block.makeCuboidShape(2, 14, 14, 14, 16, 16),
-          Block.makeCuboidShape(0, 14, 2, 2, 16, 14),
-          Block.makeCuboidShape(14, 14, 2, 16, 16, 14),
+        return Shapes.join(Shapes.join(Stream.of(
+          Block.box(0, 5, 0, 2, 16, 2),
+          Block.box(14, 5, 0, 16, 16, 2),
+          Block.box(0, 5, 14, 2, 16, 16),
+          Block.box(14, 5, 14, 16, 16, 16)
+          ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).orElse(Shapes.empty()), Stream.of(
+          Block.box(2, 14, 0, 14, 16, 2),
+          Block.box(2, 14, 14, 14, 16, 16),
+          Block.box(0, 14, 2, 2, 16, 14),
+          Block.box(14, 14, 2, 16, 16, 14),
           Stream.of(
-            Block.makeCuboidShape(2, 14, 7, 14, 16, 9),
-            Block.makeCuboidShape(7, 13.99, 2, 9, 15.98, 14),
-            Block.makeCuboidShape(7, 11, 7, 9, 14, 9),
-            Block.makeCuboidShape(7.5, 10, 7.5, 8.5, 11, 8.5)
-          ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, IBooleanFunction.OR)).orElse(VoxelShapes.empty())
-          ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, IBooleanFunction.OR)).orElse(VoxelShapes.empty()), IBooleanFunction.OR),
-          VoxelShapes.combineAndSimplify(Block.makeCuboidShape(0, 0, 0, 16, 5, 16), BUTTON_VS_MAP.getOrDefault(direction, VoxelShapes.empty()), IBooleanFunction.OR),
-          IBooleanFunction.OR);
+            Block.box(2, 14, 7, 14, 16, 9),
+            Block.box(7, 13.99, 2, 9, 15.98, 14),
+            Block.box(7, 11, 7, 9, 14, 9),
+            Block.box(7.5, 10, 7.5, 8.5, 11, 8.5)
+          ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).orElse(Shapes.empty())
+          ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).orElse(Shapes.empty()), BooleanOp.OR),
+          Shapes.join(Block.box(0, 0, 0, 16, 5, 16), BUTTON_VS_MAP.getOrDefault(direction, Shapes.empty()), BooleanOp.OR),
+          BooleanOp.OR);
     }
 
     public ChiselPrinterBlock(final Properties builder)
     {
         super(builder);
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
-    public BlockState getStateForPlacement(BlockItemUseContext context)
+    public BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    public BlockRenderType getRenderType(BlockState state)
+    public RenderShape getRenderShape(BlockState state)
     {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     public BlockState rotate(BlockState state, Rotation rot)
     {
-        return state.with(FACING, rot.rotate(state.get(FACING)));
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
 
     public BlockState mirror(BlockState state, Mirror mirrorIn)
     {
-        return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+        return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
     }
 
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
         builder.add(FACING);
     }
 
     @Override
-    public VoxelShape getShape(final BlockState state, final IBlockReader worldIn, final BlockPos pos, final ISelectionContext context)
+    public VoxelShape getShape(final BlockState state, final BlockGetter worldIn, final BlockPos pos, final CollisionContext context)
     {
-        return VS_MAP.getOrDefault(state.get(FACING), VoxelShapes.empty());
+        return VS_MAP.getOrDefault(state.getValue(FACING), Shapes.empty());
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(final IBlockReader worldIn)
-    {
-        return new ChiselPrinterTileEntity();
+    public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
+        return new ChiselPrinterTileEntity(p_153215_, p_153216_);
     }
 
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit)
     {
-        if (worldIn.isRemote)
+        if (worldIn.isClientSide)
         {
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         else
         {
-            player.openContainer((INamedContainerProvider) worldIn.getTileEntity(pos));
-            return ActionResultType.CONSUME;
+            player.openMenu((MenuProvider) worldIn.getBlockEntity(pos));
+            return InteractionResult.CONSUME;
         }
     }
 
     @Override
-    public void addInformation(
-      final ItemStack stack, @Nullable final IBlockReader worldIn, final List<ITextComponent> tooltip, final ITooltipFlag flagIn)
+    public void appendHoverText(
+      final ItemStack stack, @Nullable final BlockGetter worldIn, final List<Component> tooltip, final TooltipFlag flagIn)
     {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         ChiselsAndBits.getConfig().getCommon().helpText(LocalStrings.ChiselStationHelp, tooltip);
     }
 }

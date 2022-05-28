@@ -11,34 +11,31 @@ import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.IChiseledTileContainer;
 import mod.chiselsandbits.registry.ModBlocks;
-import mod.chiselsandbits.registry.ModTileEntityTypes;
+import mod.chiselsandbits.registry.ModBlockEntityTypes;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.utils.SingleBlockBlockReader;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -46,19 +43,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-public class TileEntityBlockChiseled extends TileEntity implements IChiseledTileContainer, IChiseledBlockTileEntity
+public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTileContainer, IChiseledBlockTileEntity
 {
     public static final ModelProperty<VoxelBlobStateReference>    MP_VBSR = new ModelProperty<>();
     public static final ModelProperty<Integer> MP_PBSI = new ModelProperty<>();
 
-    public TileEntityBlockChiseled()
-    {
-        this(ModTileEntityTypes.CHISELED.get());
+    public BlockEntityChiseledBlock() {
+        this(BlockPos.ZERO, ModBlocks.getChiseledDefaultState());
     }
 
-    public TileEntityBlockChiseled(final TileEntityType<?> tileEntityTypeIn)
+    public BlockEntityChiseledBlock(BlockPos pos, BlockState state)
     {
-        super(tileEntityTypeIn == null ? ModTileEntityTypes.CHISELED.get() : tileEntityTypeIn);
+        this(ModBlockEntityTypes.CHISELED.get(), pos, state);
+    }
+
+    public BlockEntityChiseledBlock(final BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state)
+    {
+        super(tileEntityTypeIn == null ? ModBlockEntityTypes.CHISELED.get() : tileEntityTypeIn, pos, state);
     }
 
     public IChiseledTileContainer occlusionState;
@@ -118,19 +119,13 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     @Override
     public void saveData()
     {
-        super.markDirty();
+        super.setChanged();
     }
 
     @Override
     public void sendUpdate()
     {
-        ModUtil.sendUpdate(Objects.requireNonNull(getWorld()), pos);
-    }
-
-    @Override
-    public void setWorldAndPos(@NotNull final World world, @NotNull final BlockPos pos)
-    {
-        super.setWorldAndPos(world, pos);
+        ModUtil.sendUpdate(Objects.requireNonNull(getLevel()), worldPosition);
     }
 
     @Nonnull
@@ -155,7 +150,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             return state;
         }
 
-        return alternative.getDefaultState();
+        return alternative.defaultBlockState();
     }
 
     public void setState(
@@ -168,16 +163,16 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
 
         if (newRef != null && !newRef.equals(originalRef))
         {
-            final EventBlockBitPostModification bmm = new EventBlockBitPostModification(Objects.requireNonNull(getWorld()), getPos());
+            final EventBlockBitPostModification bmm = new EventBlockBitPostModification(Objects.requireNonNull(getLevel()), getBlockPos());
             MinecraftForge.EVENT_BUS.post(bmm);
             setBlobStateReference(newRef);
         }
     }
 
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket()
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
     {
-        final CompoundNBT compound = new CompoundNBT();
+        final CompoundTag compound = new CompoundTag();
         writeChiselData(compound);
 
         if (compound.size() == 0)
@@ -185,18 +180,18 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             return null;
         }
 
-        return new SUpdateTileEntityPacket(pos, 255, compound);
+        return new ClientboundBlockEntityDataPacket(worldPosition, ModBlockEntityTypes.CHISELED.get(), compound);
     }
 
     @NotNull
     @Override
-    public CompoundNBT getUpdateTag()
+    public CompoundTag getUpdateTag()
     {
-        final CompoundNBT compound = new CompoundNBT();
+        final CompoundTag compound = new CompoundTag();
 
-        compound.putInt("x", pos.getX());
-        compound.putInt("y", pos.getY());
-        compound.putInt("z", pos.getZ());
+        compound.putInt("x", worldPosition.getX());
+        compound.putInt("y", worldPosition.getY());
+        compound.putInt("z", worldPosition.getZ());
 
         writeChiselData(compound);
 
@@ -204,105 +199,100 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     }
 
     @Override
-    public void handleUpdateTag(final BlockState state, final CompoundNBT tag)
-    {
+    public void handleUpdateTag(CompoundTag tag) {
         readChiselData(tag);
     }
 
     @Override
     public void onDataPacket(
-      final NetworkManager net,
-      final SUpdateTileEntityPacket pkt)
+      final Connection net,
+      final ClientboundBlockEntityDataPacket pkt)
     {
         final VoxelBlobStateReference current = getBlobStateReference();
         final int oldLight = lightLevel;
-        final boolean changed = readChiselData(pkt.getNbtCompound());
+        final boolean changed = readChiselData(pkt.getTag());
 
-        if (world != null && changed)
+        if (level != null && changed)
         {
-            world.markBlockRangeForRenderUpdate(pos, world.getBlockState(pos), Blocks.AIR.getDefaultState());
+            level.setBlocksDirty(worldPosition, level.getBlockState(worldPosition), Blocks.AIR.defaultBlockState());
 
             // fixes lighting on placement when tile packet arrives.
             if (oldLight != lightLevel)
             {
-                world.getLightManager().checkBlock(pos);
+                level.getLightEngine().checkBlock(worldPosition);
             }
         }
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             UndoTracker.getInstance().onNetworkUpdate(current, getBlobStateReference());
         }
     }
 
     public boolean readChiselData(
-      final CompoundNBT tag)
+      final CompoundTag tag)
     {
         final NBTBlobConverter converter = new NBTBlobConverter(false, this);
         return converter.readChisleData(tag, VoxelBlob.VERSION_COMPACT_PALLETED);
     }
 
     public void writeChiselData(
-      final CompoundNBT tag)
+      final CompoundTag tag)
     {
         new NBTBlobConverter(false, this).writeChisleData(tag, false);
     }
 
-    @NotNull
     @Override
-    public CompoundNBT write(@NotNull final CompoundNBT compound)
-    {
-        final CompoundNBT nbt = super.write(compound);
-        writeChiselData(nbt);
-        return nbt;
+    protected void saveAdditional(CompoundTag p_187471_) {
+        super.saveAdditional(p_187471_);
+        writeChiselData(p_187471_);
     }
 
     @Override
-    public void read(@NotNull final BlockState state, @NotNull final CompoundNBT nbt)
-    {
-        super.read(state, nbt);
-        readChiselData(nbt);
+    public void load(CompoundTag p_155245_) {
+        super.load(p_155245_);
+        readChiselData(p_155245_);
     }
 
     @NotNull
     @Override
-    public CompoundNBT writeTileEntityToTag(
-      @NotNull final CompoundNBT tag,
+    public CompoundTag writeTileEntityToTag(
+      @NotNull final CompoundTag tag,
       final boolean crossWorld)
     {
-        final CompoundNBT superNbt = super.write(tag);
-        new NBTBlobConverter(false, this).writeChisleData(superNbt, crossWorld);
-        superNbt.putBoolean("cw", crossWorld);
-        return superNbt;
+        super.saveAdditional(tag);
+        new NBTBlobConverter(false, this).writeChisleData(tag, crossWorld);
+        tag.putBoolean("cw", crossWorld);
+        return tag;
     }
 
-    @Override
-    public void mirror(
-      @NotNull final Mirror mirrorIn)
-    {
-        switch (mirrorIn)
-        {
-            case FRONT_BACK:
-                setBlob(getBlob().mirror(Axis.X), true);
-                break;
-            case LEFT_RIGHT:
-                setBlob(getBlob().mirror(Axis.Z), true);
-                break;
-            case NONE:
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void rotate(
-      @NotNull final Rotation rotationIn)
-    {
-        VoxelBlob blob = ModUtil.rotate(getBlob(), Axis.Y, rotationIn);
-        if (blob != null)
-        {
-            setBlob(blob, true);
-        }
-    }
+//    @Override
+//    public void mirror(
+//      @NotNull final Mirror mirrorIn)
+//    {
+//        switch (mirrorIn)
+//        {
+//            case FRONT_BACK:
+//                setBlob(getBlob().mirror(Axis.X), true);
+//                break;
+//            case LEFT_RIGHT:
+//                setBlob(getBlob().mirror(Axis.Z), true);
+//                break;
+//            case NONE:
+//            default:
+//                break;
+//        }
+//    }
+//
+//    @Override
+//    public void rotate(
+//      @NotNull final Rotation rotationIn)
+//    {
+//        VoxelBlob blob = ModUtil.rotate(getBlob(), Axis.Y, rotationIn);
+//        if (blob != null)
+//        {
+//            setBlob(blob, true);
+//        }
+//    }
 
     public void fillWith(
       final BlockState blockType)
@@ -321,7 +311,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             setPrimaryBlockStateId(ref);
         }
 
-        setState(defaultState, new VoxelBlobStateReference(ModUtil.getStateId(blockType), getPositionRandom(pos)));
+        setState(defaultState, new VoxelBlobStateReference(ModUtil.getStateId(blockType), getPositionRandom(worldPosition)));
 
         getTileContainer().saveData();
     }
@@ -331,7 +321,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     {
         if (pos != null && EffectiveSide.get().isClient())
         {
-            return MathHelper.getPositionRandom(pos);
+            return Mth.getSeed(pos);
         }
 
         return 0;
@@ -379,35 +369,35 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
 
         try
         {
-            voxelRef = converter.getVoxelRef(VoxelBlob.VERSION_COMPACT_PALLETED, getPositionRandom(pos));
+            voxelRef = converter.getVoxelRef(VoxelBlob.VERSION_COMPACT_PALLETED, getPositionRandom(worldPosition));
         }
         catch (final Exception e)
         {
-            Log.logError("Unable to read blob at " + getPos(), e);
-            voxelRef = new VoxelBlobStateReference(0, getPositionRandom(pos));
+            Log.logError("Unable to read blob at " + getBlockPos(), e);
+            voxelRef = new VoxelBlobStateReference(0, getPositionRandom(worldPosition));
         }
 
         setPrimaryBlockStateId(b);
         setBlobStateReference(voxelRef);
         setState(getState(), voxelRef);
 
-        if (getWorld() != null && triggerUpdates)
+        if (getLevel() != null && triggerUpdates)
         {
             if (oldLV != getLightValue() || oldNC != isNormalCube())
             {
-                getWorld().getLightManager().checkBlock(pos);
+                getLevel().getLightEngine().checkBlock(worldPosition);
 
                 // update block state to reflect lighting characteristics
-                final BlockState state = getWorld().getBlockState(pos);
-                if (state.isNormalCube(new SingleBlockBlockReader(state), BlockPos.ZERO) != isNormalCube && state.getBlock() instanceof BlockChiseled)
+                final BlockState state = getLevel().getBlockState(worldPosition);
+                if (state.isRedstoneConductor(new SingleBlockBlockReader(state), BlockPos.ZERO) != isNormalCube && state.getBlock() instanceof BlockChiseled)
                 {
-                    getWorld().setBlockState(pos, state.with(BlockChiseled.FULL_BLOCK, isNormalCube));
+                    getLevel().setBlockAndUpdate(worldPosition, state.setValue(BlockChiseled.FULL_BLOCK, isNormalCube));
                 }
             }
 
             if (oldSides != sideState)
             {
-                Objects.requireNonNull(world).notifyNeighborsOfStateChange(pos, world.getBlockState(pos).getBlock());
+                Objects.requireNonNull(level).updateNeighborsAt(worldPosition, level.getBlockState(worldPosition).getBlock());
             }
         }
 
@@ -429,7 +419,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
         // are most of the bits in the center solid?
         final int sideFlags = vb.getSideFlags(5, 11, 4 * 4);
 
-        if (getWorld() == null)
+        if (getLevel() == null)
         {
             if (common.mostCommonState == 0)
             {
@@ -440,7 +430,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             lightLevel = lv;
             isNormalCube = nc;
 
-            setBlobStateReference(new VoxelBlobStateReference(vb.blobToBytes(VoxelBlob.VERSION_COMPACT_PALLETED), getPositionRandom(pos)));
+            setBlobStateReference(new VoxelBlobStateReference(vb.blobToBytes(VoxelBlob.VERSION_COMPACT_PALLETED), getPositionRandom(worldPosition)));
             setPrimaryBlockStateId(common.mostCommonState);
             setState(getState(), getBlobStateReference());
             return;
@@ -448,15 +438,15 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
 
         if (common.isFullBlock)
         {
-            setBlobStateReference(new VoxelBlobStateReference(common.mostCommonState, getPositionRandom(pos)));
+            setBlobStateReference(new VoxelBlobStateReference(common.mostCommonState, getPositionRandom(worldPosition)));
             setState(getState(), getBlobStateReference());
 
             final BlockState newState = ModUtil.getStateById(common.mostCommonState);
             if (ChiselsAndBits.getConfig().getServer().canRevertToBlock(newState))
             {
-                if (!MinecraftForge.EVENT_BUS.post(new EventFullBlockRestoration(Objects.requireNonNull(world), pos, newState)))
+                if (!MinecraftForge.EVENT_BUS.post(new EventFullBlockRestoration(Objects.requireNonNull(level), worldPosition, newState)))
                 {
-                    world.setBlockState(pos, newState, triggerUpdates ? 3 : 0);
+                    level.setBlock(worldPosition, newState, triggerUpdates ? 3 : 0);
                 }
             }
         }
@@ -466,7 +456,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             lightLevel = lv;
             isNormalCube = nc;
 
-            setBlobStateReference(new VoxelBlobStateReference(vb.blobToBytes(VoxelBlob.VERSION_COMPACT_PALLETED), getPositionRandom(pos)));
+            setBlobStateReference(new VoxelBlobStateReference(vb.blobToBytes(VoxelBlob.VERSION_COMPACT_PALLETED), getPositionRandom(worldPosition)));
             setPrimaryBlockStateId(common.mostCommonState);
             setState(getState(), getBlobStateReference());
 
@@ -474,31 +464,31 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             getTileContainer().sendUpdate();
 
             // since its possible for bits to occlude parts.. update every time.
-            final Block blk = Objects.requireNonNull(world).getBlockState(pos).getBlock();
+            final Block blk = Objects.requireNonNull(level).getBlockState(worldPosition).getBlock();
             // worldObj.notifyBlockOfStateChange( pos, blk, false );
 
             if (triggerUpdates)
             {
-                world.notifyNeighborsOfStateChange(pos, blk);
+                level.updateNeighborsAt(worldPosition, blk);
             }
         }
         else
         {
-            setBlobStateReference(new VoxelBlobStateReference(0, getPositionRandom(pos)));
+            setBlobStateReference(new VoxelBlobStateReference(0, getPositionRandom(worldPosition)));
             setState(getState(), getBlobStateReference());
 
-            ModUtil.removeChiseledBlock(Objects.requireNonNull(world), pos);
+            ModUtil.removeChiseledBlock(Objects.requireNonNull(level), worldPosition);
         }
 
         if (olv != lv || oldNC != nc)
         {
-            Objects.requireNonNull(world).getLightManager().checkBlock(pos);
+            Objects.requireNonNull(level).getLightEngine().checkBlock(worldPosition);
 
             // update block state to reflect lighting characteristics
-            final BlockState state = world.getBlockState(pos);
-            if (state.isNormalCube(new SingleBlockBlockReader(state), BlockPos.ZERO) != isNormalCube && state.getBlock() instanceof BlockChiseled)
+            final BlockState state = level.getBlockState(worldPosition);
+            if (state.isRedstoneConductor(new SingleBlockBlockReader(state), BlockPos.ZERO) != isNormalCube && state.getBlock() instanceof BlockChiseled)
             {
-                world.setBlockState(pos, state.with(BlockChiseled.FULL_BLOCK, isNormalCube));
+                level.setBlockAndUpdate(worldPosition, state.setValue(BlockChiseled.FULL_BLOCK, isNormalCube));
             }
         }
     }
@@ -531,7 +521,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     private ItemStackGeneratedCache pickCache = null;
 
     public ItemStack getItemStack(
-      final PlayerEntity player)
+      final Player player)
     {
         final ItemStackGeneratedCache cache = pickCache;
 
@@ -551,7 +541,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
             while (countDown > 0)
             {
                 countDown--;
-                placingFace = placingFace.rotateYCCW();
+                placingFace = placingFace.getCounterClockWise();
                 vb = vb.spin(Axis.Y);
             }
 
@@ -590,7 +580,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     public boolean isSideOpaque(
       final Direction side)
     {
-        if (this.getWorld() != null && this.getWorld().isRemote)
+        if (this.getLevel() != null && this.getLevel().isClientSide)
         {
             return isInnerSideOpaque(side);
         }
@@ -613,12 +603,12 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
         setBlob(vb);
         final VoxelBlobStateReference after = getBlobStateReference();
 
-        if (world != null)
+        if (level != null)
         {
-            world.markBlockRangeForRenderUpdate(pos, world.getBlockState(pos), Blocks.AIR.getDefaultState());
+            level.setBlocksDirty(worldPosition, level.getBlockState(worldPosition), Blocks.AIR.defaultBlockState());
         }
 
-        UndoTracker.getInstance().add(getWorld(), getPos(), before, after);
+        UndoTracker.getInstance().add(getLevel(), getBlockPos(), before, after);
     }
 
     //TODO: Figure this out.
@@ -651,7 +641,7 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
 
     @NotNull
     @Override
-    public Collection<AxisAlignedBB> getBoxes(
+    public Collection<AABB> getBoxes(
       @NotNull final BoxType type)
     {
         final VoxelBlobStateReference ref = getBlobStateReference();
@@ -667,10 +657,10 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox()
+    public AABB getRenderBoundingBox()
     {
-        final BlockPos p = getPos();
-        return new AxisAlignedBB(p.getX(), p.getY(), p.getZ(), p.getX() + 1, p.getY() + 1, p.getZ() + 1);
+        final BlockPos p = getBlockPos();
+        return new AABB(p.getX(), p.getY(), p.getZ(), p.getX() + 1, p.getY() + 1, p.getZ() + 1);
     }
 
     public void setNormalCube(
@@ -710,12 +700,12 @@ public class TileEntityBlockChiseled extends TileEntity implements IChiseledTile
     {
         VoxelBlob mask = VoxelBlob.NULL_BLOB;
 
-        if (world != null)
+        if (level != null)
         {
             mask = new VoxelBlob();
         }
 
-        return new BitAccess(world, pos, getBlob(), mask);
+        return new BitAccess(level, worldPosition, getBlob(), mask);
     }
 
     @Override

@@ -5,27 +5,25 @@ import com.ldtteam.datagenerators.recipes.RecipeIngredientKeyJson;
 import com.ldtteam.datagenerators.recipes.RecipeResultJson;
 import com.ldtteam.datagenerators.recipes.shaped.ShapedPatternJson;
 import com.ldtteam.datagenerators.recipes.shaped.ShapedRecipeJson;
-import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.utils.Constants;
-import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.HashCache;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public abstract class AbstractRecipeGenerator implements IDataProvider
+public abstract class AbstractRecipeGenerator implements DataProvider
 {
 
     private final DataGenerator generator;
     private final IForgeRegistryEntry<?> result;
 
-    private DirectoryCache cache = null;
+    private HashCache cache = null;
 
     protected AbstractRecipeGenerator(final DataGenerator generator, final Item result) {
         this.generator = generator;
@@ -35,7 +33,7 @@ public abstract class AbstractRecipeGenerator implements IDataProvider
         this.result = result;}
 
     @Override
-    public final void act(final DirectoryCache cache) throws IOException
+    public final void run(final HashCache cache) throws IOException
     {
         this.cache = cache;
         generate();
@@ -130,7 +128,7 @@ public abstract class AbstractRecipeGenerator implements IDataProvider
         final Path recipeFolder = this.generator.getOutputFolder().resolve(Constants.DataGenerator.RECIPES_DIR);
         final Path recipePath = recipeFolder.resolve(Objects.requireNonNull(this.result.getRegistryName()).getPath() + ".json");
 
-        IDataProvider.save(Constants.DataGenerator.GSON, cache, shapedRecipeJson.serialize(), recipePath);
+        DataProvider.save(Constants.DataGenerator.GSON, cache, shapedRecipeJson.serialize(), recipePath);
     }
 
     @Override

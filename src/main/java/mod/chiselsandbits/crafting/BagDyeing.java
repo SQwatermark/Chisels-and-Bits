@@ -1,22 +1,20 @@
 package mod.chiselsandbits.crafting;
 
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 
-public class BagDyeing extends SpecialRecipe
+public class BagDyeing extends CustomRecipe
 {
 
 	public BagDyeing(
@@ -41,8 +39,8 @@ public class BagDyeing extends SpecialRecipe
 	};
 
 	@Override
-	public ItemStack getCraftingResult(
-			CraftingInventory inv )
+	public ItemStack assemble(
+			CraftingContainer inv )
 	{
 		dyed_output output = getOutput( inv );
 
@@ -55,14 +53,14 @@ public class BagDyeing extends SpecialRecipe
 	}
 
 	private dyed_output getOutput(
-      CraftingInventory inv )
+      CraftingContainer inv )
 	{
 		ItemStack bag = null;
 		ItemStack dye = null;
 
-		for ( int x = 0; x < inv.getSizeInventory(); ++x )
+		for ( int x = 0; x < inv.getContainerSize(); ++x )
 		{
-			ItemStack is = inv.getStackInSlot( x );
+			ItemStack is = inv.getItem( x );
 			if ( is != null && !ModUtil.isEmpty( is ) )
 			{
 				if ( is.getItem() == Items.WATER_BUCKET || getDye( is ) != null )
@@ -104,19 +102,19 @@ public class BagDyeing extends SpecialRecipe
 	}
 
     @Override
-    public boolean matches(final CraftingInventory inv, final World worldIn)
+    public boolean matches(final CraftingContainer inv, final Level worldIn)
     {
         return getOutput( inv ) != null;
     }
 
     @Override
-    public boolean canFit(final int width, final int height)
+    public boolean canCraftInDimensions(final int width, final int height)
     {
         return width * height >= 2;
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.BAG_DYEING.get();
     }

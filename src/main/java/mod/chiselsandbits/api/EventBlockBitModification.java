@@ -1,10 +1,10 @@
 package mod.chiselsandbits.api;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -12,18 +12,18 @@ import net.minecraftforge.eventbus.api.Event;
 public class EventBlockBitModification extends Event
 {
 
-	private final World        w;
+	private final Level        w;
 	private final BlockPos     pos;
-	private final PlayerEntity player;
-	private final Hand         hand;
+	private final Player player;
+	private final InteractionHand         hand;
 	private final ItemStack    stackUsed;
 	private final boolean      placement;
 
 	public EventBlockBitModification(
-			final World w,
+			final Level w,
 			final BlockPos pos,
-			final PlayerEntity player,
-			final Hand hand,
+			final Player player,
+			final InteractionHand hand,
 			final ItemStack stackUsed,
 			final boolean placement )
 	{
@@ -36,7 +36,7 @@ public class EventBlockBitModification extends Event
 		this.placement = placement;
 	}
 
-	public World getWorld()
+	public Level getWorld()
 	{
 		return w;
 	}
@@ -46,12 +46,12 @@ public class EventBlockBitModification extends Event
 		return pos;
 	}
 
-	public PlayerEntity getPlayer()
+	public Player getPlayer()
 	{
 		return player;
 	}
 
-	public Hand getHand()
+	public InteractionHand getHand()
 	{
 		return hand;
 	}

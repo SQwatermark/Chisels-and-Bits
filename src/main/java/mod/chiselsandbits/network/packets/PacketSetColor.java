@@ -4,13 +4,13 @@ import mod.chiselsandbits.helpers.ChiselToolType;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.IChiselModeItem;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class PacketSetColor extends ModPacket
 {
@@ -19,7 +19,7 @@ public class PacketSetColor extends ModPacket
     private ChiselToolType type             = ChiselToolType.TAPEMEASURE;
     private boolean        chatNotification = false;
 
-    public PacketSetColor(final PacketBuffer buffer)
+    public PacketSetColor(final FriendlyByteBuf buffer)
     {
         readPayload(buffer);
     }
@@ -33,9 +33,9 @@ public class PacketSetColor extends ModPacket
 
     @Override
 	public void server(
-			final ServerPlayerEntity player )
+			final ServerPlayer player )
 	{
-		final ItemStack ei = player.getHeldItemMainhand();
+		final ItemStack ei = player.getMainHandItem();
 		if ( ei != null && ei.getItem() instanceof IChiselModeItem )
 		{
 			final DyeColor originalMode = getColor( ei );
@@ -43,7 +43,7 @@ public class PacketSetColor extends ModPacket
 
 			if ( originalMode != newColor && chatNotification )
 			{
-				player.sendMessage( new TranslationTextComponent( "chiselsandbits.color." + newColor.getTranslationKey() ), Util.DUMMY_UUID );
+				player.sendMessage( new TranslatableComponent( "chiselsandbits.color." + newColor.getName() ), Util.NIL_UUID );
 			}
 		}
 	}
@@ -54,7 +54,7 @@ public class PacketSetColor extends ModPacket
 	{
 		if ( ei != null )
 		{
-			ei.setTagInfo( "color", StringNBT.valueOf( newColor2.name() ) );
+			ei.addTagElement( "color", StringTag.valueOf( newColor2.name() ) );
 		}
 	}
 
@@ -78,20 +78,20 @@ public class PacketSetColor extends ModPacket
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		buffer.writeBoolean( chatNotification );
-		buffer.writeEnumValue( type );
-		buffer.writeEnumValue( newColor );
+		buffer.writeEnum( type );
+		buffer.writeEnum( newColor );
 	}
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		chatNotification = buffer.readBoolean();
-		type = buffer.readEnumValue( ChiselToolType.class );
-		newColor = buffer.readEnumValue( DyeColor.class );
+		type = buffer.readEnum( ChiselToolType.class );
+		newColor = buffer.readEnum( DyeColor.class );
 	}
 
 }

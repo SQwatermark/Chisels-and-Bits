@@ -4,8 +4,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import mod.chiselsandbits.client.model.ChiseledBlockModel;
 import mod.chiselsandbits.core.ChiselsAndBits;
-import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 
@@ -24,7 +23,7 @@ public final class ChiseledBlockModelLoader implements IModelLoader
     }
 
     @Override
-    public void onResourceManagerReload(final IResourceManager resourceManager)
+    public void onResourceManagerReload(final ResourceManager resourceManager)
     {
         ChiselsAndBits.getInstance().clearCache();
     }

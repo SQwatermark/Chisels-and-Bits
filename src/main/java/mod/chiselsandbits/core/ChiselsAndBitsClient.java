@@ -12,11 +12,11 @@ import mod.chiselsandbits.printer.ChiselPrinterScreen;
 import mod.chiselsandbits.utils.Constants;
 import mod.chiselsandbits.utils.TextureUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -24,6 +24,8 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DeferredWorkQueue;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.awt.image.BufferedImage;
@@ -33,41 +35,38 @@ public class ChiselsAndBitsClient
 {
 
     @OnlyIn(Dist.CLIENT)
-    public static void onClientInit(FMLClientSetupEvent clientSetupEvent)
+    public static void onClientInit(FMLClientSetupEvent event)
     {
         // load this after items are created...
         //TODO: Load clipboard
         //CreativeClipboardTab.load( new File( configFile.getParent(), MODID + "_clipboard.cfg" ) );
 
+        System.out.println("守矢神社");
         ClientSide.instance.preinit( ChiselsAndBits.getInstance() );
         ClientSide.instance.init( ChiselsAndBits.getInstance() );
         ClientSide.instance.postinit( ChiselsAndBits.getInstance() );
 
-        DeferredWorkQueue.runLater(() -> {
-            ScreenManager.registerFactory(
-              ModContainerTypes.BAG_CONTAINER.get(),
-              BagGui::new
-            );
-            ScreenManager.registerFactory(
-              ModContainerTypes.CHISEL_STATION_CONTAINER.get(),
-              ChiselPrinterScreen::new
-            );
-        });
+        // TODO
+        MenuScreens.register(
+                ModContainerTypes.BAG_CONTAINER.get(),
+                BagGui::new
+        );
+        MenuScreens.register(
+                ModContainerTypes.CHISEL_STATION_CONTAINER.get(),
+                ChiselPrinterScreen::new
+        );
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void onModelRegistry(final ModelRegistryEvent event)
-    {
+    public static void onModelRegistry(final ModelRegistryEvent event) {
         ModelLoaderRegistry.registerLoader(new ResourceLocation(Constants.MOD_ID, "chiseled_block"), ChiseledBlockModelLoader.getInstance());
     }
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
-    public static void registerIconTextures(
-      final TextureStitchEvent.Pre ev )
-    {
-        final AtlasTexture map = ev.getMap();
-        if (!map.getTextureLocation().equals(PlayerContainer.LOCATION_BLOCKS_TEXTURE))
+    public static void registerIconTextures(final TextureStitchEvent.Pre ev) {
+        final TextureAtlas map = ev.getAtlas();
+        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS))
             return;
 
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/swap" ) );
@@ -101,8 +100,8 @@ public class ChiselsAndBitsClient
     public static void retrieveRegisteredIconSprites(
       final TextureStitchEvent.Post ev )
     {
-        final AtlasTexture map = ev.getMap();
-        if (!map.getTextureLocation().equals(PlayerContainer.LOCATION_BLOCKS_TEXTURE))
+        final TextureAtlas map = ev.getAtlas();
+        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS))
             return;
 
         ClientSide.swapIcon = map.getSprite( new ResourceLocation( "chiselsandbits", "icons/swap" ) );
@@ -133,7 +132,7 @@ public class ChiselsAndBitsClient
 
     @OnlyIn(Dist.CLIENT)
     private static void loadIcon(
-      final AtlasTexture map,
+      final TextureAtlas map,
       final IToolMode mode )
     {
         final SpriteIconPositioning sip = new SpriteIconPositioning();
@@ -145,7 +144,7 @@ public class ChiselsAndBitsClient
 
         try
         {
-            final IResource iresource = Minecraft.getInstance().getResourceManager().getResource( png );
+            final Resource iresource = Minecraft.getInstance().getResourceManager().getResource( png );
             final BufferedImage bi = TextureUtils.readBufferedImage( iresource.getInputStream() );
 
             int bottom = 0;

@@ -2,15 +2,16 @@ package mod.chiselsandbits.client.culling;
 
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.helpers.ModUtil;
-import net.minecraft.block.*;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.StainedGlassBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.IFluidBlock;
 
 /**
@@ -18,7 +19,7 @@ import net.minecraftforge.fluids.IFluidBlock;
  *
  * hardcode vanilla stained glass because that looks horrible.
  */
-public class MCCullTest implements ICullTest, IBlockReader
+public class MCCullTest implements ICullTest, BlockGetter
 {
 
 	private BlockState a;
@@ -37,12 +38,12 @@ public class MCCullTest implements ICullTest, IBlockReader
 		a = ModUtil.getStateById( mySpot );
 		if ( a == null )
 		{
-			a = Blocks.AIR.getDefaultState();
+			a = Blocks.AIR.defaultBlockState();
 		}
 		b = ModUtil.getStateById( secondSpot );
 		if ( b == null )
 		{
-			b = Blocks.AIR.getDefaultState();
+			b = Blocks.AIR.defaultBlockState();
 		}
 
 		if ( a.getBlock().getClass() == StainedGlassBlock.class && a.getBlock() == b.getBlock() )
@@ -50,14 +51,14 @@ public class MCCullTest implements ICullTest, IBlockReader
 			return false;
 		}
 
-		if ( a.getBlock() instanceof IFluidBlock || a.getBlock() instanceof FlowingFluidBlock)
+		if ( a.getBlock() instanceof IFluidBlock || a.getBlock() instanceof LiquidBlock)
 		{
 			return true;
 		}
 
 		try
 		{
-			return !a.isSideInvisible( b, Direction.NORTH );
+			return !a.skipRendering( b, Direction.NORTH );
 		}
 		catch ( final Throwable t )
 		{
@@ -67,7 +68,7 @@ public class MCCullTest implements ICullTest, IBlockReader
 	}
 
 	@Override
-	public TileEntity getTileEntity(
+	public BlockEntity getBlockEntity(
 			final BlockPos pos )
 	{
 		return null;
@@ -83,6 +84,18 @@ public class MCCullTest implements ICullTest, IBlockReader
     @Override
     public FluidState getFluidState(final BlockPos pos)
     {
-        return Fluids.EMPTY.getDefaultState();
+        return Fluids.EMPTY.defaultFluidState();
     }
+
+	// 新增
+	@Override
+	public int getHeight() {
+		return 0;
+	}
+
+	// 新增
+	@Override
+	public int getMinBuildHeight() {
+		return 0;
+	}
 }

@@ -3,20 +3,20 @@ package mod.chiselsandbits.items;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -27,52 +27,52 @@ public class ItemWrench extends Item
 
 	public ItemWrench(Item.Properties properties)
 	{
-	    super(properties.maxStackSize(1).maxDamage(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max( 0, Math.min( Short.MAX_VALUE, ChiselsAndBits.getConfig().getServer().wrenchUses.get() ) ) : 0));
+	    super(properties.stacksTo(1).durability(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max( 0, Math.min( Short.MAX_VALUE, ChiselsAndBits.getConfig().getServer().wrenchUses.get() ) ) : 0));
 	}
 
 	@Override
 	@OnlyIn( Dist.CLIENT )
-	public void addInformation(
+	public void appendHoverText(
 			final ItemStack stack,
-			final World worldIn,
-			final List<ITextComponent> tooltip,
-			final ITooltipFlag advanced )
+			final Level worldIn,
+			final List<Component> tooltip,
+			final TooltipFlag advanced )
 	{
-		super.addInformation( stack, worldIn, tooltip, advanced );
+		super.appendHoverText( stack, worldIn, tooltip, advanced );
 		ChiselsAndBits.getConfig().getCommon().helpText( LocalStrings.HelpWrench, tooltip,
-				ClientSide.instance.getKeyName( Minecraft.getInstance().gameSettings.keyBindUseItem ) );
+				ClientSide.instance.getKeyName( Minecraft.getInstance().options.keyUse ) );
 	}
 
     @Override
-    public ActionResultType onItemUse(final ItemUseContext context)
+    public InteractionResult useOn(final UseOnContext context)
     {
-        final PlayerEntity player = context.getPlayer();
-        final BlockPos pos = context.getPos();
-        final Direction side = context.getFace();
-        final World world = context.getWorld();
-        final ItemStack stack = context.getItem();
-        final Hand hand = context.getHand();
+        final Player player = context.getPlayer();
+        final BlockPos pos = context.getClickedPos();
+        final Direction side = context.getClickedFace();
+        final Level world = context.getLevel();
+        final ItemStack stack = context.getItemInHand();
+        final InteractionHand hand = context.getHand();
 
-        if ( !player.canPlayerEdit( pos, side, stack ) || !world.isBlockModifiable( player, pos ) )
+        if ( !player.mayUseItemAt( pos, side, stack ) || !world.mayInteract( player, pos ) )
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
 
         final BlockState b = world.getBlockState( pos );
-        if ( b != null && !player.isSneaking() )
+        if ( b != null && !player.isShiftKeyDown() )
         {
             BlockState nb;
             if ((nb = b.rotate( world, pos, Rotation.CLOCKWISE_90 )) != b )
             {
-                world.setBlockState(pos, nb);
-                stack.damageItem(1, player, playerEntity -> {
-                    playerEntity.sendBreakAnimation(hand);
+                world.setBlockAndUpdate(pos, nb);
+                stack.hurtAndBreak(1, player, playerEntity -> {
+                    playerEntity.broadcastBreakEvent(hand);
                 });
-                world.notifyNeighborsOfStateChange( pos, b.getBlock() );
-                player.swingArm( hand );
-                return ActionResultType.SUCCESS;
+                world.updateNeighborsAt( pos, b.getBlock() );
+                player.swing( hand );
+                return InteractionResult.SUCCESS;
             }
         }
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 }

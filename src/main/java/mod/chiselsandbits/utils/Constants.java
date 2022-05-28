@@ -3,7 +3,7 @@ package mod.chiselsandbits.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mod.chiselsandbits.core.ChiselsAndBits;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
 public final class Constants

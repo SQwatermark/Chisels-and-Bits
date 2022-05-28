@@ -8,7 +8,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.ItemTags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 
@@ -36,7 +36,7 @@ public class BitBagRecipeGenerator extends AbstractRecipeGenerator
           "b",
           new RecipeIngredientKeyJson(new RecipeIngredientJson(ModItems.ITEM_BLOCK_BIT.getId().toString(), false)),
           "w",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.WOOL.getName().toString(), true))
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.WOOL.location().toString(), true))
         );
     }
 }

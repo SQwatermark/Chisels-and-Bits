@@ -2,29 +2,29 @@ package mod.chiselsandbits.items;
 
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
-import static net.minecraft.item.ItemTier.*;
+import static net.minecraft.world.item.Tiers.*;
 
 public class ItemBitSaw extends Item
 {
 
-	public ItemBitSaw(IItemTier tier, Item.Properties properties)
+	public ItemBitSaw(Tier tier, Item.Properties properties)
 	{
-        super(setupDamageStack(tier, properties.maxStackSize(1)));
+        super(setupDamageStack(tier, properties.stacksTo(1)));
 	}
 
 
-    private static Item.Properties setupDamageStack(IItemTier material, Item.Properties properties) {
+    private static Item.Properties setupDamageStack(Tier material, Item.Properties properties) {
         long uses = 1;
         if (DIAMOND.equals(material))
         {
@@ -47,18 +47,18 @@ public class ItemBitSaw extends Item
             uses = ChiselsAndBits.getConfig().getServer().netheriteSawUses.get();
         }
 
-        return properties.maxDamage(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max( 0, uses ) : 0);
+        return properties.durability(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max( 0, uses ) : 0);
     }
 
 	@Override
 	@OnlyIn( Dist.CLIENT )
-	public void addInformation(
+	public void appendHoverText(
 			final ItemStack stack,
-			final World worldIn,
-			final List<ITextComponent> tooltip,
-			final ITooltipFlag advanced )
+			final Level worldIn,
+			final List<Component> tooltip,
+			final TooltipFlag advanced )
 	{
-		super.addInformation( stack, worldIn, tooltip, advanced );
+		super.appendHoverText( stack, worldIn, tooltip, advanced );
 		ChiselsAndBits.getConfig().getCommon().helpText( LocalStrings.HelpBitSaw, tooltip );
 	}
 
@@ -68,8 +68,8 @@ public class ItemBitSaw extends Item
 	{
 		if ( ChiselsAndBits.getConfig().getServer().damageTools.get() )
 		{
-			itemStack.setDamage( itemStack.getDamage() + 1 );
-			if (itemStack.getDamage() == itemStack.getMaxDamage())
+			itemStack.setDamageValue( itemStack.getDamageValue() + 1 );
+			if (itemStack.getDamageValue() == itemStack.getMaxDamage())
             {
                 return ItemStack.EMPTY;
             }
@@ -79,7 +79,7 @@ public class ItemBitSaw extends Item
 	}
 
 	@Override
-	public boolean hasContainerItem()
+	public boolean hasCraftingRemainingItem()
 	{
 		return true;
 	}

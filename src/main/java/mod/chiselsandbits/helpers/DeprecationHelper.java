@@ -2,16 +2,13 @@ package mod.chiselsandbits.helpers;
 
 import mod.chiselsandbits.utils.LanguageHandler;
 import mod.chiselsandbits.utils.SingleBlockBlockReader;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.core.BlockPos;
+import net.minecraft.locale.Language;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.DistExecutor;
 
 @SuppressWarnings( "deprecation" )
@@ -21,7 +18,7 @@ public class DeprecationHelper
 	public static int getLightValue(
 			final BlockState state )
 	{
-		return state.getBlock().getLightValue( state, new SingleBlockBlockReader(state, state.getBlock()), BlockPos.ZERO );
+		return state.getBlock().getLightEmission( state, new SingleBlockBlockReader(state, state.getBlock()), BlockPos.ZERO );
 	}
 
 	public static BlockState getStateFromItem(
@@ -30,7 +27,7 @@ public class DeprecationHelper
 		if ( bitItemStack != null && bitItemStack.getItem() instanceof BlockItem)
 		{
 			final BlockItem blkItem = (BlockItem) bitItemStack.getItem();
-			return blkItem.getBlock().getDefaultState();
+			return blkItem.getBlock().defaultBlockState();
 		}
 
 		return null;
@@ -41,7 +38,7 @@ public class DeprecationHelper
 	{
 	    return DistExecutor.unsafeRunForDist(
           () -> () -> {
-              final String translated = LanguageMap.getInstance().func_230503_a_(string);
+              final String translated = Language.getInstance().getOrDefault(string);
               if (translated.equals(string))
                   return LanguageHandler.translateKey(string);
 
@@ -61,12 +58,12 @@ public class DeprecationHelper
 	public static SoundType getSoundType(
 			BlockState block )
 	{
-		return block.getBlock().soundType;
+		return block.getSoundType();
 	}
 
     public static SoundType getSoundType(
       Block block )
     {
-        return block.getBlock().soundType;
+        return block.defaultBlockState().getSoundType();
     }
 }

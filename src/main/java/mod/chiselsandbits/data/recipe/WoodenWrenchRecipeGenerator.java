@@ -9,7 +9,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 
@@ -35,9 +35,9 @@ public class WoodenWrenchRecipeGenerator extends AbstractRecipeGenerator
           "ws ",
           "  w",
           "s",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.RODS_WOODEN.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.RODS_WOODEN.location().toString(), true)),
           "w",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.PLANKS.getName().toString(), true))
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.PLANKS.location().toString(), true))
           );
     }
 }

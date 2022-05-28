@@ -1,8 +1,8 @@
 package mod.chiselsandbits.api;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 /**
  * Implemented by C&B Blocks, can be used to request a material that represents
@@ -11,6 +11,6 @@ import net.minecraft.world.IBlockReader;
 public interface IMultiStateBlock
 {
 	BlockState getPrimaryState(
-			IBlockReader world,
+			BlockGetter world,
 			BlockPos pos );
 }

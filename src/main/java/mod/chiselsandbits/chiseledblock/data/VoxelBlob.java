@@ -13,20 +13,20 @@ import mod.chiselsandbits.helpers.IVoxelSrc;
 import mod.chiselsandbits.helpers.LocalStrings;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.AxisDirection;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.AxisDirection;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
@@ -61,7 +61,7 @@ public final class VoxelBlob implements IVoxelSrc
 
         for (final Block block : blockReg)
         {
-            block.getStateContainer().getValidStates().forEach(blockState -> {
+            block.getStateDefinition().getPossibleStates().forEach(blockState -> {
                 final int stateId = ModUtil.getStateId(blockState);
                 if (BlockBitInfo.getTypeFromStateID(stateId) == VoxelType.FLUID)
                 {
@@ -83,7 +83,7 @@ public final class VoxelBlob implements IVoxelSrc
 
         final Map<Object, BitSet> layerFilters = VoxelBlob.layerFilters;
 
-        for (final RenderType layer : RenderType.getBlockRenderTypes())
+        for (final RenderType layer : RenderType.chunkBufferLayers())
         {
             layerFilters.put(layer, new BitSet(4096));
         }
@@ -91,11 +91,11 @@ public final class VoxelBlob implements IVoxelSrc
         final ForgeRegistry<Block> blockReg = (ForgeRegistry<Block>) ForgeRegistries.BLOCKS;
         for (final Block block : blockReg)
         {
-            if (block instanceof FlowingFluidBlock) {
+            if (block instanceof LiquidBlock) {
                 continue;
             }
 
-            for (final BlockState state : block.getStateContainer().getValidStates())
+            for (final BlockState state : block.getStateDefinition().getPossibleStates())
             {
                 final int id = ModUtil.getStateId(state);
                 if (state == null || state.getBlock() != block)
@@ -104,9 +104,9 @@ public final class VoxelBlob implements IVoxelSrc
                     continue;
                 }
 
-                for (final RenderType layer : RenderType.getBlockRenderTypes())
+                for (final RenderType layer : RenderType.chunkBufferLayers())
                 {
-                    if (RenderTypeLookup.canRenderInLayer(state, layer))
+                    if (ItemBlockRenderTypes.canRenderInLayer(state, layer))
                     {
                         layerFilters.get(layer).set(id);
                     }
@@ -116,13 +116,13 @@ public final class VoxelBlob implements IVoxelSrc
 
         for (final Fluid fluid : ForgeRegistries.FLUIDS)
         {
-            for (final FluidState state : fluid.getStateContainer().getValidStates())
+            for (final FluidState state : fluid.getStateDefinition().getPossibleStates())
             {
-                final int id = ModUtil.getStateId(state.getBlockState());
+                final int id = ModUtil.getStateId(state.createLegacyBlock());
 
-                for (final RenderType layer : RenderType.getBlockRenderTypes())
+                for (final RenderType layer : RenderType.chunkBufferLayers())
                 {
-                    if (RenderTypeLookup.canRenderInLayer(state, layer))
+                    if (ItemBlockRenderTypes.canRenderInLayer(state, layer))
                     {
                         layerFilters.get(layer).set(id);
                     }
@@ -693,9 +693,9 @@ public final class VoxelBlob implements IVoxelSrc
         final int mySpot = get(x, y, z);
         dest.state = mySpot;
 
-        x += face.getXOffset();
-        y += face.getYOffset();
-        z += face.getZOffset();
+        x += face.getStepX();
+        y += face.getStepY();
+        z += face.getStepZ();
 
         if (x >= 0 && x < dim && y >= 0 && y < dim && z >= 0 && z < dim)
         {
@@ -824,11 +824,11 @@ public final class VoxelBlob implements IVoxelSrc
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<ITextComponent> listContents(
-      final List<ITextComponent> details)
+    public List<Component> listContents(
+      final List<Component> details)
     {
         final HashMap<Integer, Integer> states = new HashMap<>();
-        final HashMap<ITextComponent, Integer> contents = new HashMap<>();
+        final HashMap<Component, Integer> contents = new HashMap<>();
 
         final BitIterator bi = new BitIterator();
         while (bi.hasNext())
@@ -855,7 +855,7 @@ public final class VoxelBlob implements IVoxelSrc
 
         for (final Entry<Integer, Integer> e : states.entrySet())
         {
-            final ITextComponent name = ItemChiseledBit.getBitTypeName(ItemChiseledBit.createStack(e.getKey(), 1, false));
+            final Component name = ItemChiseledBit.getBitTypeName(ItemChiseledBit.createStack(e.getKey(), 1, false));
 
             if (name == null)
             {
@@ -878,12 +878,12 @@ public final class VoxelBlob implements IVoxelSrc
 
         if (contents.isEmpty())
         {
-            details.add(new StringTextComponent(LocalStrings.Empty.getLocal()));
+            details.add(new TextComponent(LocalStrings.Empty.getLocal()));
         }
 
-        for (final Entry<ITextComponent, Integer> e : contents.entrySet())
+        for (final Entry<Component, Integer> e : contents.entrySet())
         {
-            details.add(new StringTextComponent(new StringBuilder().append(e.getValue()).append(' ').toString()).append(e.getKey()));
+            details.add(new TextComponent(new StringBuilder().append(e.getValue()).append(' ').toString()).append(e.getKey()));
         }
 
         return details;
@@ -1042,7 +1042,7 @@ public final class VoxelBlob implements IVoxelSrc
         }
         while (rv > 0);
 
-        final PacketBuffer header = new PacketBuffer(Unpooled.wrappedBuffer(bb));
+        final FriendlyByteBuf header = new FriendlyByteBuf(Unpooled.wrappedBuffer(bb));
 
         final int version = header.readInt();
 
@@ -1126,7 +1126,7 @@ public final class VoxelBlob implements IVoxelSrc
             final Deflater def = BlobSerilizationCache.getCacheDeflater();
             final DeflaterOutputStream w = new DeflaterOutputStream(o, def, bestBufferSize);
 
-            final PacketBuffer pb = BlobSerilizationCache.getCachePacketBuffer();
+            final FriendlyByteBuf pb = BlobSerilizationCache.getCachePacketBuffer();
             pb.writeInt(bs.getVersion());
             bs.write(pb);
 

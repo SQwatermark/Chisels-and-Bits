@@ -2,12 +2,11 @@ package mod.chiselsandbits.chiseledblock.data;
 
 import mod.chiselsandbits.api.IBitLocation;
 import mod.chiselsandbits.helpers.BitOperation;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 
@@ -46,9 +45,9 @@ public class BitLocation implements IBitLocation
     @Override
     public IBitLocation offSet(final Direction direction)
     {
-        final int newBitX = bitX + direction.getXOffset();
-        final int newBitY = bitY + direction.getYOffset();
-        final int newBitZ = bitZ + direction.getZOffset();
+        final int newBitX = bitX + direction.getStepX();
+        final int newBitY = bitY + direction.getStepY();
+        final int newBitZ = bitZ + direction.getStepZ();
 
         return new BitLocation(
           blockPos,
@@ -65,37 +64,37 @@ public class BitLocation implements IBitLocation
 	}
 
 	public BitLocation(
-			final BlockRayTraceResult mop,
+			final BlockHitResult mop,
 			final BitOperation type )
 	{
-		final Vector3d hitVec = mop.getHitVec();
-		final Vector3d accuratePos = new Vector3d(
-		  mop.getPos().getX(),
-          mop.getPos().getY(),
-          mop.getPos().getZ()
+		final Vec3 hitVec = mop.getLocation();
+		final Vec3 accuratePos = new Vec3(
+		  mop.getBlockPos().getX(),
+          mop.getBlockPos().getY(),
+          mop.getBlockPos().getZ()
         );
-		final Vector3d faceOffset = new Vector3d(
-          mop.getFace().getOpposite().getXOffset() * One32nd,
-          mop.getFace().getOpposite().getYOffset() * One32nd,
-          mop.getFace().getOpposite().getZOffset() * One32nd
+		final Vec3 faceOffset = new Vec3(
+          mop.getDirection().getOpposite().getStepX() * One32nd,
+          mop.getDirection().getOpposite().getStepY() * One32nd,
+          mop.getDirection().getOpposite().getStepZ() * One32nd
         );
-        final Vector3d hitDelta = hitVec.subtract(accuratePos).add(faceOffset);
-        final Vector3d inBlockPosAccurate = hitDelta.scale(16d);
-        final Vector3i inBlockPos = new Vector3i(
-          (int) inBlockPosAccurate.getX(),
-          (int) inBlockPosAccurate.getY(),
-          (int) inBlockPosAccurate.getZ()
+        final Vec3 hitDelta = hitVec.subtract(accuratePos).add(faceOffset);
+        final Vec3 inBlockPosAccurate = hitDelta.scale(16d);
+        final Vec3i inBlockPos = new Vec3i(
+          (int) inBlockPosAccurate.x(),
+          (int) inBlockPosAccurate.y(),
+          (int) inBlockPosAccurate.z()
         );
-        final Vector3i normalizedInBlockPos = new Vector3i(
+        final Vec3i normalizedInBlockPos = new Vec3i(
           snapToValid(inBlockPos.getX()),
           snapToValid(inBlockPos.getY()),
           snapToValid(inBlockPos.getZ())
         );
-        final Vector3i normalizedInBlockPosWithOffset = type.usePlacementOffset() ?
-                                                normalizedInBlockPos.offset(mop.getFace(), 1) :
+        final Vec3i normalizedInBlockPosWithOffset = type.usePlacementOffset() ?
+                                                normalizedInBlockPos.relative(mop.getDirection(), 1) :
                                                 normalizedInBlockPos;
 
-        this.blockPos = mop.getPos();
+        this.blockPos = mop.getBlockPos();
         this.bitX = normalizedInBlockPosWithOffset.getX();
         this.bitY = normalizedInBlockPosWithOffset.getY();
         this.bitZ = normalizedInBlockPosWithOffset.getZ();
@@ -191,7 +190,7 @@ public class BitLocation implements IBitLocation
 	    bitY = (bitY + 16) % 16;
 	    bitZ = (bitZ + 16) % 16;
 
-	    this.blockPos = this.blockPos.add(
+	    this.blockPos = this.blockPos.offset(
 	      xOffset,
           yOffset,
           zOffset

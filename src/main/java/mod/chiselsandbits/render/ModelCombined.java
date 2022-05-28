@@ -7,11 +7,11 @@ import java.util.Random;
 
 import mod.chiselsandbits.client.model.baked.BaseBakedBlockModel;
 import mod.chiselsandbits.core.ClientSide;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.data.IModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +21,7 @@ public class ModelCombined extends BaseBakedBlockModel
 
     private static final Random COMBINED_RANDOM_MODEL = new Random();
 
-	IBakedModel[] merged;
+	BakedModel[] merged;
 
 	List<BakedQuad>[] face;
 	List<BakedQuad>   generic;
@@ -30,7 +30,7 @@ public class ModelCombined extends BaseBakedBlockModel
 
 	@SuppressWarnings( "unchecked" )
 	public ModelCombined(
-			final IBakedModel... args )
+			final BakedModel... args )
 	{
 		face = new ArrayList[Direction.values().length];
 
@@ -42,7 +42,7 @@ public class ModelCombined extends BaseBakedBlockModel
 
 		merged = args;
 
-		for ( final IBakedModel m : merged )
+		for ( final BakedModel m : merged )
 		{
 			generic.addAll( m.getQuads( null, null, COMBINED_RANDOM_MODEL ) );
 			for ( final Direction f : Direction.values() )
@@ -51,15 +51,15 @@ public class ModelCombined extends BaseBakedBlockModel
 			}
 		}
 
-		isSideLit = Arrays.stream(args).anyMatch(IBakedModel::isSideLit);
+		isSideLit = Arrays.stream(args).anyMatch(BakedModel::usesBlockLight);
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleTexture()
+	public TextureAtlasSprite getParticleIcon()
 	{
-		for ( final IBakedModel a : merged )
+		for ( final BakedModel a : merged )
 		{
-			return a.getParticleTexture();
+			return a.getParticleIcon();
 		}
 
 		return ClientSide.instance.getMissingIcon();
@@ -90,7 +90,7 @@ public class ModelCombined extends BaseBakedBlockModel
     }
 
     @Override
-    public boolean isSideLit()
+    public boolean usesBlockLight()
     {
         return isSideLit;
     }

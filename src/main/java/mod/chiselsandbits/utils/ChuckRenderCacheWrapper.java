@@ -1,17 +1,17 @@
 package mod.chiselsandbits.utils;
 
 import mod.chiselsandbits.core.Log;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.renderer.chunk.ChunkRenderCache;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.renderer.chunk.RenderChunkRegion;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.lighting.WorldLightManager;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -19,40 +19,40 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class ChuckRenderCacheWrapper implements IBlockDisplayReader
+public class ChuckRenderCacheWrapper implements BlockAndTintGetter
 {
-    private final ChunkRenderCache chunkRenderCache;
+    private final RenderChunkRegion chunkRenderCache;
 
-    public ChuckRenderCacheWrapper(final ChunkRenderCache chunkRenderCache) {this.chunkRenderCache = chunkRenderCache;}
+    public ChuckRenderCacheWrapper(final RenderChunkRegion chunkRenderCache) {this.chunkRenderCache = chunkRenderCache;}
 
     @Override
-    public float func_230487_a_(final Direction p_230487_1_, final boolean p_230487_2_)
+    public float getShade(final Direction p_230487_1_, final boolean p_230487_2_)
     {
-        return chunkRenderCache.func_230487_a_(p_230487_1_, p_230487_2_);
+        return chunkRenderCache.getShade(p_230487_1_, p_230487_2_);
     }
 
     @Override
-    public WorldLightManager getLightManager()
+    public LevelLightEngine getLightEngine()
     {
-        return chunkRenderCache.getLightManager();
+        return chunkRenderCache.getLightEngine();
     }
 
     @Override
-    public int getBlockColor(final BlockPos blockPosIn, final ColorResolver colorResolverIn)
+    public int getBlockTint(final BlockPos blockPosIn, final ColorResolver colorResolverIn)
     {
         return this.whenPosValidOrElse(
           blockPosIn,
-          () -> chunkRenderCache.getBlockColor(blockPosIn, colorResolverIn),
+          () -> chunkRenderCache.getBlockTint(blockPosIn, colorResolverIn),
           () -> 0
         );
     }
 
     @Nullable
     @Override
-    public TileEntity getTileEntity(final BlockPos pos)
+    public BlockEntity getBlockEntity(final BlockPos pos)
     {
         return this.whenPosValidOrElse(pos,
-          () -> chunkRenderCache.getTileEntity(pos),
+          () -> chunkRenderCache.getBlockEntity(pos),
           () -> null);
     }
 
@@ -61,7 +61,7 @@ public class ChuckRenderCacheWrapper implements IBlockDisplayReader
     {
         return this.whenPosValidOrElse(pos,
           () -> chunkRenderCache.getBlockState(pos),
-          Blocks.AIR::getDefaultState);
+          Blocks.AIR::defaultBlockState);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ChuckRenderCacheWrapper implements IBlockDisplayReader
     {
         return this.whenPosValidOrElse(pos,
           () -> chunkRenderCache.getFluidState(pos),
-          Fluids.EMPTY::getDefaultState
+          Fluids.EMPTY::defaultFluidState
         );
     }
 
@@ -90,5 +90,15 @@ public class ChuckRenderCacheWrapper implements IBlockDisplayReader
             Log.logError("Failed to process cached wrapped info for: " + pos, e);
             return invalidSupplier.get();
         }
+    }
+
+    @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    @Override
+    public int getMinBuildHeight() {
+        return 0;
     }
 }

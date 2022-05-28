@@ -1,15 +1,14 @@
 package mod.chiselsandbits.client;
 
 import mod.chiselsandbits.helpers.ModUtil;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.IBlockColor;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockColorChisled implements IBlockColor
+public class BlockColorChisled implements BlockColor
 {
 
 	public static final int TINT_MASK = 0xff;
@@ -17,7 +16,7 @@ public class BlockColorChisled implements IBlockColor
 
     @Override
     public int getColor(
-      final BlockState p_getColor_1_, @Nullable final IBlockDisplayReader p_getColor_2_, @Nullable final BlockPos p_getColor_3_, final int p_getColor_4_)
+      final BlockState p_getColor_1_, @Nullable final BlockAndTintGetter p_getColor_2_, @Nullable final BlockPos p_getColor_3_, final int p_getColor_4_)
     {
 
         final BlockState tstate = ModUtil.getStateById( p_getColor_4_ >> TINT_BITS );

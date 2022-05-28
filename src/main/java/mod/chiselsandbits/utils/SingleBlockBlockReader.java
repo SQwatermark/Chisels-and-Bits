@@ -1,16 +1,17 @@
 package mod.chiselsandbits.utils;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import org.jetbrains.annotations.Nullable;
 
-public class SingleBlockBlockReader implements IBlockReader
+public class SingleBlockBlockReader implements BlockGetter
 {
 
     private final BlockState state;
@@ -30,11 +31,11 @@ public class SingleBlockBlockReader implements IBlockReader
 
     @Nullable
     @Override
-    public TileEntity getTileEntity(final BlockPos pos)
+    public BlockEntity getBlockEntity(final BlockPos pos)
     {
-        if (pos == BlockPos.ZERO && blk.hasTileEntity(state))
+        if (pos == BlockPos.ZERO && state.hasBlockEntity())
         {
-            return blk.createTileEntity(state, this);
+            return ((EntityBlock) blk).newBlockEntity(pos, state);
         }
 
         return null;
@@ -47,12 +48,22 @@ public class SingleBlockBlockReader implements IBlockReader
         {
             return state;
         }
-        return Blocks.AIR.getDefaultState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     @Override
     public FluidState getFluidState(final BlockPos pos)
     {
-        return Fluids.EMPTY.getDefaultState();
+        return Fluids.EMPTY.defaultFluidState();
+    }
+
+    @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    @Override
+    public int getMinBuildHeight() {
+        return 0;
     }
 }

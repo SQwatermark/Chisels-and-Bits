@@ -1,7 +1,7 @@
 package mod.chiselsandbits.render.chiseledblock;
 
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.util.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.Direction;
 
 import java.util.ArrayList;
 import java.util.List;

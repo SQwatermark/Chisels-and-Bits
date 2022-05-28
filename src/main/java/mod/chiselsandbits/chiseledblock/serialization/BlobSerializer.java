@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class BlobSerializer
 {
@@ -38,7 +38,7 @@ public class BlobSerializer
 	}
 
 	public BlobSerializer(
-			final PacketBuffer toInflate )
+			final FriendlyByteBuf toInflate )
 	{
 		types = toInflate.readInt();
 		palette = new int[types];
@@ -63,7 +63,7 @@ public class BlobSerializer
     }
 
 	public void write(
-			final PacketBuffer to )
+			final FriendlyByteBuf to )
 	{
 		// palette size...
 		to.writeInt( palette.length );
@@ -76,13 +76,13 @@ public class BlobSerializer
 	}
 
 	protected int readStateID(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		return buffer.readInt();
 	}
 
 	protected void writeStateID(
-			final PacketBuffer buffer,
+			final FriendlyByteBuf buffer,
 			final int key )
 	{
 		buffer.writeInt( key );

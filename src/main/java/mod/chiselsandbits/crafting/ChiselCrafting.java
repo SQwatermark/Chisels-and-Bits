@@ -1,20 +1,19 @@
 package mod.chiselsandbits.crafting;
 
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 
-public class ChiselCrafting extends SpecialRecipe
+public class ChiselCrafting extends CustomRecipe
 {
 
 	public ChiselCrafting(
@@ -30,14 +29,14 @@ public class ChiselCrafting extends SpecialRecipe
 	 * @return
 	 */
 	private ChiselCraftingRequirements getCraftingReqs(
-			final CraftingInventory inv,
+			final CraftingContainer inv,
 			final boolean copy )
 	{
 		ItemStack pattern = null;
 
-		for ( int x = 0; x < inv.getSizeInventory(); x++ )
+		for ( int x = 0; x < inv.getContainerSize(); x++ )
 		{
-			final ItemStack is = inv.getStackInSlot( x );
+			final ItemStack is = inv.getItem( x );
 
 			if ( is == null )
 			{
@@ -78,15 +77,15 @@ public class ChiselCrafting extends SpecialRecipe
 
 	@Override
 	public boolean matches(
-			final CraftingInventory inv,
-			final World worldIn )
+			final CraftingContainer inv,
+			final Level worldIn )
 	{
 		return getCraftingReqs( inv, true ) != null;
 	}
 
 	@Override
-	public ItemStack getCraftingResult(
-			final CraftingInventory inv )
+	public ItemStack assemble(
+			final CraftingContainer inv )
 	{
 		final ChiselCraftingRequirements req = getCraftingReqs( inv, true );
 
@@ -99,7 +98,7 @@ public class ChiselCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public boolean canFit(
+	public boolean canCraftInDimensions(
 			final int width,
 			final int height )
 	{
@@ -107,7 +106,7 @@ public class ChiselCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public ItemStack getRecipeOutput()
+	public ItemStack getResultItem()
 	{
 		// no inputs, means no output.
 		return ModUtil.getEmptyStack();
@@ -115,14 +114,14 @@ public class ChiselCrafting extends SpecialRecipe
 
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(
-			final CraftingInventory inv )
+			final CraftingContainer inv )
 	{
-		final NonNullList<ItemStack> out = NonNullList.withSize( inv.getSizeInventory(), ItemStack.EMPTY );
+		final NonNullList<ItemStack> out = NonNullList.withSize( inv.getContainerSize(), ItemStack.EMPTY );
 
 		// just getting this will alter the stacks..
 		final ChiselCraftingRequirements r = getCraftingReqs( inv, false );
 
-		if ( inv.getSizeInventory() != r.pile.length )
+		if ( inv.getContainerSize() != r.pile.length )
 		{
 			throw new RuntimeException( "Inventory Changed Size!" );
 		}
@@ -140,7 +139,7 @@ public class ChiselCrafting extends SpecialRecipe
 	}
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.CHISEL_CRAFTING.get();
     }

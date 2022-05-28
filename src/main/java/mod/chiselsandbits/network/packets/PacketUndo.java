@@ -12,14 +12,14 @@ import mod.chiselsandbits.helpers.*;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class PacketUndo extends ModPacket
 	private VoxelBlobStateReference before;
 	private VoxelBlobStateReference after;
 
-	public PacketUndo(PacketBuffer buffer)
+	public PacketUndo(FriendlyByteBuf buffer)
 	{
 	    readPayload(buffer);
 	}
@@ -49,14 +49,14 @@ public class PacketUndo extends ModPacket
 
 	@Override
 	public void server(
-			final ServerPlayerEntity player )
+			final ServerPlayer player )
 	{
-		preformAction( ActingPlayer.actingAs( player, Hand.MAIN_HAND ), true );
+		preformAction( ActingPlayer.actingAs( player, InteractionHand.MAIN_HAND ), true );
 	}
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		buffer.writeBlockPos( pos );
 
@@ -71,7 +71,7 @@ public class PacketUndo extends ModPacket
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		pos = buffer.readBlockPos();
 
@@ -107,7 +107,7 @@ public class PacketUndo extends ModPacket
 		{
 			final Direction side = Direction.UP;
 
-			final World world = player.getWorld();
+			final Level world = player.getWorld();
 			final BitAccess ba = (BitAccess) ChiselsAndBits.getApi().getBitAccess( world, pos );
 
 			final VoxelBlob bBefore = before.getVoxelBlob();
@@ -240,7 +240,7 @@ public class PacketUndo extends ModPacket
 			reach = 32;
 		}
 
-		if ( player.getPlayer().getDistanceSq( pos.getX(), pos.getY(), pos.getZ() ) < reach * reach )
+		if ( player.getPlayer().distanceToSqr( pos.getX(), pos.getY(), pos.getZ() ) < reach * reach )
 		{
 			return true;
 		}

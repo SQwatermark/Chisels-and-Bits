@@ -1,33 +1,25 @@
-/bin/
-
-/.gradle/
-/.settings/
-/build/
-/.classpath
-/config/
-/logs/
-/screenshots/
-/crash-reports/
-/saves/
-/options.txt
-/usernamecache.json
-/world/
-/banned-ips.json
-/banned-players.json
-/eula.txt
-/ops.json
-/server.properties
-/servers.dat
-/usercache.json
-/whitelist.json
-/eclipse
-/*.launch
-/eclipse2
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
 .project
-/out
-/.idea/*
-out/*
-run/*
+
+# idea
 out
-run/
-.cache
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+
+# Files from Forge MDK
+forge*changelog.txt

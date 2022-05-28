@@ -1,14 +1,14 @@
 package mod.chiselsandbits.render.helpers;
 
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public class ModelLightMapReader extends BaseModelReader
 {
 	public int lv = 0;
 	final float maxLightmap = 32.0f / 0xffff;
-	private VertexFormat format = DefaultVertexFormats.BLOCK;
+	private VertexFormat format = DefaultVertexFormat.BLOCK;
 	boolean hasLightMap = false;
 
 	public ModelLightMapReader()
@@ -20,7 +20,7 @@ public class ModelLightMapReader extends BaseModelReader
 	{
 		hasLightMap = false;
 
-		int eCount = format.getSize();
+		int eCount = format.getVertexSize();
 		for ( int x = 0; x < eCount; x++ )
 		{
 			VertexFormatElement e = format.getElements().get(x);

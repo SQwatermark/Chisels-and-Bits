@@ -8,9 +8,9 @@ import mod.chiselsandbits.chiseledblock.data.BitIterator;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.helpers.IVoxelSrc;
 import mod.chiselsandbits.modes.ChiselMode;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Direction.AxisDirection;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.Direction.AxisDirection;
 
 public class ChiselMaterialIterator extends BaseChiselIterator implements ChiselIterator
 {
@@ -61,7 +61,7 @@ public class ChiselMaterialIterator extends BaseChiselIterator implements Chisel
 		this.side = side;
 		final List<Integer> selectedpositions = new ArrayList<Integer>();
 
-		final int tx = side.getXOffset(), ty = side.getYOffset(), tz = side.getZOffset();
+		final int tx = side.getStepX(), ty = side.getStepY(), tz = side.getStepZ();
 
 		int x = sx, y = sy, z = sz;
 

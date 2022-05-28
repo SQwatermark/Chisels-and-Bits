@@ -9,13 +9,12 @@ import mod.chiselsandbits.render.bit.BitItemSmartModel;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.render.patterns.PrintSmartModel;
 import mod.chiselsandbits.utils.Constants;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class SmartModelManager
     }
 
     private boolean setup = false;
-	private final HashMap<ResourceLocation, IBakedModel> models    = new HashMap<ResourceLocation, IBakedModel>();
+	private final HashMap<ResourceLocation, BakedModel> models    = new HashMap<ResourceLocation, BakedModel>();
 	private final List<ModelResourceLocation>            res       = new ArrayList<ModelResourceLocation>();
 	private final List<ICacheClearable>                  clearable = new ArrayList<ICacheClearable>();
 
@@ -62,7 +61,7 @@ public class SmartModelManager
 
 	private void add(
 			final ResourceLocation modelLocation,
-			final IBakedModel modelGen )
+			final BakedModel modelGen )
 	{
 		final ResourceLocation second = new ResourceLocation( modelLocation.getNamespace(), modelLocation.getPath().substring( 1 + modelLocation.getPath().lastIndexOf( '/' ) ) );
 
@@ -114,7 +113,7 @@ public class SmartModelManager
 		}
 	}
 
-	private IBakedModel getModel(
+	private BakedModel getModel(
 			final ResourceLocation modelLocation )
 	{
 		try

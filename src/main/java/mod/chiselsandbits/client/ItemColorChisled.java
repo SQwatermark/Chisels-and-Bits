@@ -2,13 +2,13 @@ package mod.chiselsandbits.client;
 
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.render.helpers.ModelUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
-public class ItemColorChisled implements IItemColor
+public class ItemColorChisled implements ItemColor
 {
 
 	@Override
@@ -18,7 +18,7 @@ public class ItemColorChisled implements IItemColor
 	{
 		final BlockState state = ModUtil.getStateById( tint >> BlockColorChisled.TINT_BITS );
 		final Block blk = state.getBlock();
-		final Item i = Item.getItemFromBlock( blk );
+		final Item i = Item.byBlock( blk );
 		int tintValue = tint & BlockColorChisled.TINT_MASK;
 
 		if ( i != null )

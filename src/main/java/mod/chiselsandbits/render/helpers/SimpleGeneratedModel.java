@@ -1,27 +1,29 @@
 package mod.chiselsandbits.render.helpers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.math.Vector3f;
 import mod.chiselsandbits.core.ChiselsAndBits;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SimpleGeneratedModel implements IBakedModel
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+public class SimpleGeneratedModel implements BakedModel
 {
 
 	@SuppressWarnings( "unchecked" )
@@ -49,47 +51,47 @@ public class SimpleGeneratedModel implements IBakedModel
 		final Vector3f to = new Vector3f( 0.0f, 0.0f, 0.0f );
 		final Vector3f from = new Vector3f( 16.0f, 16.0f, 16.0f );
 
-		final BlockPartRotation bpr = null;
-		final ModelRotation mr = ModelRotation.X0_Y0;
+		final BlockElementRotation bpr = null;
+		final BlockModelRotation mr = BlockModelRotation.X0_Y0;
 
 		for ( final Direction side : Direction.values() )
 		{
-			final BlockPartFace bpf = new BlockPartFace( side, 1, "", uv );
+			final BlockElementFace bpf = new BlockElementFace( side, 1, "", uv );
 
 			Vector3f toB, fromB;
 
 			switch ( side )
 			{
 				case UP:
-					toB = new Vector3f( to.getX(), from.getY(), to.getZ() );
-					fromB = new Vector3f( from.getX(), from.getY(), from.getZ() );
+					toB = new Vector3f( to.x(), from.y(), to.z() );
+					fromB = new Vector3f( from.x(), from.y(), from.z() );
 					break;
 				case EAST:
-					toB = new Vector3f( from.getX(), to.getY(), to.getZ() );
-					fromB = new Vector3f( from.getX(), from.getY(), from.getZ() );
+					toB = new Vector3f( from.x(), to.y(), to.z() );
+					fromB = new Vector3f( from.x(), from.y(), from.z() );
 					break;
 				case NORTH:
-					toB = new Vector3f( to.getX(), to.getY(), to.getZ() );
-					fromB = new Vector3f( from.getX(), from.getY(), to.getZ() );
+					toB = new Vector3f( to.x(), to.y(), to.z() );
+					fromB = new Vector3f( from.x(), from.y(), to.z() );
 					break;
 				case SOUTH:
-					toB = new Vector3f( to.getX(), to.getY(), from.getZ() );
-					fromB = new Vector3f( from.getX(), from.getY(), from.getZ() );
+					toB = new Vector3f( to.x(), to.y(), from.z() );
+					fromB = new Vector3f( from.x(), from.y(), from.z() );
 					break;
 				case DOWN:
-					toB = new Vector3f( to.getX(), to.getY(), to.getZ() );
-					fromB = new Vector3f( from.getX(), to.getY(), from.getZ() );
+					toB = new Vector3f( to.x(), to.y(), to.z() );
+					fromB = new Vector3f( from.x(), to.y(), from.z() );
 					break;
 				case WEST:
-					toB = new Vector3f( to.getX(), to.getY(), to.getZ() );
-					fromB = new Vector3f( to.getX(), from.getY(), from.getZ() );
+					toB = new Vector3f( to.x(), to.y(), to.z() );
+					fromB = new Vector3f( to.x(), from.y(), from.z() );
 					break;
 				default:
 					throw new NullPointerException();
 			}
 
 			final BakedQuad g = faceBakery.bakeQuad( toB, fromB, bpf, texture, side, mr, bpr, false, new ResourceLocation(ChiselsAndBits.MODID, "simple"));
-			face[side.ordinal()].add( finishFace( g, side, DefaultVertexFormats.BLOCK ) );
+			face[side.ordinal()].add( finishFace( g, side, DefaultVertexFormat.BLOCK ) );
 		}
 	}
 
@@ -98,10 +100,10 @@ public class SimpleGeneratedModel implements IBakedModel
 			final Direction myFace,
 			final VertexFormat format )
 	{
-		final int[] vertData = g.getVertexData();
+		final int[] vertData = g.getVertices();
 		final int wrapAt = vertData.length / 4;
 
-		final BakedQuadBuilder b = new BakedQuadBuilder( g.sprite );
+		final BakedQuadBuilder b = new BakedQuadBuilder( g.getSprite() );
 		b.setQuadOrientation( myFace );
 		b.setQuadTint( 1 );
 
@@ -122,7 +124,7 @@ public class SimpleGeneratedModel implements IBakedModel
 						break;
 
 					case NORMAL:
-						b.put( elementIndex, myFace.getXOffset(), myFace.getYOffset(), myFace.getZOffset() );
+						b.put( elementIndex, myFace.getStepX(), myFace.getStepY(), myFace.getStepZ() );
 						break;
 
 					case UV:
@@ -183,7 +185,7 @@ public class SimpleGeneratedModel implements IBakedModel
     }
 
     @Override
-	public boolean isAmbientOcclusion()
+	public boolean useAmbientOcclusion()
 	{
 		return true;
 	}
@@ -195,32 +197,32 @@ public class SimpleGeneratedModel implements IBakedModel
 	}
 
     @Override
-    public boolean isSideLit()
+    public boolean usesBlockLight()
     {
         return false;
     }
 
     @Override
-	public ItemCameraTransforms getItemCameraTransforms()
+	public ItemTransforms getTransforms()
 	{
-		return ItemCameraTransforms.DEFAULT;
+		return ItemTransforms.NO_TRANSFORMS;
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleTexture()
+	public TextureAtlasSprite getParticleIcon()
 	{
 		return texture;
 	}
 
 	@Override
-	public boolean isBuiltInRenderer()
+	public boolean isCustomRenderer()
 	{
 		return false;
 	}
 
 	@Override
-	public ItemOverrideList getOverrides()
+	public ItemOverrides getOverrides()
 	{
-		return ItemOverrideList.EMPTY;
+		return ItemOverrides.EMPTY;
 	}
 }

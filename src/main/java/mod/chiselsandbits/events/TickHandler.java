@@ -6,14 +6,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = ChiselsAndBits.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class TickHandler
-{
+public class TickHandler {
 
     private static long clientTicks = 0;
 
     @SubscribeEvent
-    public static void onTickClientTick(final TickEvent.ClientTickEvent event)
-    {
+    public static void onTickClientTick(final TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START)
             clientTicks++;
     }

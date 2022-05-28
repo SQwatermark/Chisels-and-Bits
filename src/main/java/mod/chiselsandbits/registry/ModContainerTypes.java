@@ -3,27 +3,22 @@ package mod.chiselsandbits.registry;
 import mod.chiselsandbits.bitbag.BagContainer;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.printer.ChiselPrinterContainer;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
-public final class ModContainerTypes
-{
+public final class ModContainerTypes {
 
-    private static final DeferredRegister<ContainerType<?>> REGISTRAR = DeferredRegister.create(ForgeRegistries.CONTAINERS, ChiselsAndBits.MODID);
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, ChiselsAndBits.MODID);
 
-    private ModContainerTypes()
-    {
-        throw new IllegalStateException("Tried to initialize: ModContainerTypes but this is a Utility class.");
-    }
-
-    public static final RegistryObject<ContainerType<BagContainer>>           BAG_CONTAINER            = REGISTRAR.register("bag", () -> new ContainerType<>(BagContainer::new));
-    public static final RegistryObject<ContainerType<ChiselPrinterContainer>> CHISEL_STATION_CONTAINER = REGISTRAR.register("chisel_station", () -> new ContainerType<>(
-      ChiselPrinterContainer::new));
+    public static final RegistryObject<MenuType<BagContainer>> BAG_CONTAINER = MENUS.register("bag",
+            () -> new MenuType<>(BagContainer::new));
+    public static final RegistryObject<MenuType<ChiselPrinterContainer>> CHISEL_STATION_CONTAINER = MENUS.register("chisel_station",
+            () -> new MenuType<>(ChiselPrinterContainer::new));
 
     public static void onModConstruction() {
-        REGISTRAR.register(FMLJavaModLoadingContext.get().getModEventBus());
+        MENUS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

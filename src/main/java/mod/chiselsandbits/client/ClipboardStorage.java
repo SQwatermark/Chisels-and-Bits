@@ -1,7 +1,7 @@
 package mod.chiselsandbits.client;
 
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
 import java.util.List;
@@ -15,7 +15,7 @@ public class ClipboardStorage
 	}
 
 	public void write(
-			final List<CompoundNBT> myitems )
+			final List<CompoundTag> myitems )
 	{
 		/*if ( !ChiselsAndBits.getConfig().getServer().persistCreativeClipboard.get() )
 		{
@@ -45,7 +45,7 @@ public class ClipboardStorage
 		save();*/
 	}
 
-	public List<CompoundNBT> read()
+	public List<CompoundTag> read()
 	{
 		/*final List<NBTTagCompound> myItems = new ArrayList<NBTTagCompound>();
 

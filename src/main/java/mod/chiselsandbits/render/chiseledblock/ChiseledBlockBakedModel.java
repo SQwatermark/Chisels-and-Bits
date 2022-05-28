@@ -1,5 +1,9 @@
 package mod.chiselsandbits.render.chiseledblock;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.math.Vector3f;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob.VisibleFace;
 import mod.chiselsandbits.client.culling.ICullTest;
@@ -9,18 +13,16 @@ import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.render.helpers.ModelQuadLayer;
 import mod.chiselsandbits.render.helpers.ModelUtil;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,17 +50,17 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         {
             final FaceBakery faceBakery = new FaceBakery();
 
-            final BlockPartRotation bpr = null;
-            final ModelRotation mr = ModelRotation.X0_Y0;
+            final BlockElementRotation bpr = null;
+            final BlockModelRotation mr = BlockModelRotation.X0_Y0;
 
             final float[] defUVs = new float[] {0, 0, 1, 1};
             final BlockFaceUV uv = new BlockFaceUV(defUVs, 0);
-            final BlockPartFace bpf = new BlockPartFace(myFace, 0, "", uv);
+            final BlockElementFace bpf = new BlockElementFace(myFace, 0, "", uv);
 
-            final TextureAtlasSprite texture = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("missingno"));
+            final TextureAtlasSprite texture = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("missingno"));
             final BakedQuad q = faceBakery.bakeQuad(to, from, bpf, texture, myFace, mr, bpr, true, new ResourceLocation(ChiselsAndBits.MODID, "chiseled_block"));
 
-            final int[] vertData = q.getVertexData();
+            final int[] vertData = q.getVertices();
 
             int a = 0;
             int b = 2;
@@ -94,19 +96,19 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
 
                 if (ModelUtil.isZero(A) && ModelUtil.isZero(B))
                 {
-                    faceVertMap[myFace.getIndex()][vertNum] = 0;
+                    faceVertMap[myFace.get3DDataValue()][vertNum] = 0;
                 }
                 else if (ModelUtil.isZero(A) && ModelUtil.isOne(B))
                 {
-                    faceVertMap[myFace.getIndex()][vertNum] = 3;
+                    faceVertMap[myFace.get3DDataValue()][vertNum] = 3;
                 }
                 else if (ModelUtil.isOne(A) && ModelUtil.isZero(B))
                 {
-                    faceVertMap[myFace.getIndex()][vertNum] = 1;
+                    faceVertMap[myFace.get3DDataValue()][vertNum] = 1;
                 }
                 else
                 {
-                    faceVertMap[myFace.getIndex()][vertNum] = 2;
+                    faceVertMap[myFace.get3DDataValue()][vertNum] = 2;
                 }
             }
         }
@@ -174,11 +176,11 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         myLayer = layer;
         final BlockState state = ModUtil.getStateById(blockReference);
 
-        IBakedModel originalModel = null;
+        BakedModel originalModel = null;
 
         if (state != null)
         {
-            originalModel = Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel(state);
+            originalModel = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state);
         }
 
         if (originalModel != null && data != null)
@@ -225,7 +227,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
     {
         if (ChiseledBlockSmartModel.ForgePipelineDisabled())
         {
-            format = DefaultVertexFormats.BLOCK;
+            format = DefaultVertexFormat.BLOCK;
         }
 
         return new ChiselsAndBitsBakedQuad.Builder(format);
@@ -250,7 +252,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         final float[] pos = new float[3];
 
         // single reusable face builder.
-        final IFaceBuilder darkBuilder = getBuilder(DefaultVertexFormats.BLOCK);
+        final IFaceBuilder darkBuilder = getBuilder(DefaultVertexFormat.BLOCK);
         final IFaceBuilder litBuilder = darkBuilder;
 
         for (final ArrayList<FaceRegion> src : rset)
@@ -303,7 +305,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                                         // this fixes a bug with Forge AO?? and
                                         // solid blocks.. I have no idea why...
                                         final float normalShift = 0.999f;
-                                        faceBuilder.put(elementIndex, normalShift * myFace.getXOffset(), normalShift * myFace.getYOffset(), normalShift * myFace.getZOffset());
+                                        faceBuilder.put(elementIndex, normalShift * myFace.getStepX(), normalShift * myFace.getStepY(), normalShift * myFace.getStepZ());
                                         break;
 
                                     case UV:
@@ -314,9 +316,9 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                                         }
                                         else
                                         {
-                                            final float u = uvs[faceVertMap[myFace.getIndex()][vertNum] * 2 + 0];
-                                            final float v = uvs[faceVertMap[myFace.getIndex()][vertNum] * 2 + 1];
-                                            faceBuilder.put(elementIndex, pc.sprite.getInterpolatedU(u), pc.sprite.getInterpolatedV(v));
+                                            final float u = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 0];
+                                            final float v = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 1];
+                                            faceBuilder.put(elementIndex, pc.sprite.getU(u), pc.sprite.getV(v));
                                         }
                                         break;
 
@@ -565,7 +567,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
 
         if (visFace.visibleFace)
         {
-            final Vector3i off = myFace.getDirectionVec();
+            final Vec3i off = myFace.getNormal();
 
             return new FaceRegion(myFace,
               x * 2 + 1 + off.getX(),
@@ -748,13 +750,13 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
     }
 
     @Override
-    public boolean isSideLit()
+    public boolean usesBlockLight()
     {
         return true;
     }
 
     @Override
-    public TextureAtlasSprite getParticleTexture()
+    public TextureAtlasSprite getParticleIcon()
     {
         return sprite != null ? sprite : ClientSide.instance.getMissingIcon();
     }

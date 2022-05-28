@@ -1,10 +1,5 @@
 package mod.chiselsandbits.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
 import mod.chiselsandbits.api.IChiselAndBitsAPI;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
@@ -21,27 +16,31 @@ import mod.chiselsandbits.render.SmartModelManager;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.utils.Constants;
 import mod.chiselsandbits.utils.LanguageHandler;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLModIdMappingEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(ChiselsAndBits.MODID)
 public class ChiselsAndBits
 {
 	public static final @Nonnull String MODID = Constants.MOD_ID;
 
-	private static ChiselsAndBits    instance;
-	private        Configuration     config;
-	private final  IChiselAndBitsAPI api = new ChiselAndBitsAPI();
-	private final  NetworkChannel    networkChannel = new NetworkChannel(MODID);
+	private static ChiselsAndBits instance;
+	private final Configuration config;
+	private final IChiselAndBitsAPI api = new ChiselAndBitsAPI();
+	private final NetworkChannel networkChannel = new NetworkChannel(MODID);
 
 	List<ICacheClearable> cacheClearables = new ArrayList<>();
 
@@ -72,7 +71,7 @@ public class ChiselsAndBits
         ModContainerTypes.onModConstruction();
         ModItems.onModConstruction();
         ModRecipeSerializers.onModConstruction();
-        ModTileEntityTypes.onModConstruction();
+        ModBlockEntityTypes.onModConstruction();
 
         networkChannel.registerCommonMessages();
 	}
@@ -108,12 +107,12 @@ public class ChiselsAndBits
 	{
 		// merge most of the extra materials into the normal set.
 		ChiselsAndBits.getApi().addEquivilantMaterial( Material.SPONGE, Material.CLAY );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.ANVIL, Material.IRON );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.GOURD, Material.PLANTS );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.CACTUS, Material.PLANTS );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.CORAL, Material.ROCK );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.WEB, Material.PLANTS );
-		ChiselsAndBits.getApi().addEquivilantMaterial( Material.TNT, Material.ROCK );
+		ChiselsAndBits.getApi().addEquivilantMaterial( Material.HEAVY_METAL, Material.METAL );
+		ChiselsAndBits.getApi().addEquivilantMaterial( Material.VEGETABLE, Material.PLANT );
+		ChiselsAndBits.getApi().addEquivilantMaterial( Material.CACTUS, Material.PLANT );
+//		ChiselsAndBits.getApi().addEquivilantMaterial( Material.CORAL, Material.STONE );
+		ChiselsAndBits.getApi().addEquivilantMaterial( Material.WEB, Material.PLANT );
+		ChiselsAndBits.getApi().addEquivilantMaterial( Material.EXPLOSIVE, Material.STONE );
 	}
 
     public void clientSetup(
@@ -125,7 +124,7 @@ public class ChiselsAndBits
 	boolean idsHaveBeenMapped = false;
 
 	public void handleIdMapping(
-			final FMLModIdMappingEvent event )
+			final RegistryEvent.IdMappingEvent event )
 	{
 		idsHaveBeenMapped = true;
 		BlockBitInfo.recalculate();

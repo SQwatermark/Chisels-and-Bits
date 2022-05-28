@@ -5,11 +5,11 @@ import com.google.common.collect.Lists;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class ContinousChisels implements IContinuousInventory
 	{
 		this.who = who;
 		final ItemStack inHand = who.getCurrentEquippedItem();
-		final IInventory inv = who.getInventory();
+		final Container inv = who.getInventory();
 
 		// test can edit...
 		canEdit = who.canPlayerManipulate( pos, side, new ItemStack(ModItems.ITEM_CHISEL_DIAMOND.get(), 1 ), false );
@@ -47,9 +47,9 @@ public class ContinousChisels implements IContinuousInventory
 		{
 			final ArrayListMultimap<Integer, ItemStackSlot> discovered = ArrayListMultimap.create();
 
-			for ( int x = 0; x < inv.getSizeInventory(); x++ )
+			for ( int x = 0; x < inv.getContainerSize(); x++ )
 			{
-				final ItemStack is = inv.getStackInSlot( x );
+				final ItemStack is = inv.getItem( x );
 
 				if ( is == inHand )
 				{
@@ -63,8 +63,8 @@ public class ContinousChisels implements IContinuousInventory
 
 				if ( is != null && ModUtil.notEmpty( is ) && is.getItem() instanceof ItemChisel )
 				{
-					final IItemTier newMat = ( (ItemChisel) is.getItem() ).getTier();
-					discovered.put( newMat.getHarvestLevel(), new ItemStackSlot( inv, x, is, who, canEdit ) );
+					final Tier newMat = ( (ItemChisel) is.getItem() ).getTier();
+					discovered.put( newMat.getLevel(), new ItemStackSlot( inv, x, is, who, canEdit ) );
 				}
 			}
 

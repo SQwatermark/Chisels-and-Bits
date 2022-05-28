@@ -1,45 +1,48 @@
 package mod.chiselsandbits.bitstorage;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class ItemStackSpecialRendererBitStorage extends ItemStackTileEntityRenderer
+public class ItemStackSpecialRendererBitStorage extends BlockEntityWithoutLevelRenderer
 {
 
+    public ItemStackSpecialRendererBitStorage(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
+        super(p_172550_, p_172551_);
+    }
+
     @Override
-    public void func_239207_a_(
+    public void renderByItem(
       final ItemStack stack,
-      final ItemCameraTransforms.TransformType p_239207_2_,
-      final MatrixStack matrixStack,
-      final IRenderTypeBuffer buffer,
+      final ItemTransforms.TransformType p_239207_2_,
+      final PoseStack matrixStack,
+      final MultiBufferSource buffer,
       final int combinedLight,
       final int combinedOverlay)
     {
 
-        final IBakedModel model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(ModBlocks.BIT_STORAGE_BLOCK.getId(), "facing=east"));
+        final BakedModel model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(ModBlocks.BIT_STORAGE_BLOCK.getId(), "facing=east"));
 
-        Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(matrixStack.getLast(), buffer.getBuffer(RenderType.getTranslucent()), ModBlocks.BIT_STORAGE_BLOCK
-                                                                                                                                                                         .get().getDefaultState(), model, 1f,1f,1f, combinedLight, combinedOverlay,
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(matrixStack.last(), buffer.getBuffer(RenderType.translucent()), ModBlocks.BIT_STORAGE_BLOCK
+                                                                                                                                                                         .get().defaultBlockState(), model, 1f,1f,1f, combinedLight, combinedOverlay,
           EmptyModelData.INSTANCE);
 
-        final TileEntityBitStorage tileEntity = new TileEntityBitStorage();
-        tileEntity
-          .getCapability(
-            CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY
-          )
+        final TileEntityBitStorage tileEntity = new TileEntityBitStorage(null, null);
+        tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
           .ifPresent(t -> t
                             .fill(
                               stack.getCapability(
@@ -53,6 +56,6 @@ public class ItemStackSpecialRendererBitStorage extends ItemStackTileEntityRende
                             )
           );
 
-        TileEntityRendererDispatcher.instance.renderItem(tileEntity, matrixStack, buffer, combinedLight, combinedOverlay);
+        this.blockEntityRenderDispatcher.renderItem(tileEntity, matrixStack, buffer, combinedLight, combinedOverlay);
     }
 }

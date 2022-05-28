@@ -2,9 +2,9 @@ package mod.chiselsandbits.modes;
 
 import mod.chiselsandbits.core.Log;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
 
 public enum PositivePatternMode implements IToolMode
 {
@@ -31,7 +31,7 @@ public enum PositivePatternMode implements IToolMode
 		{
 			try
 			{
-				final CompoundNBT nbt = stack.getTag();
+				final CompoundTag nbt = stack.getTag();
 				if ( nbt != null && nbt.contains( "mode" ) )
 				{
 					return valueOf( nbt.getString( "mode" ) );
@@ -56,7 +56,7 @@ public enum PositivePatternMode implements IToolMode
 	{
 		if ( stack != null )
 		{
-			stack.setTagInfo( "mode", StringNBT.valueOf( name() ) );
+			stack.addTagElement( "mode", StringTag.valueOf( name() ) );
 		}
 	}
 

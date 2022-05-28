@@ -1,12 +1,11 @@
 package mod.chiselsandbits.client;
 
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 
-public class ItemColorBitBag implements IItemColor
+public class ItemColorBitBag implements ItemColor
 {
 
     @Override
@@ -16,7 +15,7 @@ public class ItemColorBitBag implements IItemColor
         {
             DyeColor color = ModItems.ITEM_BIT_BAG_DYED.get().getDyedColor( p_getColor_1_ );
             if ( color != null )
-                return color.getColorValue();
+                return color.getMaterialColor().col;
         }
 
         return -1;

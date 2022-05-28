@@ -1,6 +1,6 @@
 package mod.chiselsandbits.render.chiseledblock;
 
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 class FaceRegion
 {

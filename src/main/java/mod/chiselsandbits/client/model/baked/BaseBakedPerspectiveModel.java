@@ -1,28 +1,26 @@
 package mod.chiselsandbits.client.model.baked;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import mod.chiselsandbits.helpers.IStateRef;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.TransformationMatrix;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.resources.model.BakedModel;
 
 import java.util.Random;
 
-public abstract class BaseBakedPerspectiveModel implements IBakedModel
+public abstract class BaseBakedPerspectiveModel implements BakedModel
 {
 
     protected static final Random RANDOM = new Random();
 
-	private static final TransformationMatrix ground;
-	private static final TransformationMatrix gui;
-	private static final TransformationMatrix fixed;
-	private static final TransformationMatrix firstPerson_righthand;
-	private static final TransformationMatrix firstPerson_lefthand;
-	private static final TransformationMatrix thirdPerson_righthand;
-	private static final TransformationMatrix thirdPerson_lefthand;
+	private static final Transformation ground;
+	private static final Transformation gui;
+	private static final Transformation fixed;
+	private static final Transformation firstPerson_righthand;
+	private static final Transformation firstPerson_lefthand;
+	private static final Transformation thirdPerson_righthand;
+	private static final Transformation thirdPerson_lefthand;
 
 	static
 	{
@@ -33,7 +31,7 @@ public abstract class BaseBakedPerspectiveModel implements IBakedModel
 		firstPerson_righthand = firstPerson_lefthand = getMatrix( 0, 0, 0, 0, 45, 0, 0.40f );
 	}
 
-	private static TransformationMatrix getMatrix(
+	private static Transformation getMatrix(
 			final float transX,
 			final float transY,
 			final float transZ,
@@ -46,11 +44,11 @@ public abstract class BaseBakedPerspectiveModel implements IBakedModel
 		final Vector3f scale = new Vector3f( scaleXYZ, scaleXYZ, scaleXYZ );
 		final Quaternion rotation = new Quaternion(rotX, rotY, rotZ, true);
 
-		return new TransformationMatrix(translation, rotation, scale, null);
+		return new Transformation(translation, rotation, scale, null);
 	}
 
     @Override
-    public IBakedModel handlePerspective(final ItemCameraTransforms.TransformType cameraTransformType, final MatrixStack mat)
+    public BakedModel handlePerspective(final ItemTransforms.TransformType cameraTransformType, final PoseStack mat)
     {
         switch ( cameraTransformType )
         {

@@ -1,13 +1,13 @@
 package mod.chiselsandbits.interfaces;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public interface IItemScrollWheel
 {
 
 	void scroll(
-			PlayerEntity player,
+			Player player,
 			ItemStack stack,
 			int dwheel );
 

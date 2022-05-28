@@ -12,25 +12,21 @@ public class InMemoryQuadCompressor implements Runnable
 
 	protected static final float EPSILON = 0.0001f;
 
-	private static CacheMap<float[][], WeakReference<float[][]>> cachelvl2 = new CacheMap<float[][], WeakReference<float[][]>>( new EqTest() {
+	private static CacheMap<float[][], WeakReference<float[][]>> cachelvl2 = new CacheMap<>(new EqTest() {
 
 		@Override
 		public boolean doTest(
 				final Object a,
-				final Object b )
-		{
+				final Object b) {
 			final float[][] aa = (float[][]) a;
 			final float[][] bb = (float[][]) b;
 
-			if ( aa.length != bb.length )
-			{
+			if (aa.length != bb.length) {
 				return false;
 			}
 
-			for ( int x = 0; x < aa.length; x++ )
-			{
-				if ( aa[x] != bb[x] )
-				{
+			for (int x = 0; x < aa.length; x++) {
+				if (aa[x] != bb[x]) {
 					return false;
 				}
 			}
@@ -40,40 +36,34 @@ public class InMemoryQuadCompressor implements Runnable
 
 		@Override
 		public int getHash(
-				final Object referent )
-		{
+				final Object referent) {
 			final float[][] a = (float[][]) referent;
 			int out = 0;
 
-			for ( int x = 0; x < a.length; x++ )
-			{
-				out ^= System.identityHashCode( a[x] ) << x;
+			for (int x = 0; x < a.length; x++) {
+				out ^= System.identityHashCode(a[x]) << x;
 			}
 
 			return out;
 		}
 
-	} );
+	});
 
-	private static CacheMap<float[], WeakReference<float[]>> cache = new CacheMap<float[], WeakReference<float[]>>( new EqTest() {
+	private static CacheMap<float[], WeakReference<float[]>> cache = new CacheMap<>(new EqTest() {
 
 		@Override
 		public boolean doTest(
 				final Object a,
-				final Object b )
-		{
+				final Object b) {
 			final float[] aa = (float[]) a;
 			final float[] bb = (float[]) b;
 
-			if ( aa.length != bb.length )
-			{
+			if (aa.length != bb.length) {
 				return false;
 			}
 
-			for ( int x = 0; x < aa.length; x++ )
-			{
-				if ( Math.abs( aa[x] - bb[x] ) > EPSILON )
-				{
+			for (int x = 0; x < aa.length; x++) {
+				if (Math.abs(aa[x] - bb[x]) > EPSILON) {
 					return false;
 				}
 			}
@@ -83,20 +73,18 @@ public class InMemoryQuadCompressor implements Runnable
 
 		@Override
 		public int getHash(
-				final Object referent )
-		{
+				final Object referent) {
 			final float[] a = (float[]) referent;
 			int out = 0;
 
-			for ( int x = 0; x < a.length; x++ )
-			{
-				out ^= (int) ( a[x] * 100 ) << x;
+			for (int x = 0; x < a.length; x++) {
+				out ^= (int) (a[x] * 100) << x;
 			}
 
 			return out;
 		}
 
-	} );
+	});
 
 	BlockingQueue<WeakReference<float[][][]>> submissions = new LinkedBlockingQueue<WeakReference<float[][][]>>();
 
@@ -116,7 +104,7 @@ public class InMemoryQuadCompressor implements Runnable
 			}
 		}
 
-		cache.put( fs, new WeakReference<float[]>( fs ) );
+		cache.put( fs, new WeakReference<>(fs) );
 		return fs;
 	}
 
@@ -134,7 +122,7 @@ public class InMemoryQuadCompressor implements Runnable
 			}
 		}
 
-		cachelvl2.put( fs, new WeakReference<float[][]>( fs ) );
+		cachelvl2.put( fs, new WeakReference<>(fs) );
 		return fs;
 	}
 

@@ -8,24 +8,25 @@ import com.ldtteam.datagenerators.recipes.shapeless.ShapelessRecipeJson;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.tags.ITag;
+import net.minecraft.data.HashCache;
+import net.minecraft.data.DataProvider;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.tags.Tag;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternItem> implements IDataProvider
+public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternItem> implements DataProvider
 {
     private final DataGenerator generator;
     private final ITEM item;
     private final ITEM printedItem;
-    private final ITag.INamedTag<Item> primaryIngredient;
+    private final TagKey<Item> primaryIngredient;
 
-    protected AbstractPrintRecipeGenerator(final DataGenerator generator, final ITEM item, final ITEM printedItem, final ITag.INamedTag<Item> primaryIngredient) {
+    protected AbstractPrintRecipeGenerator(final DataGenerator generator, final ITEM item, final ITEM printedItem, final TagKey<Item> primaryIngredient) {
         this.generator = generator;
         this.item = item;
         this.printedItem = printedItem;
@@ -33,14 +34,14 @@ public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternI
     }
 
     @Override
-    public final void act(final DirectoryCache cache) throws IOException
+    public final void run(final HashCache cache) throws IOException
     {
         generateInitialRecipe(cache);
         generateCleanResettingRecipe(cache);
         generatePrintedResettingRecipe(cache);
     }
 
-    private void generateInitialRecipe(final DirectoryCache cache) throws IOException
+    private void generateInitialRecipe(final HashCache cache) throws IOException
     {
         final ShapelessRecipeJson shapelessRecipeJson = new ShapelessRecipeJson();
         shapelessRecipeJson.setGroup(Constants.MOD_ID);
@@ -61,7 +62,7 @@ public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternI
             ),
             new RecipeIngredientKeyJson(
               new RecipeIngredientJson(
-                primaryIngredient.getName().toString(),
+                primaryIngredient.toString(),
                 true
               )
             )
@@ -77,20 +78,20 @@ public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternI
         final Path recipeFolder = this.generator.getOutputFolder().resolve(Constants.DataGenerator.RECIPES_DIR);
         final Path initialRecipeFolder = recipeFolder.resolve(item.getRegistryName().getPath() + "_initial.json");
 
-        IDataProvider.save(Constants.DataGenerator.GSON, cache, shapelessRecipeJson.serialize(), initialRecipeFolder);
+        DataProvider.save(Constants.DataGenerator.GSON, cache, shapelessRecipeJson.serialize(), initialRecipeFolder);
     }
 
-    private void generateCleanResettingRecipe(final DirectoryCache cache) throws IOException
+    private void generateCleanResettingRecipe(final HashCache cache) throws IOException
     {
         generateResettingRecipe(cache, item, "resetting");
     }
 
-    private void generatePrintedResettingRecipe(final DirectoryCache cache) throws IOException
+    private void generatePrintedResettingRecipe(final HashCache cache) throws IOException
     {
         generateResettingRecipe(cache, printedItem, "cleaning");
     }
 
-    private void generateResettingRecipe(final DirectoryCache cache, final ITEM printedItem, final String suffix) throws IOException
+    private void generateResettingRecipe(final HashCache cache, final ITEM printedItem, final String suffix) throws IOException
     {
         final ShapelessRecipeJson shapelessRecipeJson = new ShapelessRecipeJson();
         shapelessRecipeJson.setGroup(Constants.MOD_ID);
@@ -115,7 +116,7 @@ public abstract class AbstractPrintRecipeGenerator<ITEM extends Item & IPatternI
         final Path recipeFolder = this.generator.getOutputFolder().resolve(Constants.DataGenerator.RECIPES_DIR);
         final Path initialRecipeFolder = recipeFolder.resolve(item.getRegistryName().getPath() + "_" + suffix + ".json");
 
-        IDataProvider.save(Constants.DataGenerator.GSON, cache, shapelessRecipeJson.serialize(), initialRecipeFolder);
+        DataProvider.save(Constants.DataGenerator.GSON, cache, shapelessRecipeJson.serialize(), initialRecipeFolder);
     }
 
     @Override

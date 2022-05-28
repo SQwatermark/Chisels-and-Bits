@@ -2,8 +2,8 @@ package mod.chiselsandbits.chiseledblock.iterators;
 
 import mod.chiselsandbits.chiseledblock.data.IntegerBox;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
 
 public interface ChiselIterator
 {
@@ -12,7 +12,7 @@ public interface ChiselIterator
 			VoxelBlob blobAt,
 			boolean b );
 
-	AxisAlignedBB getBoundingBox(
+	AABB getBoundingBox(
 			VoxelBlob nULL_BLOB,
 			boolean b );
 

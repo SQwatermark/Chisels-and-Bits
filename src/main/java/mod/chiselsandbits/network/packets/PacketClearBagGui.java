@@ -1,18 +1,16 @@
 package mod.chiselsandbits.network.packets;
 
-import java.io.IOException;
-
 import mod.chiselsandbits.bitbag.BagContainer;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 public class PacketClearBagGui extends ModPacket
 {
 	private ItemStack stack = null;
 
-	public PacketClearBagGui(final PacketBuffer buffer)
+	public PacketClearBagGui(final FriendlyByteBuf buffer)
 	{
 	    readPayload(buffer);
 	}
@@ -25,27 +23,27 @@ public class PacketClearBagGui extends ModPacket
 
 	@Override
 	public void server(
-      final ServerPlayerEntity player )
+      final ServerPlayer player )
 	{
-		if ( player.openContainer instanceof BagContainer )
+		if ( player.containerMenu instanceof BagContainer )
 		{
-			( (BagContainer) player.openContainer ).clear( stack );
+			( (BagContainer) player.containerMenu ).clear( stack );
 		}
 	}
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-		buffer.writeItemStack( stack );
+		buffer.writeItem( stack );
 		// no data...
 	}
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-        stack = buffer.readItemStack();
+        stack = buffer.readItem();
     }
 
 }

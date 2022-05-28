@@ -10,10 +10,10 @@ import mod.chiselsandbits.helpers.ChiselToolType;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.IVoxelBlobItem;
 import mod.chiselsandbits.network.packets.PacketAccurateSneakPlace.IItemBlockAccurate;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 
@@ -31,7 +31,7 @@ public enum ModConflictContext implements IKeyConflictContext
 
 			try
 			{
-				final ItemStack held = getPlayer().getHeldItemMainhand();
+				final ItemStack held = getPlayer().getMainHandItem();
 				return !ModUtil.isEmpty( held ) && held.getItem() instanceof IItemBlockAccurate;
 			}
 			catch ( final NoPlayerException e )
@@ -62,7 +62,7 @@ public enum ModConflictContext implements IKeyConflictContext
 
 			try
 			{
-				final ItemStack held = getPlayer().getHeldItemMainhand();
+				final ItemStack held = getPlayer().getMainHandItem();
 				return !ModUtil.isEmpty( held ) && held.getItem() instanceof IVoxelBlobItem;
 			}
 			catch ( final NoPlayerException e )
@@ -91,7 +91,7 @@ public enum ModConflictContext implements IKeyConflictContext
 				return true;
 			}
 
-			final ChiselToolType tool = ClientSide.instance.getHeldToolType( Hand.MAIN_HAND );
+			final ChiselToolType tool = ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND );
 			return tool != null && tool.hasMenu();
 		}
 
@@ -107,7 +107,7 @@ public enum ModConflictContext implements IKeyConflictContext
 		@Override
 		public boolean isActive()
 		{
-			return super.isActive() || ClientSide.instance.getHeldToolType( Hand.MAIN_HAND ) == ChiselToolType.TAPEMEASURE;
+			return super.isActive() || ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND ) == ChiselToolType.TAPEMEASURE;
 		}
 
 		@Override
@@ -123,7 +123,7 @@ public enum ModConflictContext implements IKeyConflictContext
 		@Override
 		public boolean isActive()
 		{
-			return super.isActive() || ClientSide.instance.getHeldToolType( Hand.MAIN_HAND ) == ChiselToolType.POSITIVEPATTERN;
+			return super.isActive() || ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND ) == ChiselToolType.POSITIVEPATTERN;
 		}
 
 		@Override
@@ -144,7 +144,7 @@ public enum ModConflictContext implements IKeyConflictContext
 				return true;
 			}
 
-			final ChiselToolType tool = ClientSide.instance.getHeldToolType( Hand.MAIN_HAND );
+			final ChiselToolType tool = ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND );
 			return tool != null && tool.isBitOrChisel();
 		}
 
@@ -169,7 +169,7 @@ public enum ModConflictContext implements IKeyConflictContext
 	{
 		try
 		{
-			final ItemStack held = getPlayer().getHeldItemMainhand();
+			final ItemStack held = getPlayer().getMainHandItem();
 
 			if ( ModUtil.isEmpty( held ) )
 			{
@@ -208,9 +208,9 @@ public enum ModConflictContext implements IKeyConflictContext
 		return false;
 	}
 
-	private static PlayerEntity getPlayer() throws NoPlayerException
+	private static Player getPlayer() throws NoPlayerException
 	{
-		final PlayerEntity player = ClientSide.instance.getPlayer();
+		final Player player = ClientSide.instance.getPlayer();
 
 		if ( player == null )
 		{

@@ -1,6 +1,6 @@
 package mod.chiselsandbits.core.api;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
 import mod.chiselsandbits.api.*;
@@ -10,10 +10,9 @@ import mod.chiselsandbits.api.ParameterType.IntegerParam;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.ItemBlockChiseled;
-import mod.chiselsandbits.chiseledblock.TileEntityBlockChiseled;
+import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.BitLocation;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import mod.chiselsandbits.client.ModItemGroup;
 import mod.chiselsandbits.client.RenderHelper;
 import mod.chiselsandbits.client.UndoTracker;
 import mod.chiselsandbits.core.ChiselsAndBits;
@@ -28,20 +27,20 @@ import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
 import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -59,7 +58,7 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 	@Override
 	public boolean canBeChiseled(
-			final World world,
+			final Level world,
 			final BlockPos pos )
 	{
 		if ( world == null || pos == null )
@@ -73,7 +72,7 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 	@Override
 	public boolean isBlockChiseled(
-			final World world,
+			final Level world,
 			final BlockPos pos )
 	{
 		if ( world == null || pos == null )
@@ -86,7 +85,7 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 	@Override
 	public IBitAccess getBitAccess(
-			final World world,
+			final Level world,
 			final BlockPos pos ) throws CannotBeChiseled
 	{
 		if ( world == null || pos == null )
@@ -102,13 +101,13 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 			return new BitAccess( world, pos, blob, VoxelBlob.NULL_BLOB );
 		}
 
-		if ( world.isAirBlock( pos ) )
+		if ( world.isEmptyBlock( pos ) )
 		{
 			final VoxelBlob blob = new VoxelBlob();
 			return new BitAccess( world, pos, blob, VoxelBlob.NULL_BLOB );
 		}
 
-		final TileEntityBlockChiseled te = ModUtil.getChiseledTileEntity( world, pos, true );
+		final BlockEntityChiseledBlock te = ModUtil.getChiseledTileEntity( world, pos, true );
 		if ( te != null )
 		{
 			final VoxelBlob mask = new VoxelBlob();
@@ -150,7 +149,7 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 			final BlockPos pos,
 			final boolean placement )
 	{
-		final BlockRayTraceResult mop = new BlockRayTraceResult(new Vector3d(hitX, hitY, hitZ), side, pos, false);
+		final BlockHitResult mop = new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false);
 		return new BitLocation( mop, placement ? BitOperation.PLACE : BitOperation.CHISEL );
 	}
 
@@ -263,9 +262,9 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 	@Override
 	public void giveBitToPlayer(
-			final PlayerEntity player,
+			final Player player,
 			final ItemStack stack,
-			Vector3d spawnPos )
+			Vec3 spawnPos )
 	{
 		if ( ModUtil.isEmpty( stack ) )
 		{
@@ -274,26 +273,26 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 		if ( spawnPos == null )
 		{
-			spawnPos = new Vector3d( player.getPosX(), player.getPosY(), player.getPosZ() );
+			spawnPos = new Vec3( player.getX(), player.getY(), player.getZ() );
 		}
 
-		final ItemEntity ei = new ItemEntity( player.getEntityWorld(), spawnPos.x, spawnPos.y, spawnPos.z, stack );
+		final ItemEntity ei = new ItemEntity( player.getCommandSenderWorld(), spawnPos.x, spawnPos.y, spawnPos.z, stack );
 
 		if ( stack.getItem() == ModItems.ITEM_BLOCK_BIT.get() )
 		{
-			if ( player.getEntityWorld().isRemote )
+			if ( player.getCommandSenderWorld().isClientSide )
 			{
 				return;
 			}
 
-			BitInventoryFeeder feeder = new BitInventoryFeeder( player, player.getEntityWorld() );
+			BitInventoryFeeder feeder = new BitInventoryFeeder( player, player.getCommandSenderWorld() );
 			feeder.addItem(ei);
 			return;
 		}
-		else if ( !player.inventory.addItemStackToInventory( stack ) )
+		else if ( !player.getInventory().add( stack ) )
 		{
 			ei.setItem( stack );
-			player.getEntityWorld().addEntity( ei );
+			player.getCommandSenderWorld().addFreshEntity( ei );
 		}
 	}
 
@@ -315,65 +314,65 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 
 	@Override
 	public void beginUndoGroup(
-			final PlayerEntity player )
+			final Player player )
 	{
 		UndoTracker.getInstance().beginGroup( player );
 	}
 
 	@Override
 	public void endUndoGroup(
-			final PlayerEntity player )
+			final Player player )
 	{
 		UndoTracker.getInstance().endGroup( player );
 	}
 
 	@Override
 	@OnlyIn( Dist.CLIENT )
-	public KeyBinding getKeyBinding(
+	public KeyMapping getKeyBinding(
 			ModKeyBinding modKeyBinding )
 	{
 		switch ( modKeyBinding )
 		{
 			case SINGLE:
-				return (KeyBinding) ChiselMode.SINGLE.binding;
+				return (KeyMapping) ChiselMode.SINGLE.binding;
 			case SNAP2:
-				return (KeyBinding) ChiselMode.SNAP2.binding;
+				return (KeyMapping) ChiselMode.SNAP2.binding;
 			case SNAP4:
-				return (KeyBinding) ChiselMode.SNAP4.binding;
+				return (KeyMapping) ChiselMode.SNAP4.binding;
 			case SNAP8:
-				return (KeyBinding) ChiselMode.SNAP8.binding;
+				return (KeyMapping) ChiselMode.SNAP8.binding;
 			case LINE:
-				return (KeyBinding) ChiselMode.LINE.binding;
+				return (KeyMapping) ChiselMode.LINE.binding;
 			case PLANE:
-				return (KeyBinding) ChiselMode.PLANE.binding;
+				return (KeyMapping) ChiselMode.PLANE.binding;
 			case CONNECTED_PLANE:
-				return (KeyBinding) ChiselMode.CONNECTED_PLANE.binding;
+				return (KeyMapping) ChiselMode.CONNECTED_PLANE.binding;
 			case CUBE_SMALL:
-				return (KeyBinding) ChiselMode.CUBE_SMALL.binding;
+				return (KeyMapping) ChiselMode.CUBE_SMALL.binding;
 			case CUBE_MEDIUM:
-				return (KeyBinding) ChiselMode.CUBE_MEDIUM.binding;
+				return (KeyMapping) ChiselMode.CUBE_MEDIUM.binding;
 			case CUBE_LARGE:
-				return (KeyBinding) ChiselMode.CUBE_LARGE.binding;
+				return (KeyMapping) ChiselMode.CUBE_LARGE.binding;
 			case SAME_MATERIAL:
-				return (KeyBinding) ChiselMode.SAME_MATERIAL.binding;
+				return (KeyMapping) ChiselMode.SAME_MATERIAL.binding;
 			case DRAWN_REGION:
-				return (KeyBinding) ChiselMode.DRAWN_REGION.binding;
+				return (KeyMapping) ChiselMode.DRAWN_REGION.binding;
 			case CONNECTED_MATERIAL:
-				return (KeyBinding) ChiselMode.CONNECTED_MATERIAL.binding;
+				return (KeyMapping) ChiselMode.CONNECTED_MATERIAL.binding;
 			case REPLACE:
-				return (KeyBinding) PositivePatternMode.REPLACE.binding;
+				return (KeyMapping) PositivePatternMode.REPLACE.binding;
 			case ADDITIVE:
-				return (KeyBinding) PositivePatternMode.ADDITIVE.binding;
+				return (KeyMapping) PositivePatternMode.ADDITIVE.binding;
 			case PLACEMENT:
-				return (KeyBinding) PositivePatternMode.PLACEMENT.binding;
+				return (KeyMapping) PositivePatternMode.PLACEMENT.binding;
 			case IMPOSE:
-				return (KeyBinding) PositivePatternMode.IMPOSE.binding;
+				return (KeyMapping) PositivePatternMode.IMPOSE.binding;
 			case BIT:
-				return (KeyBinding) TapeMeasureModes.BIT.binding;
+				return (KeyMapping) TapeMeasureModes.BIT.binding;
 			case BLOCK:
-				return (KeyBinding) TapeMeasureModes.BLOCK.binding;
+				return (KeyMapping) TapeMeasureModes.BLOCK.binding;
 			case DISTANCE:
-				return (KeyBinding) TapeMeasureModes.DISTANCE.binding;
+				return (KeyMapping) TapeMeasureModes.DISTANCE.binding;
 			default:
 				return ClientSide.instance.getKeyBinding( modKeyBinding );
 		}
@@ -428,9 +427,9 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void renderModel(
-	  final MatrixStack stack,
-			final IBakedModel model,
-			final World world,
+	  final PoseStack stack,
+			final BakedModel model,
+			final Level world,
 			final BlockPos pos,
 			final int alpha,
       final int combinedLight,
@@ -442,9 +441,9 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 	@Override
     @OnlyIn(Dist.CLIENT)
 	public void renderGhostModel(
-	  final MatrixStack stack,
-			final IBakedModel model,
-			final World world,
+	  final PoseStack stack,
+			final BakedModel model,
+			final Level world,
 			final BlockPos pos,
 			final boolean isUnplaceable,
       final int combinedLight,

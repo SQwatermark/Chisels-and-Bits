@@ -1,12 +1,12 @@
 package mod.chiselsandbits.client.gui;
 
-import java.lang.reflect.Constructor;
-
 import mod.chiselsandbits.bitbag.BagContainer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
+
+import java.lang.reflect.Constructor;
 
 @SuppressWarnings( "unused" )
 public enum ModGuiTypes
@@ -17,14 +17,14 @@ public enum ModGuiTypes
     public final Constructor<?> container_construtor;
 	public final Constructor<?> gui_construtor;
 
-	private ModGuiTypes(
-			final Class<? extends Container> c )
+	ModGuiTypes(
+			final Class<? extends AbstractContainerMenu> c)
 	{
-        Class<? extends Container> container;
+        Class<? extends AbstractContainerMenu> container;
         try
 		{
 			container = c;
-			container_construtor = container.getConstructor( PlayerEntity.class, World.class, int.class, int.class, int.class );
+			container_construtor = container.getConstructor( Player.class, Level.class, int.class, int.class, int.class );
 		}
 		catch ( final Exception e )
 		{
@@ -39,7 +39,7 @@ public enum ModGuiTypes
 		try
 		{
 			g = (Class<?>) container.getMethod( "getGuiClass" ).invoke( null );
-			g_construtor = g.getConstructor( PlayerEntity.class, World.class, int.class, int.class, int.class );
+			g_construtor = g.getConstructor( Player.class, Level.class, int.class, int.class, int.class );
 		}
 		catch ( final Exception e )
 		{

@@ -2,8 +2,8 @@ package mod.chiselsandbits.api;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Do not implement, acquire from {@link IChiselAndBitsAPI}

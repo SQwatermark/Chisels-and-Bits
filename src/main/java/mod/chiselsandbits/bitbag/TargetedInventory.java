@@ -1,14 +1,13 @@
 package mod.chiselsandbits.bitbag;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public class TargetedInventory implements IInventory
+public class TargetedInventory implements Container
 {
 
-	private IInventory src;
+	private Container src;
 
 	public TargetedInventory()
 	{
@@ -16,91 +15,91 @@ public class TargetedInventory implements IInventory
 	}
 
 	public void setInventory(
-			final IInventory a )
+			final Container a )
 	{
 		src = a;
 	}
 
 	@Override
-	public int getSizeInventory()
+	public int getContainerSize()
 	{
-		return src.getSizeInventory();
+		return src.getContainerSize();
 	}
 
 	@Override
-	public ItemStack getStackInSlot(
+	public ItemStack getItem(
 			final int index )
 	{
-		return src.getStackInSlot( index );
+		return src.getItem( index );
 	}
 
 	@Override
-	public ItemStack decrStackSize(
+	public ItemStack removeItem(
 			final int index,
 			final int count )
 	{
-		return src.decrStackSize( index, count );
+		return src.removeItem( index, count );
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(
+	public ItemStack removeItemNoUpdate(
 			final int index )
 	{
-		return src.removeStackFromSlot( index );
+		return src.removeItemNoUpdate( index );
 	}
 
 	@Override
-	public void setInventorySlotContents(
+	public void setItem(
 			final int index,
 			final ItemStack stack )
 	{
-		src.setInventorySlotContents( index, stack );
+		src.setItem( index, stack );
 	}
 
 	@Override
-	public int getInventoryStackLimit()
+	public int getMaxStackSize()
 	{
-		return src.getInventoryStackLimit();
+		return src.getMaxStackSize();
 	}
 
 	@Override
-	public void markDirty()
+	public void setChanged()
 	{
-		src.markDirty();
+		src.setChanged();
 	}
 
     @Override
-    public boolean isUsableByPlayer(final PlayerEntity player)
+    public boolean stillValid(final Player player)
     {
-        return src.isUsableByPlayer( player );
+        return src.stillValid( player );
     }
 
 	@Override
-	public void openInventory(
-			final PlayerEntity player )
+	public void startOpen(
+			final Player player )
 	{
-		src.openInventory( player );
+		src.startOpen( player );
 	}
 
 	@Override
-	public void closeInventory(
-			final PlayerEntity player )
+	public void stopOpen(
+			final Player player )
 	{
-		src.closeInventory( player );
+		src.stopOpen( player );
 	}
 
 	@Override
-	public boolean isItemValidForSlot(
+	public boolean canPlaceItem(
 			final int index,
 			final ItemStack stack )
 	{
-		return src.isItemValidForSlot( index, stack );
+		return src.canPlaceItem( index, stack );
 	}
 
 	@Override
-	public void clear()
+	public void clearContent()
 	{
-		src.clear();
+		src.clearContent();
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class TargetedInventory implements IInventory
 		return src.isEmpty();
 	}
 
-    public IInventory getSrc()
+    public Container getSrc()
     {
         return src;
     }

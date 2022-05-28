@@ -1,14 +1,14 @@
 package mod.chiselsandbits.client.model.baked;
 
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 
-public abstract class BaseBakedBlockModel extends BaseBakedPerspectiveModel implements IBakedModel
+public abstract class BaseBakedBlockModel extends BaseBakedPerspectiveModel implements BakedModel
 {
 
 	@Override
-	final public boolean isAmbientOcclusion()
+	final public boolean useAmbientOcclusion()
 	{
 		return true;
 	}
@@ -20,21 +20,21 @@ public abstract class BaseBakedBlockModel extends BaseBakedPerspectiveModel impl
 	}
 
 	@Override
-	final public boolean isBuiltInRenderer()
+	final public boolean isCustomRenderer()
 	{
 		return false;
 	}
 
 	@Override
-	final public ItemCameraTransforms getItemCameraTransforms()
+	final public ItemTransforms getTransforms()
 	{
-		return ItemCameraTransforms.DEFAULT;
+		return ItemTransforms.NO_TRANSFORMS;
 	}
 
 	@Override
-	public ItemOverrideList getOverrides()
+	public ItemOverrides getOverrides()
 	{
-		return ItemOverrideList.EMPTY;
+		return ItemOverrides.EMPTY;
 	}
 
 }

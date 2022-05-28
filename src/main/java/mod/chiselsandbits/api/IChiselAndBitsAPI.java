@@ -1,18 +1,18 @@
 package mod.chiselsandbits.api;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.IItemHandler;
@@ -44,7 +44,7 @@ public interface IChiselAndBitsAPI
 	 *         multi-parts, and blocks which can be chiseled, false otherwise.
 	 */
 	boolean canBeChiseled(
-			World world,
+			Level world,
 			BlockPos pos );
 
 	/**
@@ -55,7 +55,7 @@ public interface IChiselAndBitsAPI
 	 * @return true if the block contains chiseled bits, false otherwise.
 	 */
 	boolean isBlockChiseled(
-			World world,
+			Level world,
 			BlockPos pos );
 
 	/**
@@ -69,7 +69,7 @@ public interface IChiselAndBitsAPI
 	 *             are invalid.
 	 */
 	IBitAccess getBitAccess(
-			World world,
+			Level world,
 			BlockPos pos ) throws CannotBeChiseled;
 
 	/**
@@ -154,9 +154,9 @@ public interface IChiselAndBitsAPI
 	 *            are being extracted from.
 	 */
 	void giveBitToPlayer(
-			PlayerEntity player,
+			Player player,
 			ItemStack stack,
-			Vector3d spawnPos );
+			Vec3 spawnPos );
 
 	/**
 	 * Access the contents of a bitbag as if it was a normal
@@ -197,7 +197,7 @@ public interface IChiselAndBitsAPI
 	 *
 	 */
 	void beginUndoGroup(
-			PlayerEntity player );
+			Player player );
 
 	/**
 	 * Ends a previously running undo group, must be called after starting an
@@ -205,7 +205,7 @@ public interface IChiselAndBitsAPI
 	 * exception.
 	 */
 	void endUndoGroup(
-			PlayerEntity player );
+			Player player );
 
 	/**
 	 * Register a custom material as equivalent to another material.
@@ -229,7 +229,7 @@ public interface IChiselAndBitsAPI
 	 * @return a C&B {@link KeyBinding}.
 	 */
 	@OnlyIn( Dist.CLIENT )
-	KeyBinding getKeyBinding(
+	KeyMapping getKeyBinding(
 			ModKeyBinding modKeyBinding );
 
 	/**
@@ -243,9 +243,9 @@ public interface IChiselAndBitsAPI
 	 */
 	@OnlyIn( Dist.CLIENT )
 	void renderModel(
-      final MatrixStack stack,
-      final IBakedModel model,
-      final World world,
+      final PoseStack stack,
+      final BakedModel model,
+      final Level world,
       final BlockPos pos,
       final int alpha,
       final int combinedLight,
@@ -262,9 +262,9 @@ public interface IChiselAndBitsAPI
 	 */
 	@OnlyIn( Dist.CLIENT )
 	void renderGhostModel(
-      final MatrixStack stack,
-      final IBakedModel model,
-      final World world,
+      final PoseStack stack,
+      final BakedModel model,
+      final Level world,
       final BlockPos pos,
       final boolean isUnplaceable,
       final int combinedLight,

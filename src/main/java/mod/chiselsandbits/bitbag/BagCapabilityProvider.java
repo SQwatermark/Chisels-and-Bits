@@ -1,9 +1,9 @@
 package mod.chiselsandbits.bitbag;
 
 import mod.chiselsandbits.items.ItemBitBag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -19,7 +19,7 @@ public class BagCapabilityProvider extends BagStorage implements ICapabilityProv
 
 	public BagCapabilityProvider(
 			final ItemStack stack,
-			final CompoundNBT nbt )
+			final CompoundTag nbt )
 	{
 		this.stack = stack;
 	}
@@ -36,10 +36,10 @@ public class BagCapabilityProvider extends BagStorage implements ICapabilityProv
 			final int size )
 	{
 		int[] out = null;
-		CompoundNBT compound = stack.getTag();
+		CompoundTag compound = stack.getTag();
 
 		if ( compound == null )
-			compound = new CompoundNBT();
+			compound = new CompoundTag();
 
 		if ( compound.contains( "contents" ) )
 		{

@@ -4,10 +4,11 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,11 +30,11 @@ public class EntityItemPickupEventHandler
         if ( entityItem != null )
         {
             final ItemStack is = entityItem.getItem();
-            final PlayerEntity player = event.getPlayer();
+            final Player player = event.getPlayer();
             if ( is != null && is.getItem() instanceof ItemChiseledBit)
             {
                 final int originalSize = ModUtil.getStackSize( is );
-                final IInventory inv = player.inventory;
+                final Container inv = player.getInventory();
                 final List<ItemBitBag.BagPos> bags = ItemBitBag.getBags( inv );
 
                 // has the stack?
@@ -56,7 +57,7 @@ public class EntityItemPickupEventHandler
                         final ItemStack singleStack = is.copy();
                         ModUtil.setStackSize( singleStack, singleStack.getMaxStackSize() );
 
-                        if ( player.inventory.addItemStackToInventory( singleStack ) == false )
+                        if ( player.getInventory().add( singleStack ) == false )
                         {
                             ModUtil.adjustStackSize( is, -( singleStack.getMaxStackSize() - ModUtil.getStackSize( is ) ) );
                         }
@@ -89,14 +90,14 @@ public class EntityItemPickupEventHandler
     }
 
     private static boolean updateEntity(
-      final PlayerEntity player,
+      final Player player,
       final ItemEntity ei,
       ItemStack is,
       final int originalSize )
     {
         if ( is == null )
         {
-            ei.remove();
+            ei.remove(Entity.RemovalReason.DISCARDED);
             return true;
         }
         else

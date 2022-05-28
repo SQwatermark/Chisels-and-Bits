@@ -10,16 +10,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = ChiselsAndBits.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
-public class ClientTickHandler
-{
-
+public class ClientTickHandler {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onTickPlayerTick(final TickEvent.ClientTickEvent event)
-    {
-        if (Minecraft.getInstance().player != null)
-            if (Minecraft.getInstance().player.getHeldItemMainhand().getItem() instanceof ItemMagnifyingGlass || Minecraft.getInstance().player.getHeldItemOffhand().getItem() instanceof ItemMagnifyingGlass)
-                if (Minecraft.getInstance().ingameGUI != null)
-                    Minecraft.getInstance().ingameGUI.remainingHighlightTicks = 40;
+    public static void onTickPlayerTick(final TickEvent.ClientTickEvent event) {
+        if (Minecraft.getInstance().player != null) {
+            if (Minecraft.getInstance().player.getMainHandItem().getItem() instanceof ItemMagnifyingGlass
+                    || Minecraft.getInstance().player.getOffhandItem().getItem() instanceof ItemMagnifyingGlass) {
+                if (Minecraft.getInstance().gui != null) {
+                    Minecraft.getInstance().gui.toolHighlightTimer = 40;
+                }
+            }
+        }
     }
 }

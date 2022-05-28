@@ -6,11 +6,11 @@ import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.client.model.baked.BaseSmartModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class PrintSmartModel extends BaseSmartModel
 {
@@ -29,7 +29,7 @@ public class PrintSmartModel extends BaseSmartModel
 	}
 
     @Override
-    public IBakedModel func_239290_a_(final IBakedModel originalModel, final ItemStack stack, final World world, final LivingEntity entity)
+    public BakedModel resolve(final BakedModel originalModel, final ItemStack stack, final Level world, final LivingEntity entity)
     {
         if ( ClientSide.instance.holdingShift() )
         {
@@ -43,11 +43,11 @@ public class PrintSmartModel extends BaseSmartModel
             return npb;
         }
 
-        return Minecraft.getInstance().getItemRenderer().getItemModelMesher().getModelManager().getModel( new ModelResourceLocation( "chiselsandbits:" + name + "_written", "inventory" ) );
+        return Minecraft.getInstance().getItemRenderer().getItemModelShaper().getModelManager().getModel( new ModelResourceLocation( "chiselsandbits:" + name + "_written", "inventory" ) );
     }
 
     @Override
-    public boolean isSideLit()
+    public boolean usesBlockLight()
     {
         return false;
     }

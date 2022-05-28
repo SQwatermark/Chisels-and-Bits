@@ -4,17 +4,18 @@ import com.ldtteam.datagenerators.recipes.RecipeIngredientJson;
 import com.ldtteam.datagenerators.recipes.RecipeIngredientKeyJson;
 import mod.chiselsandbits.items.ItemChisel;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraftforge.common.Tags;
 
 import java.io.IOException;
 
 public abstract class AbstractChiselRecipeGenerator extends AbstractRecipeGenerator
 {
-    private final ITag.INamedTag<?> rodTag;
-    private final ITag.INamedTag<?> ingredientTag;
+    private final TagKey<?> rodTag;
+    private final TagKey<?> ingredientTag;
 
-    protected AbstractChiselRecipeGenerator(final DataGenerator generator, final ItemChisel result, final ITag.INamedTag<?> ingredientTag)
+    protected AbstractChiselRecipeGenerator(final DataGenerator generator, final ItemChisel result, final TagKey<?> ingredientTag)
     {
         super(generator, result);
         this.ingredientTag = ingredientTag;
@@ -24,8 +25,8 @@ public abstract class AbstractChiselRecipeGenerator extends AbstractRecipeGenera
     protected AbstractChiselRecipeGenerator(
       final DataGenerator generator,
       final ItemChisel result,
-      final ITag.INamedTag<?> rodTag,
-      final ITag.INamedTag<?> ingredientTag)
+      final TagKey<?> rodTag,
+      final TagKey<?> ingredientTag)
     {
         super(generator, result);
         this.rodTag = rodTag;
@@ -41,9 +42,9 @@ public abstract class AbstractChiselRecipeGenerator extends AbstractRecipeGenera
           "   ",
           "   ",
           "s",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(rodTag.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(rodTag.location().toString(), true)), // TODO getName.toString
           "t",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(ingredientTag.getName().toString(), true))
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(ingredientTag.location().toString(), true))
         );
     }
 }

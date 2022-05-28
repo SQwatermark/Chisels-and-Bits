@@ -1,22 +1,22 @@
 package mod.chiselsandbits.bitbag;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.math.Matrix4f;
 
-public class GuiBagFontRenderer extends FontRenderer
+public class GuiBagFontRenderer extends Font
 {
-	FontRenderer talkto;
+	Font talkto;
 
 	int offsetX, offsetY;
 	float scale;
 
 	public GuiBagFontRenderer(
-			final FontRenderer src,
+			final Font src,
 			final int bagStackSize )
 	{
-		super(src.font);
+		super(src.fonts);
 		talkto = src;
 
 		if ( bagStackSize < 100 )
@@ -32,21 +32,21 @@ public class GuiBagFontRenderer extends FontRenderer
 	}
 
 	@Override
-	public int getStringWidth(
+	public int width(
 			String text )
 	{
 		text = convertText( text );
-		return talkto.getStringWidth( text );
+		return talkto.width( text );
 	}
 
     @Override
-    public int renderString(final String text, float x, float y, final int color, final Matrix4f matrix, final boolean dropShadow, final boolean p_228078_7_)
+    public int drawInternal(final String text, float x, float y, final int color, final Matrix4f matrix, final boolean dropShadow, final boolean p_228078_7_)
     {
-        final MatrixStack stack = new MatrixStack();
+        final PoseStack stack = new PoseStack();
         final Matrix4f original = new Matrix4f(matrix);
 
         try {
-            stack.getLast().getMatrix().mul(matrix);
+            stack.last().pose().multiply(matrix);
             stack.scale( scale, scale, scale );
 
             x /= scale;
@@ -54,32 +54,32 @@ public class GuiBagFontRenderer extends FontRenderer
             x += offsetX;
             y += offsetY;
 
-            return super.renderString(text, x, y, color, stack.getLast().getMatrix(), dropShadow, p_228078_7_);
+            return super.drawInternal(text, x, y, color, stack.last().pose(), dropShadow, p_228078_7_);
         }
         finally
         {
-            matrix.set(original);
+            matrix.load(original);
         }
     }
 
     @Override
-    public int renderString(
+    public int drawInBatch(
       final String text,
       float x,
       float y,
       final int color,
       final boolean dropShadow,
       final Matrix4f matrix,
-      final IRenderTypeBuffer buffer,
+      final MultiBufferSource buffer,
       final boolean transparentIn,
       final int colorBackgroundIn,
       final int packedLight)
     {
-        final MatrixStack stack = new MatrixStack();
+        final PoseStack stack = new PoseStack();
         final Matrix4f original = new Matrix4f(matrix);
 
         try {
-            stack.getLast().getMatrix().mul(matrix);
+            stack.last().pose().multiply(matrix);
             stack.scale( scale, scale, scale );
 
             x /= scale;
@@ -87,21 +87,21 @@ public class GuiBagFontRenderer extends FontRenderer
             x += offsetX;
             y += offsetY;
 
-            return super.renderString(text, x, y, color, dropShadow, stack.getLast().getMatrix(), buffer, transparentIn, colorBackgroundIn, packedLight);
+            return super.drawInBatch(text, x, y, color, dropShadow, stack.last().pose(), buffer, transparentIn, colorBackgroundIn, packedLight);
         }
         finally
         {
-            matrix.set(original);
+            matrix.load(original);
         }
     }
 
     @Override
-    public int drawString(MatrixStack matrixStack, String text, float x, float y, int color)
+    public int draw(PoseStack matrixStack, String text, float x, float y, int color)
     {
         try
         {
             text = convertText( text );
-            matrixStack.push();
+            matrixStack.pushPose();
             matrixStack.scale( scale, scale, scale );
 
             x /= scale;
@@ -109,21 +109,21 @@ public class GuiBagFontRenderer extends FontRenderer
             x += offsetX;
             y += offsetY;
 
-            return talkto.drawString(matrixStack, text, x, y, color );
+            return talkto.draw(matrixStack, text, x, y, color );
         }
         finally
         {
-            matrixStack.pop();
+            matrixStack.popPose();
         }
     }
 
     @Override
-    public int drawStringWithShadow(MatrixStack matrixStack, String text, float x, float y, int color)
+    public int drawShadow(PoseStack matrixStack, String text, float x, float y, int color)
     {
         try
         {
             text = convertText( text );
-            matrixStack.push();
+            matrixStack.pushPose();
             matrixStack.scale( scale, scale, scale );
 
             x /= scale;
@@ -131,11 +131,11 @@ public class GuiBagFontRenderer extends FontRenderer
             x += offsetX;
             y += offsetY;
 
-            return talkto.drawStringWithShadow(matrixStack, text, x, y, color );
+            return talkto.drawShadow(matrixStack, text, x, y, color );
         }
         finally
         {
-            matrixStack.pop();
+            matrixStack.popPose();
         }
     }
 

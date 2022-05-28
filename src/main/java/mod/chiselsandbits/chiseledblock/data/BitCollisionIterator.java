@@ -1,12 +1,12 @@
 package mod.chiselsandbits.chiseledblock.data;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public class BitCollisionIterator extends BitIterator
 {
 
 	public final static float One16thf = 1.0f / VoxelBlob.dim;
-	public final static AxisAlignedBB[] cachedBoxes = new AxisAlignedBB[VoxelBlob.full_size];
+	public final static AABB[] cachedBoxes = new AABB[VoxelBlob.full_size];
 
 	public float physicalX;
 	public float physicalY;
@@ -43,12 +43,12 @@ public class BitCollisionIterator extends BitIterator
 		physicalYp1 = physicalY + One16thf;
 	}
 
-	public AxisAlignedBB getBoundingBox()
+	public AABB getBoundingBox()
 	{
-		AxisAlignedBB box = cachedBoxes[bit];
+		AABB box = cachedBoxes[bit];
 
 		if ( box == null )
-			box = cachedBoxes[bit] = new AxisAlignedBB( this.physicalX, this.physicalY, this.physicalZ, this.physicalX + BitCollisionIterator.One16thf, this.physicalYp1, this.physicalZp1 );
+			box = cachedBoxes[bit] = new AABB( this.physicalX, this.physicalY, this.physicalZ, this.physicalX + BitCollisionIterator.One16thf, this.physicalYp1, this.physicalZp1 );
 
 		return box;
 	}

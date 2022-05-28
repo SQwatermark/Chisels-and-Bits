@@ -3,7 +3,7 @@ package mod.chiselsandbits.chiseledblock.data;
 import mod.chiselsandbits.api.BoxType;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.utils.SimpleMaxSizedCache;
-import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.*;
 
@@ -37,7 +37,7 @@ public final class VoxelShapeCache
     }
 
     private VoxelShape calculateNewVoxelShape(final VoxelBlob data, final BoxType type) {
-        return VoxelShapeCalculator.calculate(data, type).simplify();
+        return VoxelShapeCalculator.calculate(data, type).optimize();
     }
 
     private static final class CacheKey {

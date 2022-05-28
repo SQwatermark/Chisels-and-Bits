@@ -1,12 +1,10 @@
 package mod.chiselsandbits.bitbag;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
-public class TargetedTransferContainer extends Container
+public class TargetedTransferContainer extends AbstractContainerMenu
 {
 
     protected TargetedTransferContainer()
@@ -15,8 +13,8 @@ public class TargetedTransferContainer extends Container
     }
 
     @Override
-	public boolean canInteractWith(
-      final PlayerEntity playerIn )
+	public boolean stillValid(
+      final Player playerIn )
 	{
 		return true;
 	}
@@ -27,7 +25,7 @@ public class TargetedTransferContainer extends Container
 			final int endIndex,
 			final boolean reverseDirection )
 	{
-		return mergeItemStack( stack, startIndex, endIndex, reverseDirection );
+		return moveItemStackTo( stack, startIndex, endIndex, reverseDirection );
 	}
 
 }

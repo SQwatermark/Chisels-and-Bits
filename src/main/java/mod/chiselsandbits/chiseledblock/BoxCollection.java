@@ -3,21 +3,21 @@ package mod.chiselsandbits.chiseledblock;
 import java.util.Collection;
 import java.util.Iterator;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
-public class BoxCollection implements Collection<AxisAlignedBB>
+public class BoxCollection implements Collection<AABB>
 {
 
-	private final AxisAlignedBB[][] arrays;
+	private final AABB[][] arrays;
 
-	static class BoxIterator implements Iterator<AxisAlignedBB>
+	static class BoxIterator implements Iterator<AABB>
 	{
 
 		private int arrayOffset = 0, idx = -1;
-		private final AxisAlignedBB[][] arrays;
+		private final AABB[][] arrays;
 
 		public BoxIterator(
-				final AxisAlignedBB[][] a )
+				final AABB[][] a )
 		{
 			arrays = a;
 			findNextItem();
@@ -46,9 +46,9 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 		}
 
 		@Override
-		public AxisAlignedBB next()
+		public AABB next()
 		{
-			final AxisAlignedBB box = arrays[arrayOffset][idx];
+			final AABB box = arrays[arrayOffset][idx];
 
 			findNextItem();
 
@@ -64,27 +64,27 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 	};
 
 	public BoxCollection(
-			final AxisAlignedBB[] a )
+			final AABB[] a )
 	{
-		arrays = new AxisAlignedBB[1][];
+		arrays = new AABB[1][];
 		arrays[0] = a;
 	}
 
 	public BoxCollection(
-			final AxisAlignedBB[] a,
-			final AxisAlignedBB[] b )
+			final AABB[] a,
+			final AABB[] b )
 	{
-		arrays = new AxisAlignedBB[2][];
+		arrays = new AABB[2][];
 		arrays[0] = a;
 		arrays[1] = b;
 	}
 
 	public BoxCollection(
-			final AxisAlignedBB[] a,
-			final AxisAlignedBB[] b,
-			final AxisAlignedBB[] c )
+			final AABB[] a,
+			final AABB[] b,
+			final AABB[] c )
 	{
-		arrays = new AxisAlignedBB[3][];
+		arrays = new AABB[3][];
 		arrays[0] = a;
 		arrays[1] = b;
 		arrays[2] = c;
@@ -92,14 +92,14 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 
 	@Override
 	public boolean add(
-			final AxisAlignedBB e )
+			final AABB e )
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean addAll(
-			final Collection<? extends AxisAlignedBB> c )
+			final Collection<? extends AABB> c )
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -131,7 +131,7 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 	}
 
 	@Override
-	public Iterator<AxisAlignedBB> iterator()
+	public Iterator<AABB> iterator()
 	{
 		return new BoxIterator( arrays );
 	}
@@ -162,7 +162,7 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 	{
 		int size = 0;
 
-		for ( final AxisAlignedBB[] bb : arrays )
+		for ( final AABB[] bb : arrays )
 		{
 			if ( bb != null )
 			{
@@ -177,10 +177,10 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 	public Object[] toArray()
 	{
 		int s = size();
-		final AxisAlignedBB[] storage = new AxisAlignedBB[s];
+		final AABB[] storage = new AABB[s];
 
 		s = 0;
-		for ( final AxisAlignedBB bb : this )
+		for ( final AABB bb : this )
 		{
 			storage[s++] = bb;
 		}
@@ -194,7 +194,7 @@ public class BoxCollection implements Collection<AxisAlignedBB>
 			T[] a )
 	{
 	    int s = 0;
-		for ( final AxisAlignedBB bb : this )
+		for ( final AABB bb : this )
 		{
 			a[s++] = (T) bb;
 		}

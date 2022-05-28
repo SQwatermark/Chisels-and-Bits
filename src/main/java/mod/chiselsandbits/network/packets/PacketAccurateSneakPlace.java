@@ -2,21 +2,17 @@ package mod.chiselsandbits.network.packets;
 
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-
-import javax.annotation.Nonnull;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class PacketAccurateSneakPlace extends ModPacket
 {
@@ -24,14 +20,14 @@ public class PacketAccurateSneakPlace extends ModPacket
 	public interface IItemBlockAccurate
 	{
 
-		ActionResultType tryPlace(
-		  ItemUseContext context,
+		InteractionResult tryPlace(
+		  UseOnContext context,
           boolean offGrid
         );
 
 	};
 
-    public PacketAccurateSneakPlace(PacketBuffer buffer)
+    public PacketAccurateSneakPlace(FriendlyByteBuf buffer)
     {
         readPayload(buffer);
     }
@@ -39,7 +35,7 @@ public class PacketAccurateSneakPlace extends ModPacket
     public PacketAccurateSneakPlace(
       final ItemStack stack,
       final BlockPos pos,
-      final Hand hand,
+      final InteractionHand hand,
       final Direction side,
       final double hitX,
       final double hitY,
@@ -58,19 +54,19 @@ public class PacketAccurateSneakPlace extends ModPacket
 
     private ItemStack stack;
     private BlockPos  pos;
-    private Hand      hand;
+    private InteractionHand      hand;
     private Direction side;
     private double     hitX, hitY, hitZ;
 	private boolean offgrid;
 
 	@Override
 	public void server(
-			final ServerPlayerEntity playerEntity )
+			final ServerPlayer playerEntity )
 	{
 		if ( stack != null && stack.getItem() instanceof IItemBlockAccurate )
 		{
-			ItemStack inHand = playerEntity.getHeldItem( hand );
-			if ( ItemStack.areItemStackTagsEqual( stack, inHand ) )
+			ItemStack inHand = playerEntity.getItemInHand( hand );
+			if ( ItemStack.tagMatches( stack, inHand ) )
 			{
 				if ( playerEntity.isCreative() )
 				{
@@ -78,16 +74,16 @@ public class PacketAccurateSneakPlace extends ModPacket
 				}
 
 				final IItemBlockAccurate ibc = (IItemBlockAccurate) stack.getItem();
-				final ItemUseContext context = new ItemUseContext(
+				final UseOnContext context = new UseOnContext(
 				  playerEntity,
                   hand,
-                  new BlockRayTraceResult(new Vector3d(hitX, hitY, hitZ), side, pos, false)
+                  new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)
                 );
-				ibc.tryPlace(new BlockItemUseContext(context), offgrid);
+				ibc.tryPlace(new BlockPlaceContext(context), offgrid);
 
 				if ( !playerEntity.isCreative() && ModUtil.getStackSize( inHand ) <= 0 )
 				{
-					playerEntity.setHeldItem( hand, ModUtil.getEmptyStack() );
+					playerEntity.setItemInHand( hand, ModUtil.getEmptyStack() );
 				}
 			}
 		}
@@ -95,12 +91,12 @@ public class PacketAccurateSneakPlace extends ModPacket
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-		buffer.writeItemStack( stack );
+		buffer.writeItem( stack );
 		buffer.writeBlockPos( pos );
-		buffer.writeEnumValue( side );
-		buffer.writeEnumValue( hand );
+		buffer.writeEnum( side );
+		buffer.writeEnum( hand );
 		buffer.writeDouble( hitX );
 		buffer.writeDouble( hitY );
 		buffer.writeDouble( hitZ );
@@ -109,12 +105,12 @@ public class PacketAccurateSneakPlace extends ModPacket
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-        stack = buffer.readItemStack();
+        stack = buffer.readItem();
         pos = buffer.readBlockPos();
-        side = buffer.readEnumValue( Direction.class );
-        hand = buffer.readEnumValue( Hand.class );
+        side = buffer.readEnum( Direction.class );
+        hand = buffer.readEnum( InteractionHand.class );
         hitX = buffer.readDouble();
         hitY = buffer.readDouble();
         hitZ = buffer.readDouble();
@@ -141,12 +137,12 @@ public class PacketAccurateSneakPlace extends ModPacket
         this.pos = pos;
     }
 
-    public Hand getHand()
+    public InteractionHand getHand()
     {
         return hand;
     }
 
-    public void setHand(final Hand hand)
+    public void setHand(final InteractionHand hand)
     {
         this.hand = hand;
     }

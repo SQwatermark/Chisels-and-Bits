@@ -3,16 +3,16 @@ package mod.chiselsandbits.client;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 
-public class ModItemGroup extends ItemGroup
+public class ModItemGroup extends CreativeModeTab
 {
 
 	public ModItemGroup()
 	{
 		super( ChiselsAndBits.MODID );
-		setBackgroundImageName( "item_search.png" );
+		setBackgroundSuffix( "item_search.png" );
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class ModItemGroup extends ItemGroup
 	}
 
 	@Override
-	public ItemStack createIcon()
+	public ItemStack makeIcon()
 	{
 		return new ItemStack(ModItems.ITEM_BIT_BAG_DEFAULT.get());
 	}

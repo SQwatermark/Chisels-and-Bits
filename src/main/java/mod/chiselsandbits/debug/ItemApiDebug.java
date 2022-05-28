@@ -2,31 +2,31 @@ package mod.chiselsandbits.debug;
 
 import mod.chiselsandbits.debug.DebugAction.Tests;
 import mod.chiselsandbits.helpers.ModUtil;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 
 public class ItemApiDebug extends Item
 {
 
 	public ItemApiDebug(Item.Properties properties)
 	{
-	    super(properties.maxDamage(1).maxStackSize(1));
+	    super(properties.durability(1).stacksTo(1));
 	}
 
     @Override
-    public ITextComponent getDisplayName(final ItemStack stack)
+    public Component getName(final ItemStack stack)
     {
-        final ITextComponent parent = super.getDisplayName(stack);
-        if (!(parent instanceof IFormattableTextComponent))
+        final Component parent = super.getName(stack);
+        if (!(parent instanceof MutableComponent))
             return parent;
 
-        final IFormattableTextComponent name = (IFormattableTextComponent) parent;
-        return name.appendString(" - " + getAction( stack ).name());
+        final MutableComponent name = (MutableComponent) parent;
+        return name.append(" - " + getAction( stack ).name());
     }
 
 	private Tests getAction(
@@ -36,27 +36,27 @@ public class ItemApiDebug extends Item
 	}
 
     @Override
-    public ActionResultType onItemUse(final ItemUseContext context)
+    public InteractionResult useOn(final UseOnContext context)
     {
-        final ItemStack stack = context.getPlayer().getHeldItem( context.getHand() );
+        final ItemStack stack = context.getPlayer().getItemInHand( context.getHand() );
 
-        if ( context.getPlayer().isSneaking() )
+        if ( context.getPlayer().isShiftKeyDown() )
         {
             final int newDamage = getActionID( stack ) + 1;
             setActionID( stack, newDamage % Tests.values().length );
             DebugAction.Msg( context.getPlayer(), getAction( stack ).name() );
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        getAction( stack ).which.run( context.getWorld(), context.getPos(), context.getFace(), context.getHitVec().x, context.getHitVec().y, context.getHitVec().z, context.getPlayer() );
-        return ActionResultType.SUCCESS;
+        getAction( stack ).which.run( context.getLevel(), context.getClickedPos(), context.getClickedFace(), context.getClickLocation().x, context.getClickLocation().y, context.getClickLocation().z, context.getPlayer() );
+        return InteractionResult.SUCCESS;
     }
 
 	private void setActionID(
 			final ItemStack stack,
 			final int i )
 	{
-		final CompoundNBT o = new CompoundNBT();
+		final CompoundTag o = new CompoundTag();
 		o.putInt( "id", i );
 		stack.setTag( o );
 	}

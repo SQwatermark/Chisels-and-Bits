@@ -1,23 +1,15 @@
 package mod.chiselsandbits.network.packets;
 
 import mod.chiselsandbits.bitbag.BagContainer;
-import mod.chiselsandbits.client.gui.ModGuiTypes;
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.StringTextComponent;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleMenuProvider;
 
 public class PacketOpenBagGui extends ModPacket
 {
-    public PacketOpenBagGui(PacketBuffer buffer)
+    public PacketOpenBagGui(FriendlyByteBuf buffer)
     {
         readPayload(buffer);
     }
@@ -28,24 +20,24 @@ public class PacketOpenBagGui extends ModPacket
 
     @Override
 	public void server(
-			final ServerPlayerEntity player )
+			final ServerPlayer player )
 	{
-	    player.openContainer(new SimpleNamedContainerProvider(
+	    player.openMenu(new SimpleMenuProvider(
           (id, playerInventory, playerEntity) -> new BagContainer(id, playerInventory),
-          new StringTextComponent("Bitbag")
+          new TextComponent("Bitbag")
         ));
 	}
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		// no data...
 	}
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		// no data..
 	}

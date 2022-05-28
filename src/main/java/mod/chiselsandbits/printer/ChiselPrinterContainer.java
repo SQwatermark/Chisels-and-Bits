@@ -4,19 +4,19 @@ import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.registry.ModContainerTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.IntArray;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
 
-public class ChiselPrinterContainer extends Container
+public class ChiselPrinterContainer extends AbstractContainerMenu
 {
 
     public static final int PLAYER_INVENTORY_ROWS = 3;
@@ -26,13 +26,13 @@ public class ChiselPrinterContainer extends Container
     public static final int SLOT_SIZE = 18;
     public static final int PLAYER_TOOLBAR_Y_OFFSET = 142;
 
-    private final IIntArray stationData;
+    private final ContainerData stationData;
 
     private final IItemHandlerModifiable toolHandler;
 
     public ChiselPrinterContainer(
       final int id,
-      final PlayerInventory playerInventory)
+      final Inventory playerInventory)
     {
         this(
           id,
@@ -40,17 +40,17 @@ public class ChiselPrinterContainer extends Container
           new ItemStackHandler(1),
           new ItemStackHandler(1),
           new ItemStackHandler(1),
-          new IntArray(1)
+          new SimpleContainerData(1)
         );
     }
 
     public ChiselPrinterContainer(
       final int id,
-      final PlayerInventory playerInventory,
+      final Inventory playerInventory,
       final IItemHandlerModifiable patternHandler,
       final IItemHandlerModifiable toolHandler,
       final IItemHandlerModifiable resultHandler,
-      final IIntArray stationData)
+      final ContainerData stationData)
     {
         super(ModContainerTypes.CHISEL_STATION_CONTAINER.get(), id);
         this.stationData = stationData;
@@ -64,7 +64,7 @@ public class ChiselPrinterContainer extends Container
             47
           ) {
               @Override
-              public boolean isItemValid(@NotNull final ItemStack stack)
+              public boolean mayPlace(@NotNull final ItemStack stack)
               {
                   return stack.isEmpty() || stack.getItem() instanceof IPatternItem;
               }
@@ -79,7 +79,7 @@ public class ChiselPrinterContainer extends Container
             21
           ) {
               @Override
-              public boolean isItemValid(@NotNull final ItemStack stack)
+              public boolean mayPlace(@NotNull final ItemStack stack)
               {
                   return stack.getItem() instanceof ItemChisel;
               }
@@ -94,7 +94,7 @@ public class ChiselPrinterContainer extends Container
             47
           ) {
               @Override
-              public boolean isItemValid(@NotNull final ItemStack stack)
+              public boolean mayPlace(@NotNull final ItemStack stack)
               {
                   return false;
               }
@@ -117,11 +117,11 @@ public class ChiselPrinterContainer extends Container
             this.addSlot(new Slot(playerInventory, toolbarIndex, PLAYER_INVENTORY_X_OFFSET + toolbarIndex * SLOT_SIZE, PLAYER_TOOLBAR_Y_OFFSET));
         }
 
-        this.trackIntArray(this.stationData);
+        this.addDataSlots(this.stationData);
     }
 
     @Override
-    public boolean canInteractWith(final PlayerEntity playerIn)
+    public boolean stillValid(final Player playerIn)
     {
         return true;
     }
@@ -139,43 +139,43 @@ public class ChiselPrinterContainer extends Container
 
     @NotNull
     @Override
-    public ItemStack transferStackInSlot(final PlayerEntity playerIn, final int index)
+    public ItemStack quickMoveStack(final Player playerIn, final int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (index == 2) {
-                if (!this.mergeItemStack(itemstack1, 3, 39, true)) {
+                if (!this.moveItemStackTo(itemstack1, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
 
-                slot.onSlotChange(itemstack1, itemstack);
+                slot.onQuickCraft(itemstack1, itemstack);
             } else if (index != 1 && index != 0) {
                 if (itemstack1.getItem() instanceof IPatternItem) {
-                    if (!this.mergeItemStack(itemstack1, 0, 1, false)) {
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
                         return ItemStack.EMPTY;
                     }
                 } else if (itemstack1.getItem() instanceof ItemChisel) {
-                    if (!this.mergeItemStack(itemstack1, 1, 2, false)) {
+                    if (!this.moveItemStackTo(itemstack1, 1, 2, false)) {
                         return ItemStack.EMPTY;
                     }
                 } else if (index < 30) {
-                    if (!this.mergeItemStack(itemstack1, 30, 39, false)) {
+                    if (!this.moveItemStackTo(itemstack1, 30, 39, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (index < 39 && !this.mergeItemStack(itemstack1, 3, 30, false)) {
+                } else if (index < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 3, 39, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 3, 39, false)) {
                 return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
             if (itemstack1.getCount() == itemstack.getCount()) {

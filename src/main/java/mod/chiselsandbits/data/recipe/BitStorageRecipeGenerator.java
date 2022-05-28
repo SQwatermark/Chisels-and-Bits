@@ -10,7 +10,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 
@@ -35,13 +35,13 @@ public class BitStorageRecipeGenerator extends AbstractRecipeGenerator
           "glg",
           "ici",
           "g",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.GLASS.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.GLASS.location().toString(), true)),
           "l",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.LOGS.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(ItemTags.LOGS.location().toString(), true)),
           "i",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.INGOTS_IRON.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.INGOTS_IRON.location().toString(), true)),
           "c",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(ModTags.Items.CHISEL.getName().toString(), true))
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(ModTags.Items.CHISEL.location().toString(), true))
         );
     }
 }

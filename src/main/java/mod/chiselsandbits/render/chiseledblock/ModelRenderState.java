@@ -1,7 +1,7 @@
 package mod.chiselsandbits.render.chiseledblock;
 
 import mod.chiselsandbits.helpers.IStateRef;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public class ModelRenderState
 {

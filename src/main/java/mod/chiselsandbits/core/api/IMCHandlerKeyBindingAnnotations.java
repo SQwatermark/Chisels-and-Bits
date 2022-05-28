@@ -3,8 +3,8 @@ package mod.chiselsandbits.core.api;
 import mod.chiselsandbits.api.KeyBindingContext;
 import mod.chiselsandbits.client.ModConflictContext;
 import mod.chiselsandbits.core.Log;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.registries.ForgeRegistries;
 

@@ -6,11 +6,11 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 
@@ -43,12 +43,12 @@ public class MagnifyingGlassRecipeGenerator extends AbstractRecipeGenerator
           )),
           "g",
           new RecipeIngredientKeyJson(new RecipeIngredientJson(
-            Tags.Items.GLASS.getName().toString(),
+            Tags.Items.GLASS.location().toString(),
             true
           )),
           "s",
           new RecipeIngredientKeyJson(new RecipeIngredientJson(
-            Tags.Items.RODS_WOODEN.getName().toString(),
+            Tags.Items.RODS_WOODEN.location().toString(),
             true
           ))
         );

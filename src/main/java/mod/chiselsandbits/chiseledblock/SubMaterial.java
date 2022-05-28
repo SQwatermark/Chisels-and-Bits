@@ -1,6 +1,6 @@
 package mod.chiselsandbits.chiseledblock;
 
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.material.Material;
 
 class SubMaterial
 {

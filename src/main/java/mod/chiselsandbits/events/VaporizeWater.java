@@ -1,10 +1,10 @@
 package mod.chiselsandbits.events;
 
 import mod.chiselsandbits.api.EventFullBlockRestoration;
-import net.minecraft.block.Blocks;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class VaporizeWater
@@ -14,18 +14,18 @@ public class VaporizeWater
 	public void handle(
 			final EventFullBlockRestoration e )
 	{
-		if ( e.getState().getBlock() == Blocks.WATER && e.getWorld().getDimensionType().isUltrawarm() )
+		if ( e.getState().getBlock() == Blocks.WATER && e.getWorld().dimensionType().ultraWarm() )
 		{
             double i = e.getPos().getX();
             double j = e.getPos().getY();
             double k = e.getPos().getZ();
-            e.getWorld().playSound(i,j,k, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (e.getWorld().rand.nextFloat() - e.getWorld().rand.nextFloat()) * 0.8F, true);
+            e.getWorld().playLocalSound(i,j,k, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (e.getWorld().random.nextFloat() - e.getWorld().random.nextFloat()) * 0.8F, true);
 
             for(int l = 0; l < 8; ++l) {
                 e.getWorld().addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0D, 0.0D, 0.0D);
             }
 
-			e.getWorld().setBlockState( e.getPos(), Blocks.AIR.getDefaultState() );
+			e.getWorld().setBlockAndUpdate( e.getPos(), Blocks.AIR.defaultBlockState() );
 			e.setCanceled( true );
 		}
 	}

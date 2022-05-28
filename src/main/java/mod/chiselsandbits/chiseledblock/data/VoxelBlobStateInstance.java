@@ -14,8 +14,8 @@ import io.netty.buffer.Unpooled;
 import mod.chiselsandbits.api.BoxType;
 import mod.chiselsandbits.chiseledblock.BoxCollection;
 import mod.chiselsandbits.core.Log;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.AABB;
 
 public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateInstance>
 {
@@ -28,8 +28,8 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 
 	// Separate fluids and solids, and use both for occlusion.
 	private int generated = 0;
-	private SoftReference<AxisAlignedBB[]> fluidBoxes = null;
-	private SoftReference<AxisAlignedBB[]> solidBoxes = null;
+	private SoftReference<AABB[]> fluidBoxes = null;
+	private SoftReference<AABB[]> solidBoxes = null;
 
 	protected SoftReference<VoxelBlob> blob;
 
@@ -109,7 +109,7 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 		return new VoxelBlob( vb );
 	}
 
-	private AxisAlignedBB[] getBoxType(
+	private AABB[] getBoxType(
 			final int type )
 	{
 		// if they are not generated, then generate them.
@@ -124,8 +124,8 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 
 					if ( fluidBlob.filterFluids( true ) )
 					{
-						final AxisAlignedBB[] out = generateBoxes( fluidBlob );
-						fluidBoxes = new SoftReference<AxisAlignedBB[]>( out );
+						final AABB[] out = generateBoxes( fluidBlob );
+						fluidBoxes = new SoftReference<AABB[]>( out );
 						return out;
 					}
 
@@ -139,8 +139,8 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 
 					if ( solidBlob.filterFluids( false ) )
 					{
-						final AxisAlignedBB[] out = generateBoxes( solidBlob );
-						solidBoxes = new SoftReference<AxisAlignedBB[]>( out );
+						final AABB[] out = generateBoxes( solidBlob );
+						solidBoxes = new SoftReference<AABB[]>( out );
 						return out;
 					}
 
@@ -152,7 +152,7 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 		}
 
 		// snag the boxes we want.
-		AxisAlignedBB[] out = null;
+		AABB[] out = null;
 		switch ( type )
 		{
 			case HAS_FLUIDS:
@@ -187,7 +187,7 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 		return getBoxType( type );
 	}
 
-	public Collection<AxisAlignedBB> getBoxes(
+	public Collection<AABB> getBoxes(
 			final BoxType type )
 	{
 		switch ( type )
@@ -206,10 +206,10 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 		return Collections.emptyList();
 	}
 
-	private AxisAlignedBB[] generateBoxes(
+	private AABB[] generateBoxes(
 			final VoxelBlob blob )
 	{
-		final List<AxisAlignedBB> cache = new ArrayList<AxisAlignedBB>();
+		final List<AABB> cache = new ArrayList<AABB>();
 		final BitOcclusionIterator boi = new BitOcclusionIterator( cache );
 
 		while ( boi.hasNext() )
@@ -224,7 +224,7 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 			}
 		}
 
-		return cache.toArray( new AxisAlignedBB[cache.size()] );
+		return cache.toArray( new AABB[cache.size()] );
 	}
 
 	// cache the format after reading it once.
@@ -246,7 +246,7 @@ public final class VoxelBlobStateInstance implements Comparable<VoxelBlobStateIn
 					final byte[] peekBytes = new byte[5];
 					arrayPeek.read( peekBytes );
 
-					final PacketBuffer header = new PacketBuffer( Unpooled.wrappedBuffer( peekBytes ) );
+					final FriendlyByteBuf header = new FriendlyByteBuf( Unpooled.wrappedBuffer( peekBytes ) );
 					format = header.readInt();
 				}
 				catch ( final IOException e )

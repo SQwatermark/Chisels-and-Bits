@@ -5,8 +5,8 @@ import javax.annotation.Nullable;
 import mod.chiselsandbits.api.IBitBrush;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
 
 public class BitBrush implements IBitBrush
 {

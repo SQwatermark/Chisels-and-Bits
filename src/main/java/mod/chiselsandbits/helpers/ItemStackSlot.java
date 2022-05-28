@@ -2,12 +2,12 @@ package mod.chiselsandbits.helpers;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemStackSlot implements IItemInInventory
 {
-	private final IInventory inv;
+	private final Container inv;
 	private final int slot;
 	private @Nonnull ItemStack stack;
 	private final @Nonnull ItemStack originalStack;
@@ -16,7 +16,7 @@ public class ItemStackSlot implements IItemInInventory
 	private final int toolSlot;
 
 	ItemStackSlot(
-			final IInventory i,
+			final Container i,
 			final int s,
 			final @Nonnull ItemStack st,
 			final ActingPlayer player,
@@ -50,7 +50,7 @@ public class ItemStackSlot implements IItemInInventory
 		if ( ModUtil.getStackSize( stack ) <= 0 )
 		{
 			who.playerDestroyItem( stack, who.getHand() );
-			inv.setInventorySlotContents( slot, ModUtil.getEmptyStack() );
+			inv.setItem( slot, ModUtil.getEmptyStack() );
 		}
 	}
 
@@ -67,7 +67,7 @@ public class ItemStackSlot implements IItemInInventory
 			ModUtil.adjustStackSize( stack, -1 );
 			if ( ModUtil.getStackSize( stack ) <= 0 )
 			{
-				inv.setInventorySlotContents( slot, ModUtil.getEmptyStack() );
+				inv.setItem( slot, ModUtil.getEmptyStack() );
 			}
 
 			return true;
@@ -85,9 +85,9 @@ public class ItemStackSlot implements IItemInInventory
 	@Override
 	public void swapWithWeapon()
 	{
-		final ItemStack it = inv.getStackInSlot( toolSlot );
-		inv.setInventorySlotContents( toolSlot, inv.getStackInSlot( slot ) );
-		inv.setInventorySlotContents( slot, it );
+		final ItemStack it = inv.getItem( toolSlot );
+		inv.setItem( toolSlot, inv.getItem( slot ) );
+		inv.setItem( slot, it );
 	}
 
 	@Override
@@ -100,6 +100,6 @@ public class ItemStackSlot implements IItemInInventory
 			final @Nonnull ItemStack restockItem )
 	{
 		stack = restockItem;
-		inv.setInventorySlotContents( slot, restockItem );
+		inv.setItem( slot, restockItem );
 	}
 }

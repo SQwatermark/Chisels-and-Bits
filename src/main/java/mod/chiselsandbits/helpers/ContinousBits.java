@@ -8,11 +8,11 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -29,16 +29,16 @@ public class ContinousBits implements IContinuousInventory
 			final int stateID )
 	{
         this.stateID = stateID;
-		final IInventory inv = src.getInventory();
+		final Container inv = src.getInventory();
 
 		// test can edit...
         final boolean canEdit = src.canPlayerManipulate(pos, Direction.UP, new ItemStack(ModItems.ITEM_CHISEL_DIAMOND.get(), 1), true);
 
 		ItemStackSlot handSlot = null;
 
-		for ( int zz = 0; zz < inv.getSizeInventory(); zz++ )
+		for ( int zz = 0; zz < inv.getContainerSize(); zz++ )
 		{
-			final ItemStack which = inv.getStackInSlot( zz );
+			final ItemStack which = inv.getItem( zz );
 			if ( which != null && which.getItem() != null )
 			{
 				Item i = which.getItem();

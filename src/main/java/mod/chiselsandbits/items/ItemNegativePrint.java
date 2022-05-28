@@ -9,7 +9,7 @@ import mod.chiselsandbits.api.IBitAccess;
 import mod.chiselsandbits.api.VoxelStats;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
-import mod.chiselsandbits.chiseledblock.TileEntityBlockChiseled;
+import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
@@ -26,25 +26,25 @@ import mod.chiselsandbits.network.packets.PacketRotateVoxelBlob;
 import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.render.helpers.SimpleInstanceCache;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -59,34 +59,34 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 	@OnlyIn( Dist.CLIENT )
 	protected void defaultAddInfo(
 			final ItemStack stack,
-			final World worldIn,
-			final List<ITextComponent> tooltip,
-			final ITooltipFlag advanced )
+			final Level worldIn,
+			final List<Component> tooltip,
+			final TooltipFlag advanced )
 	{
-		super.addInformation( stack, worldIn, tooltip, advanced );
+		super.appendHoverText( stack, worldIn, tooltip, advanced );
 	}
 
 	// add info cached info
-	SimpleInstanceCache<ItemStack, List<ITextComponent>> toolTipCache = new SimpleInstanceCache<>(null, new ArrayList<>());
+	SimpleInstanceCache<ItemStack, List<Component>> toolTipCache = new SimpleInstanceCache<>(null, new ArrayList<>());
 
 	@Override
 	@OnlyIn( Dist.CLIENT )
-	public void addInformation(
+	public void appendHoverText(
 			final ItemStack stack,
-			final World worldIn,
-			final List<ITextComponent> tooltip,
-			final ITooltipFlag advanced )
+			final Level worldIn,
+			final List<Component> tooltip,
+			final TooltipFlag advanced )
 	{
 		defaultAddInfo( stack, worldIn, tooltip, advanced );
 		ChiselsAndBits.getConfig().getCommon().helpText( LocalStrings.HelpNegativePrint, tooltip,
-				ClientSide.instance.getKeyName( Minecraft.getInstance().gameSettings.keyBindUseItem ),
-				ClientSide.instance.getKeyName( Minecraft.getInstance().gameSettings.keyBindUseItem ) );
+				ClientSide.instance.getKeyName( Minecraft.getInstance().options.keyUse ),
+				ClientSide.instance.getKeyName( Minecraft.getInstance().options.keyUse ) );
 
 		if ( isWritten( stack ) )
 		{
 			if ( ClientSide.instance.holdingShift() )
 			{
-				final List<ITextComponent> details = toolTipCache.getCached();
+				final List<Component> details = toolTipCache.getCached();
 
 				if ( toolTipCache.needsUpdate( stack ) )
 				{
@@ -99,12 +99,12 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 
 					if ( solid > 0 )
 					{
-                        details.add( new StringTextComponent(Integer.valueOf(solid).toString()).appendString(" ").append(new StringTextComponent(LocalStrings.Filled.getLocal()) ));
+                        details.add( new TextComponent(Integer.valueOf(solid).toString()).append(" ").append(new TextComponent(LocalStrings.Filled.getLocal()) ));
 					}
 
 					if ( air > 0 )
 					{
-						details.add( new StringTextComponent(Integer.valueOf(air).toString()).appendString(" ").append(new StringTextComponent(LocalStrings.Empty.getLocal()) ));
+						details.add( new TextComponent(Integer.valueOf(air).toString()).append(" ").append(new TextComponent(LocalStrings.Empty.getLocal()) ));
 					}
 				}
 
@@ -112,7 +112,7 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 			}
 			else
 			{
-				tooltip.add( new StringTextComponent(LocalStrings.ShiftDetails.getLocal()) );
+				tooltip.add( new TextComponent(LocalStrings.ShiftDetails.getLocal()) );
 			}
 		}
 	}
@@ -139,30 +139,30 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
     }
 
     @Override
-    public ActionResultType onItemUse(final ItemUseContext context)
+    public InteractionResult useOn(final UseOnContext context)
     {
-        final PlayerEntity player = context.getPlayer();
-        final Hand hand = context.getHand();
-        final World world = context.getWorld();
-        final BlockPos pos = context.getPos();
-        final Direction side = context.getFace();
+        final Player player = context.getPlayer();
+        final InteractionHand hand = context.getHand();
+        final Level world = context.getLevel();
+        final BlockPos pos = context.getClickedPos();
+        final Direction side = context.getClickedFace();
 
-        final ItemStack stack = player.getHeldItem( hand );
+        final ItemStack stack = player.getItemInHand( hand );
         final BlockState blkstate = world.getBlockState( pos );
 
         if ( ItemChiseledBit.checkRequiredSpace( player, blkstate ) )
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        if ( !player.canPlayerEdit( pos, side, stack ) || !world.isBlockModifiable( player, pos ) )
+        if ( !player.mayUseItemAt( pos, side, stack ) || !world.mayInteract( player, pos ) )
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
 
         if ( !isWritten( stack ) )
         {
-            final CompoundNBT comp = getCompoundFromBlock( world, pos, player );
+            final CompoundTag comp = getCompoundFromBlock( world, pos, player );
             if ( comp != null )
             {
                 final int count = stack.getCount();
@@ -174,28 +174,28 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
                 );
                 newStack.setTag(comp);
 
-                ItemEntity itementity = player.dropItem(newStack, false);
+                ItemEntity itementity = player.drop(newStack, false);
                 if (itementity != null) {
-                    itementity.setNoPickupDelay();
-                    itementity.setOwnerId(player.getUniqueID());
+                    itementity.setNoPickUpDelay();
+                    itementity.setOwner(player.getUUID());
                 }
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
 
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        final TileEntityBlockChiseled te = ModUtil.getChiseledTileEntity( world, pos, false );
+        final BlockEntityChiseledBlock te = ModUtil.getChiseledTileEntity( world, pos, false );
         if ( te != null )
         {
             // we can do this!
         }
         else if ( !BlockChiseled.replaceWithChiseled( world, pos, blkstate, true ) )
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        final TileEntityBlockChiseled tec = ModUtil.getChiseledTileEntity( world, pos, true );
+        final BlockEntityChiseledBlock tec = ModUtil.getChiseledTileEntity( world, pos, true );
         if ( tec != null )
         {
             final VoxelBlob vb = tec.getBlob();
@@ -205,10 +205,10 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
             applyPrint( stack, world, pos, side, vb, pattern, player, hand );
 
             tec.completeEditOperation( vb );
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 
 	protected boolean convertToStone()
@@ -216,25 +216,25 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 		return true;
 	}
 
-	protected CompoundNBT getCompoundFromBlock(
-			final World world,
+	protected CompoundTag getCompoundFromBlock(
+			final Level world,
 			final BlockPos pos,
-			final PlayerEntity player )
+			final Player player )
 	{
 
-		final TileEntityBlockChiseled te = ModUtil.getChiseledTileEntity( world, pos, false );
+		final BlockEntityChiseledBlock te = ModUtil.getChiseledTileEntity( world, pos, false );
 		if ( te != null )
 		{
-			final CompoundNBT comp = new CompoundNBT();
+			final CompoundTag comp = new CompoundTag();
 			te.writeChiselData( comp );
 
 			if ( convertToStone() )
 			{
-				final TileEntityBlockChiseled tmp = new TileEntityBlockChiseled();
+				final BlockEntityChiseledBlock tmp = new BlockEntityChiseledBlock(pos, world.getBlockState(pos));
 				tmp.readChiselData( comp );
 
 				final VoxelBlob bestBlob = tmp.getBlob();
-				bestBlob.binaryReplacement( 0, ModUtil.getStateId( Blocks.STONE.getDefaultState() ) );
+				bestBlob.binaryReplacement( 0, ModUtil.getStateId( Blocks.STONE.defaultBlockState() ) );
 
 				tmp.setBlob( bestBlob );
 				tmp.writeChiselData( comp );
@@ -257,7 +257,7 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 			return null;
 		}
 
-		final CompoundNBT tag = ModUtil.getTagCompound( stack );
+		final CompoundTag tag = ModUtil.getTagCompound( stack );
 
 		// Detect and provide full blocks if pattern solid full and solid.
 		final NBTBlobConverter conv = new NBTBlobConverter();
@@ -281,19 +281,19 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 		final BlockState state = conv.getPrimaryBlockState();
 		final ItemStack itemstack = new ItemStack(ModBlocks.convertGivenStateToChiseledBlock(state), 1 );
 
-		itemstack.setTagInfo( ModUtil.NBT_BLOCKENTITYTAG, tag );
+		itemstack.addTagElement( ModUtil.NBT_BLOCKENTITYTAG, tag );
 		return itemstack;
 	}
 
 	protected void applyPrint(
 			@Nonnull final ItemStack stack,
-			@Nonnull final World world,
+			@Nonnull final Level world,
 			@Nonnull final BlockPos pos,
 			@Nonnull final Direction side,
 			@Nonnull final VoxelBlob vb,
 			@Nonnull final VoxelBlob pattern,
-			@Nonnull final PlayerEntity who,
-			@Nonnull final Hand hand )
+			@Nonnull final Player who,
+			@Nonnull final InteractionHand hand )
 	{
 		// snag a tool...
 		final ActingPlayer player = ActingPlayer.actingAs( who, hand );
@@ -326,7 +326,7 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 
 	@Override
 	public void scroll(
-			final PlayerEntity player,
+			final Player player,
 			final ItemStack stack,
 			final int dwheel )
 	{
@@ -352,12 +352,12 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 			switch ( rotation )
 			{
 				case CLOCKWISE_180:
-					side = side.rotateY();
+					side = side.getClockWise();
 				case CLOCKWISE_90:
-					side = side.rotateY();
+					side = side.getClockWise();
 					break;
 				case COUNTERCLOCKWISE_90:
-					side = side.rotateYCCW();
+					side = side.getCounterClockWise();
 					break;
 				default:
 				case NONE:

@@ -4,12 +4,12 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.client.model.baked.BaseBakedItemModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 public class PrintBaked extends BaseBakedItemModel
 {
@@ -24,9 +24,9 @@ public class PrintBaked extends BaseBakedItemModel
 		itemName = itname;
 
 		final ItemStack blockItem = item.getPatternedItem( stack, false );
-		IBakedModel model = Minecraft.getInstance().getItemRenderer().getItemModelMesher().getItemModel( blockItem );
+		BakedModel model = Minecraft.getInstance().getItemRenderer().getItemModelShaper().getItemModel( blockItem );
 
-		model = model.getOverrides().getOverrideModel( model, blockItem, null, null );
+		model = model.getOverrides().resolve( model, blockItem, null, null, 0 );
 
 		for ( final Direction face : Direction.values() )
 		{
@@ -37,14 +37,14 @@ public class PrintBaked extends BaseBakedItemModel
 	}
 
     @Override
-    public boolean isSideLit()
+    public boolean usesBlockLight()
     {
         return false;
     }
 
     @Override
-	public TextureAtlasSprite getParticleTexture()
+	public TextureAtlasSprite getParticleIcon()
 	{
-		return Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply( new ResourceLocation(ChiselsAndBits.MODID,"item/" + itemName ));
+		return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply( new ResourceLocation(ChiselsAndBits.MODID,"item/" + itemName ));
 	}
 }

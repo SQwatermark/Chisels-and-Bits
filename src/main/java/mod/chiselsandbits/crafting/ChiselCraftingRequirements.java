@@ -9,8 +9,8 @@ import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 class ChiselCraftingRequirements
 {
@@ -24,22 +24,22 @@ class ChiselCraftingRequirements
 	private final ArrayList<BagInventory> bags = new ArrayList<BagInventory>();
 
 	public ChiselCraftingRequirements(
-			final IInventory inv,
+			final Container inv,
 			final ItemStack inPattern,
 			final boolean copy )
 	{
-		pile = new ItemStack[inv.getSizeInventory()];
+		pile = new ItemStack[inv.getContainerSize()];
 		pattern = inPattern;
 
-		for ( int x = 0; x < inv.getSizeInventory(); x++ )
+		for ( int x = 0; x < inv.getContainerSize(); x++ )
 		{
-			final ItemStack is = inv.getStackInSlot( x );
+			final ItemStack is = inv.getItem( x );
 			pile[x] = is;
 
 			if ( !copy )
 			{
 				// if we are not copying.. then we remove it...
-				inv.setInventorySlotContents( x, ModUtil.getEmptyStack() );
+				inv.setItem( x, ModUtil.getEmptyStack() );
 			}
 
 			if ( is == null )

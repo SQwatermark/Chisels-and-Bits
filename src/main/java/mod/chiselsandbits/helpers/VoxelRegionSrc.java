@@ -4,8 +4,8 @@ import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.api.BitAccess;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public class VoxelRegionSrc implements IVoxelSrc
 {
@@ -21,7 +21,7 @@ public class VoxelRegionSrc implements IVoxelSrc
 	final VoxelBlob blobs[];
 
 	private VoxelRegionSrc(
-			final World src,
+			final Level src,
 			final BlockPos min,
 			final BlockPos max,
 			final BlockPos actingCenter )
@@ -59,11 +59,11 @@ public class VoxelRegionSrc implements IVoxelSrc
 	}
 
 	public VoxelRegionSrc(
-			final World theWorld,
+			final Level theWorld,
 			final BlockPos blockPos,
 			final int range )
 	{
-		this( theWorld, blockPos.add( -range, -range, -range ), blockPos.add( range, range, range ), blockPos );
+		this( theWorld, blockPos.offset( -range, -range, -range ), blockPos.offset( range, range, range ), blockPos );
 	}
 
 	@Override

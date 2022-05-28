@@ -9,22 +9,22 @@ import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.render.chiseledblock.ChiselRenderType;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockBakedModel;
 import mod.chiselsandbits.render.helpers.ModelQuadLayer.ModelQuadLayerBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.ResourceLocation;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -70,16 +70,16 @@ public class ModelUtil implements ICacheClearable
 			return mpc;
 		}
 
-		final RenderType original = net.minecraftforge.client.MinecraftForgeClient.getRenderLayer();
+		final RenderType original = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
 		try
 		{
-			ForgeHooksClient.setRenderLayer( layer );
+			ForgeHooksClient.setRenderType( layer );
 			return getInnerCachedFace( cacheVal, stateID, weight, face, layer );
 		}
 		finally
 		{
 			// restore previous layer.
-			ForgeHooksClient.setRenderLayer( original );
+			ForgeHooksClient.setRenderType( original );
 		}
 	}
 
@@ -91,7 +91,7 @@ public class ModelUtil implements ICacheClearable
 			final RenderType layer )
 	{
 		final BlockState state = ModUtil.getStateById( stateID );
-		final IBakedModel model = ModelUtil.solveModel( state, weight, Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel( state ), layer );
+		final BakedModel model = ModelUtil.solveModel( state, weight, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel( state ), layer );
 		final int lv = ChiselsAndBits.getConfig().getClient().useGetLightValue.get() ? DeprecationHelper.getLightValue( state ) : 0;
 
 		final Fluid fluid = BlockBitInfo.getFluidFromBlock( state.getBlock() );
@@ -111,17 +111,17 @@ public class ModelUtil implements ICacheClearable
 
 				if ( xf.getAxis() == Axis.Y )
 				{
-					mp[0].sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(fluid.getAttributes().getStillTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getStillTexture());
 					mp[0].uvs = new float[] { Uf, Vf, 0, Vf, Uf, 0, 0, 0 };
 				}
 				else if ( xf.getAxis() == Axis.X )
 				{
-					mp[0].sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(fluid.getAttributes().getFlowingTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getFlowingTexture());
 					mp[0].uvs = new float[] { U, 0, U, V, 0, 0, 0, V };
 				}
 				else
 				{
-					mp[0].sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(fluid.getAttributes().getFlowingTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getFlowingTexture());
 					mp[0].uvs = new float[] { U, 0, 0, 0, U, V, 0, V };
 				}
 
@@ -171,7 +171,7 @@ public class ModelUtil implements ICacheClearable
 	}
 
 	private static List<BakedQuad> getModelQuads(
-			final IBakedModel model,
+			final BakedModel model,
 			final BlockState state,
 			final Direction f,
 			final Random rand )
@@ -199,7 +199,7 @@ public class ModelUtil implements ICacheClearable
 		final ItemStack is = ModUtil.getItemStackFromBlockState( state );
 		if ( !ModUtil.isEmpty( is ) )
 		{
-			final IBakedModel secondModel = getOverrides( model ).getOverrideModel( model, is, Minecraft.getInstance().world, Minecraft.getInstance().player );
+			final BakedModel secondModel = getOverrides( model ).resolve( model, is, Minecraft.getInstance().level, Minecraft.getInstance().player, 0 );
 
 			if ( secondModel != null )
 			{
@@ -218,15 +218,15 @@ public class ModelUtil implements ICacheClearable
 		return Collections.emptyList();
 	}
 
-	private static ItemOverrideList getOverrides(
-			final IBakedModel model )
+	private static ItemOverrides getOverrides(
+			final BakedModel model )
 	{
 		if ( model != null )
 		{
-			final ItemOverrideList modelOverrides = model.getOverrides();
-			return modelOverrides == null ? ItemOverrideList.EMPTY : modelOverrides;
+			final ItemOverrides modelOverrides = model.getOverrides();
+			return modelOverrides == null ? ItemOverrides.EMPTY : modelOverrides;
 		}
-		return ItemOverrideList.EMPTY;
+		return ItemOverrides.EMPTY;
 	}
 
 	private static void processFaces(
@@ -236,7 +236,7 @@ public class ModelUtil implements ICacheClearable
 	{
 		for ( final BakedQuad q : quads )
 		{
-			final Direction face = q.getFace();
+			final Direction face = q.getDirection();
 
 			if ( face == null )
 			{
@@ -289,7 +289,7 @@ public class ModelUtil implements ICacheClearable
 				if ( ChiselsAndBits.getConfig().getClient().enableFaceLightmapExtraction.get() )
 				{
 				    //TODO: Check if this works.
-					b.lv.setVertexFormat(DefaultVertexFormats.BLOCK);
+					b.lv.setVertexFormat(DefaultVertexFormat.BLOCK);
 					q.pipe( b.lv );
 				}
 			}
@@ -309,15 +309,15 @@ public class ModelUtil implements ICacheClearable
 			final BakedQuad q,
 			final BlockState state ) throws IllegalArgumentException, IllegalAccessException, NullPointerException
 	{
-	    if (q.sprite == null)
-	        return Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("missingno"));
-		return q.sprite;
+	    if (q.getSprite() == null)
+	        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("missingno"));
+		return q.getSprite();
 	}
 
-	public static IBakedModel solveModel(
+	public static BakedModel solveModel(
 			final BlockState state,
 			final Random weight,
-			final IBakedModel originalModel,
+			final BakedModel originalModel,
 			final RenderType layer )
 	{
 		boolean hasFaces = false;
@@ -343,7 +343,7 @@ public class ModelUtil implements ICacheClearable
 			final ItemStack is = ModUtil.getItemStackFromBlockState( state );
 			if ( !ModUtil.isEmpty( is ) )
 			{
-				final IBakedModel itemModel = Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides( is, Minecraft.getInstance().world, Minecraft.getInstance().player);
+				final BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel( is, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
 				try
 				{
@@ -366,7 +366,7 @@ public class ModelUtil implements ICacheClearable
 				}
 				else
 				{
-					return new SimpleGeneratedModel( findTexture( Block.getStateId( state ), originalModel, Direction.UP, layer, weight ) );
+					return new SimpleGeneratedModel( findTexture( Block.getId( state ), originalModel, Direction.UP, layer, weight ) );
 				}
 			}
 		}
@@ -375,7 +375,7 @@ public class ModelUtil implements ICacheClearable
 	}
 
 	private static boolean hasFaces(
-			final IBakedModel model,
+			final BakedModel model,
 			final BlockState state,
 			final Direction f,
 			final Random weight )
@@ -409,12 +409,12 @@ public class ModelUtil implements ICacheClearable
 	private static boolean isMissing(
 			final TextureAtlasSprite texture )
 	{
-		return texture == null || texture == Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("missingno"));
+		return texture == null || texture == Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("missingno"));
 	}
 
 	public static TextureAtlasSprite findTexture(
 			final int BlockRef,
-			final IBakedModel model,
+			final BakedModel model,
 			final Direction myFace,
 			final RenderType layer,
             final Random random)
@@ -423,7 +423,7 @@ public class ModelUtil implements ICacheClearable
 		if ( blockToTexture.getOrDefault(Pair.of(layer, myFace), Maps.newHashMap()).containsKey( BlockRef ) )
 		{
 			final String textureName = blockToTexture.get(Pair.of(layer, myFace)).get( BlockRef );
-			return Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation(textureName));
+			return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation(textureName));
 		}
 
 		TextureAtlasSprite texture = null;
@@ -457,7 +457,7 @@ public class ModelUtil implements ICacheClearable
 			{
 				if ( model != null )
 				{
-					texture = model.getParticleTexture();
+					texture = model.getParticleIcon();
 				}
 			}
 			catch ( final Exception err )
@@ -469,7 +469,7 @@ public class ModelUtil implements ICacheClearable
 		{
 			try
 			{
-				texture = Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getTexture( state );
+				texture = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon( state );
 			}
 			catch ( final Exception err )
 			{
@@ -478,7 +478,7 @@ public class ModelUtil implements ICacheClearable
 
 		if ( texture == null )
 		{
-			texture = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("missingno"));
+			texture = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("missingno"));
 		}
 
 		blockToTexture.remove(Pair.of(layer, myFace), null);
@@ -494,7 +494,7 @@ public class ModelUtil implements ICacheClearable
 	{
 		for ( final BakedQuad q : faceQuads )
 		{
-			if ( q.getFace() == myFace )
+			if ( q.getDirection() == myFace )
 			{
 				texture = findQuadTexture( q, null );
 			}
@@ -539,7 +539,7 @@ public class ModelUtil implements ICacheClearable
 		if ( out == null )
 		{
 			final BlockState state = ModUtil.getStateById( blockStateID );
-			final IBakedModel model = ModelUtil.solveModel( state, random, Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel( ModUtil.getStateById( blockStateID ) ), layer.layer );
+			final BakedModel model = ModelUtil.solveModel( state, random, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel( ModUtil.getStateById( blockStateID ) ), layer.layer );
 
 			if ( model != null )
 			{

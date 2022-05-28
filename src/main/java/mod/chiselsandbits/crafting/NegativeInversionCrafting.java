@@ -7,17 +7,17 @@ import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemNegativePrint;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.block.Blocks;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
-public class NegativeInversionCrafting extends SpecialRecipe
+public class NegativeInversionCrafting extends CustomRecipe
 {
 
 	public NegativeInversionCrafting(
@@ -28,22 +28,22 @@ public class NegativeInversionCrafting extends SpecialRecipe
 
 	@Override
 	public boolean matches(
-			final CraftingInventory craftingInv,
-			final World worldIn )
+			final CraftingContainer craftingInv,
+			final Level worldIn )
 	{
 		return analzyeCraftingInventory( craftingInv, true ) != null;
 	}
 
 	public ItemStack analzyeCraftingInventory(
-			final CraftingInventory craftingInv,
+			final CraftingContainer craftingInv,
 			final boolean generatePattern )
 	{
 		ItemStack targetA = null;
 		ItemStack targetB = null;
 
-		for ( int x = 0; x < craftingInv.getSizeInventory(); x++ )
+		for ( int x = 0; x < craftingInv.getContainerSize(); x++ )
 		{
-			final ItemStack f = craftingInv.getStackInSlot( x );
+			final ItemStack f = craftingInv.getItem( x );
 			if ( f.isEmpty() )
 			{
 				continue;
@@ -87,11 +87,11 @@ public class NegativeInversionCrafting extends SpecialRecipe
 			tmp.readChisleData( targetA.getTag(), VoxelBlob.VERSION_ANY );
 
 			final VoxelBlob bestBlob = tmp.getBlob();
-			bestBlob.binaryReplacement( ModUtil.getStateId( Blocks.STONE.getDefaultState() ), 0 );
+			bestBlob.binaryReplacement( ModUtil.getStateId( Blocks.STONE.defaultBlockState() ), 0 );
 
 			tmp.setBlob( bestBlob );
 
-			final CompoundNBT comp = ModUtil.getTagCompound( targetA ).copy();
+			final CompoundTag comp = ModUtil.getTagCompound( targetA ).copy();
 			tmp.writeChisleData( comp, false );
 
 			final ItemStack outputPattern = new ItemStack( targetA.getItem() );
@@ -104,14 +104,14 @@ public class NegativeInversionCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public ItemStack getCraftingResult(
-			final CraftingInventory craftingInv )
+	public ItemStack assemble(
+			final CraftingContainer craftingInv )
 	{
 		return analzyeCraftingInventory( craftingInv, false );
 	}
 
 	@Override
-	public boolean canFit(
+	public boolean canCraftInDimensions(
 			final int width,
 			final int height )
 	{
@@ -119,20 +119,20 @@ public class NegativeInversionCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public ItemStack getRecipeOutput()
+	public ItemStack getResultItem()
 	{
 		return ModUtil.getEmptyStack(); // nope
 	}
 
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(
-			final CraftingInventory craftingInv )
+			final CraftingContainer craftingInv )
 	{
-		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( craftingInv.getSizeInventory(), ItemStack.EMPTY );
+		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( craftingInv.getContainerSize(), ItemStack.EMPTY );
 
 		for ( int i = 0; i < aitemstack.size(); ++i )
 		{
-			final ItemStack itemstack = craftingInv.getStackInSlot( i );
+			final ItemStack itemstack = craftingInv.getItem( i );
 			if ( itemstack != null && itemstack.getItem() == ModItems.ITEM_NEGATIVE_PRINT_WRITTEN.get() && itemstack.hasTag() )
 			{
 				ModUtil.adjustStackSize( itemstack, 1 );
@@ -143,7 +143,7 @@ public class NegativeInversionCrafting extends SpecialRecipe
 	}
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.NEGATIVE_INVERSION_CRAFTING.get();
     }

@@ -7,13 +7,13 @@ import mod.chiselsandbits.registry.ModTags;
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.advancements.criterion.*;
+import net.minecraft.advancements.critereon.*;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.util.function.Consumer;
 
@@ -21,87 +21,83 @@ import java.util.function.Consumer;
 public class ChiselsAndBitsAdvancementGenerator extends AbstractAdvancementGenerator
 {
     @SubscribeEvent
-    public static void dataGeneratorSetup(final GatherDataEvent event)
-    {
+    public static void dataGeneratorSetup(final GatherDataEvent event) {
         event.getGenerator().addProvider(new ChiselsAndBitsAdvancementGenerator(event.getGenerator()));
     }
 
-    private ChiselsAndBitsAdvancementGenerator(
-      final DataGenerator generator)
-    {
+    private ChiselsAndBitsAdvancementGenerator(final DataGenerator generator) {
         super(generator, ChiselsAndBitsAdvancementGenerator::build);
     }
 
-    private static void build(Consumer<Advancement> register)
-    {
-        Advancement root = Advancement.Builder.builder()
-                                    .withDisplay(ModItems.ITEM_CHISEL_DIAMOND.get(),
-                                      new TranslationTextComponent("mod.chiselsandbits.advancements.root.title"),
-                                      new TranslationTextComponent("mod.chiselsandbits.advancements.root.description"),
-                                      new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
-                                      FrameType.CHALLENGE,
-                                      true,
-                                      true,
-                                      true)
-                                    .withCriterion("chisel", InventoryChangeTrigger.Instance.forItems(new ItemPredicate(
-                                      ModTags.Items.CHISEL,
-                                      null,
-                                      MinMaxBounds.IntBound.UNBOUNDED,
-                                      MinMaxBounds.IntBound.UNBOUNDED,
-                                      new EnchantmentPredicate[0],
-                                      new EnchantmentPredicate[0],
-                                      null,
-                                      NBTPredicate.ANY
-                                    )))
-                                    .register(register, Constants.MOD_ID + ":chiselsandbits/root");
+    private static void build(Consumer<Advancement> register) {
+        Advancement root = Advancement.Builder.advancement()
+                .display(ModItems.ITEM_CHISEL_DIAMOND.get(),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.root.title"),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.root.description"),
+                        new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+                        FrameType.CHALLENGE,
+                        true,
+                        true,
+                        true)
+                .addCriterion("chisel", InventoryChangeTrigger.TriggerInstance.hasItems(new ItemPredicate(
+                        ModTags.Items.CHISEL,
+                        null,
+                        MinMaxBounds.Ints.ANY,
+                        MinMaxBounds.Ints.ANY,
+                        new EnchantmentPredicate[0],
+                        new EnchantmentPredicate[0],
+                        null,
+                        NbtPredicate.ANY
+                )))
+                .save(register, Constants.MOD_ID + ":chiselsandbits/root");
 
-        Advancement findChiselables = Advancement.Builder.builder()
-                                        .withParent(root)
-                                          .withDisplay(ModItems.ITEM_MAGNIFYING_GLASS.get(),
-                                            new TranslationTextComponent("mod.chiselsandbits.advancements.find-chiselables.title"),
-                                            new TranslationTextComponent("mod.chiselsandbits.advancements.find-chiselables.description"),
-                                            new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
-                                            FrameType.TASK,
-                                            true,
-                                            true,
-                                            true)
-                                          .withCriterion("magnifier_glass", InventoryChangeTrigger.Instance.forItems(ModItems.ITEM_MAGNIFYING_GLASS.get()))
-                                          .register(register, Constants.MOD_ID + ":chiselsandbits/find_chiselables");
+        Advancement findChiselables = Advancement.Builder.advancement()
+                .parent(root)
+                .display(ModItems.ITEM_MAGNIFYING_GLASS.get(),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.find-chiselables.title"),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.find-chiselables.description"),
+                        new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+                        FrameType.TASK,
+                        true,
+                        true,
+                        true)
+                .addCriterion("magnifier_glass", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.ITEM_MAGNIFYING_GLASS.get()))
+                .save(register, Constants.MOD_ID + ":chiselsandbits/find_chiselables");
 
-        Advancement collectBits = Advancement.Builder.builder()
-                                          .withParent(root)
-                                          .withDisplay(ModItems.ITEM_BIT_BAG_DEFAULT.get(),
-                                            new TranslationTextComponent("mod.chiselsandbits.advancements.collect-bits.title"),
-                                            new TranslationTextComponent("mod.chiselsandbits.advancements.collect-bits.description"),
-                                            new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
-                                            FrameType.TASK,
-                                            true,
-                                            true,
-                                            true)
-                                          .withCriterion("bit_bag", InventoryChangeTrigger.Instance.forItems(new ItemPredicate(
-                                            ModTags.Items.BIT_BAG,
-                                            null,
-                                            MinMaxBounds.IntBound.UNBOUNDED,
-                                            MinMaxBounds.IntBound.UNBOUNDED,
-                                            new EnchantmentPredicate[0],
-                                            new EnchantmentPredicate[0],
-                                            null,
-                                            NBTPredicate.ANY
-                                          )))
-                                          .register(register, Constants.MOD_ID + ":chiselsandbits/collect_bits");
+        Advancement collectBits = Advancement.Builder.advancement()
+                .parent(root)
+                .display(ModItems.ITEM_BIT_BAG_DEFAULT.get(),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.collect-bits.title"),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.collect-bits.description"),
+                        new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+                        FrameType.TASK,
+                        true,
+                        true,
+                        true)
+                .addCriterion("bit_bag", InventoryChangeTrigger.TriggerInstance.hasItems(new ItemPredicate(
+                        ModTags.Items.BIT_BAG,
+                        null,
+                        MinMaxBounds.Ints.ANY,
+                        MinMaxBounds.Ints.ANY,
+                        new EnchantmentPredicate[0],
+                        new EnchantmentPredicate[0],
+                        null,
+                        NbtPredicate.ANY
+                )))
+                .save(register, Constants.MOD_ID + ":chiselsandbits/collect_bits");
 
-        Advancement makeTank = Advancement.Builder.builder()
-                                    .withParent(root)
-                                    .withDisplay(ModBlocks.BIT_STORAGE_BLOCK_ITEM.get(),
-                                      new TranslationTextComponent("mod.chiselsandbits.advancements.make-tank.title"),
-                                      new TranslationTextComponent("mod.chiselsandbits.advancements.make-tank.description"),
-                                      new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
-                                      FrameType.TASK,
-                                      true,
-                                      true,
-                                      true)
-                                    .withCriterion("bit_tank", InventoryChangeTrigger.Instance.forItems(ModBlocks.BIT_STORAGE_BLOCK_ITEM.get()))
-                                    .register(register, Constants.MOD_ID + ":chiselsandbits/make_tank");
+        Advancement makeTank = Advancement.Builder.advancement()
+                .parent(root)
+                .display(ModBlocks.BIT_STORAGE_BLOCK_ITEM.get(),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.make-tank.title"),
+                        new TranslatableComponent("mod.chiselsandbits.advancements.make-tank.description"),
+                        new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+                        FrameType.TASK,
+                        true,
+                        true,
+                        true)
+                .addCriterion("bit_tank", InventoryChangeTrigger.TriggerInstance.hasItems(ModBlocks.BIT_STORAGE_BLOCK_ITEM.get()))
+                .save(register, Constants.MOD_ID + ":chiselsandbits/make_tank");
     }
 
     @Override

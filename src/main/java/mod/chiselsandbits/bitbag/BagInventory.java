@@ -14,509 +14,434 @@ import mod.chiselsandbits.helpers.LocalStrings;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-public class BagInventory implements IInventory
-{
+public class BagInventory implements Container {
 
-	// internal storage, the capability.
-	BagStorage inv;
+    // internal storage, the capability.
+    BagStorage inv;
 
-	// tmp storage, the IInventory
-	ItemStack[] stackSlots;
+    // tmp storage, the IInventory
+    ItemStack[] stackSlots;
 
-	public BagInventory(
-			final ItemStack is )
-	{
-		inv = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY != null ? (BagStorage) is.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
-                                                                                     .orElseThrow(() -> new IllegalStateException("Failed to get IItemHandler from Bag!")) : null;
-		stackSlots = new ItemStack[BagStorage.BAG_STORAGE_SLOTS];
+    public BagInventory(final ItemStack is) {
+        inv = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY != null ? (BagStorage) is.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
+                .orElseThrow(() -> new IllegalStateException("Failed to get IItemHandler from Bag!")) : null;
+        stackSlots = new ItemStack[BagStorage.BAG_STORAGE_SLOTS];
 
-		// the cap is missing? then just make and load it ourselves.
-		if ( inv == null )
-		{
-			inv = new BagStorage();
-			inv.stack = is;
-			inv.setStorage( BagCapabilityProvider.getStorageArray( is, BagStorage.BAG_STORAGE_SLOTS * ItemBitBag.INTS_PER_BIT_TYPE ) );
-		}
+        // the cap is missing? then just make and load it ourselves.
+        if (inv == null) {
+            inv = new BagStorage();
+            inv.stack = is;
+            inv.setStorage(BagCapabilityProvider.getStorageArray(is, BagStorage.BAG_STORAGE_SLOTS * ItemBitBag.INTS_PER_BIT_TYPE));
+        }
 
-		for ( int x = 0; x < stackSlots.length; ++x )
-		{
-			stackSlots[x] = ModUtil.getEmptyStack();
-		}
-	}
+        for (int x = 0; x < stackSlots.length; ++x) {
+            stackSlots[x] = ModUtil.getEmptyStack();
+        }
+    }
 
-	public ItemStack getItemStack()
-	{
-		return inv.stack;
-	}
-
-	@Override
-	public int getSizeInventory()
-	{
-		return stackSlots.length;
-	}
-
-    private int getStateInSlot(
-			int index )
-	{
-		final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
-		final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
-
-		if ( qty > 0 )
-		{
-			return id;
-		}
-
-		return 0;
-	}
-
-	@Override
-	public @Nonnull ItemStack getStackInSlot(
-			final int index )
-	{
-		final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
-		final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
-
-		if ( ModUtil.notEmpty( stackSlots[index] ) )
-		{
-			final ItemStack which = ModUtil.nonNull( stackSlots[index] );
-			ModUtil.setStackSize( which, qty );
-			return which;
-		}
-
-		if ( qty == 0 || id == 0 )
-		{
-			return ModUtil.getEmptyStack();
-		}
-
-		return stackSlots[index] = ItemChiseledBit.createStack( id, qty, false );
-	}
-
-	@Override
-	public ItemStack decrStackSize(
-			final int index,
-			int count )
-	{
-		final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
-		final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
-
-		if ( qty == 0 || id == 0 )
-		{
-			return ModUtil.getEmptyStack();
-		}
-
-		if ( count > qty )
-		{
-			count = qty;
-		}
-
-		inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] -= count;
-		inv.onChange();
-
-		if ( ModUtil.notEmpty( stackSlots[index] ) )
-		{
-			ModUtil.adjustStackSize( ModUtil.nonNull( stackSlots[index] ), -count );
-		}
-
-		return ItemChiseledBit.createStack( id, count, false );
-	}
-
-	@Override
-	public ItemStack removeStackFromSlot(
-			final int index )
-	{
-		return ModUtil.getEmptyStack();
-	}
-
-	@Override
-	public void setInventorySlotContents(
-			final int index,
-			final ItemStack stack )
-	{
-		stackSlots[index] = ModUtil.getEmptyStack();
-
-		if ( stack != null && stack.getItem() instanceof ItemChiseledBit )
-		{
-			inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] = ModUtil.getStackSize( stack );
-			inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID] = ItemChiseledBit.getStackState( stack );
-		}
-		else
-		{
-			inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] = 0;
-			inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID] = 0;
-		}
-
-		inv.onChange();
-	}
-
-	@Override
-	public int getInventoryStackLimit()
-	{
-		return ChiselsAndBits.getConfig().getServer().bagStackSize.get();
-	}
-
-	@Override
-	public void markDirty()
-	{
-		for ( int x = 0; x < getSizeInventory(); x++ )
-		{
-			if ( ModUtil.notEmpty( stackSlots[x] ) )
-			{
-				inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * x + ItemBitBag.OFFSET_QUANTITY] = ModUtil.getStackSize( stackSlots[x] );
-				stackSlots[x] = ModUtil.getEmptyStack();
-				inv.onChange();
-			}
-		}
-	}
+    public ItemStack getItemStack() {
+        return inv.stack;
+    }
 
     @Override
-    public boolean isUsableByPlayer(final PlayerEntity player)
-    {
+    public int getContainerSize() {
+        return stackSlots.length;
+    }
+
+    private int getStateInSlot(
+            int index) {
+        final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
+        final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
+
+        if (qty > 0) {
+            return id;
+        }
+
+        return 0;
+    }
+
+    @Override
+    public @Nonnull
+    ItemStack getItem(
+            final int index) {
+        final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
+        final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
+
+        if (ModUtil.notEmpty(stackSlots[index])) {
+            final ItemStack which = ModUtil.nonNull(stackSlots[index]);
+            ModUtil.setStackSize(which, qty);
+            return which;
+        }
+
+        if (qty == 0 || id == 0) {
+            return ModUtil.getEmptyStack();
+        }
+
+        return stackSlots[index] = ItemChiseledBit.createStack(id, qty, false);
+    }
+
+    @Override
+    public ItemStack removeItem(
+            final int index,
+            int count) {
+        final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
+        final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
+
+        if (qty == 0 || id == 0) {
+            return ModUtil.getEmptyStack();
+        }
+
+        if (count > qty) {
+            count = qty;
+        }
+
+        inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] -= count;
+        inv.onChange();
+
+        if (ModUtil.notEmpty(stackSlots[index])) {
+            ModUtil.adjustStackSize(ModUtil.nonNull(stackSlots[index]), -count);
+        }
+
+        return ItemChiseledBit.createStack(id, count, false);
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(
+            final int index) {
+        return ModUtil.getEmptyStack();
+    }
+
+    @Override
+    public void setItem(
+            final int index,
+            final ItemStack stack) {
+        stackSlots[index] = ModUtil.getEmptyStack();
+
+        if (stack != null && stack.getItem() instanceof ItemChiseledBit) {
+            inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] = ModUtil.getStackSize(stack);
+            inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID] = ItemChiseledBit.getStackState(stack);
+        } else {
+            inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY] = 0;
+            inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID] = 0;
+        }
+
+        inv.onChange();
+    }
+
+    @Override
+    public int getMaxStackSize() {
+        return ChiselsAndBits.getConfig().getServer().bagStackSize.get();
+    }
+
+    @Override
+    public void setChanged() {
+        for (int x = 0; x < getContainerSize(); x++) {
+            if (ModUtil.notEmpty(stackSlots[x])) {
+                inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * x + ItemBitBag.OFFSET_QUANTITY] = ModUtil.getStackSize(stackSlots[x]);
+                stackSlots[x] = ModUtil.getEmptyStack();
+                inv.onChange();
+            }
+        }
+    }
+
+    @Override
+    public boolean stillValid(final Player player) {
         return true;
     }
 
     @Override
-	public void openInventory(
-			final PlayerEntity player )
-	{
-	}
+    public void startOpen(
+            final Player player) {
+    }
 
-	@Override
-	public void closeInventory(
-			final PlayerEntity player )
-	{
-	}
+    @Override
+    public void stopOpen(
+            final Player player) {
+    }
 
-	@Override
-	public boolean isItemValidForSlot(
-			final int index,
-			final ItemStack stack )
-	{
-		return stack != null && stack.getItem() instanceof ItemChiseledBit;
-	}
+    @Override
+    public boolean canPlaceItem(
+            final int index,
+            final ItemStack stack) {
+        return stack != null && stack.getItem() instanceof ItemChiseledBit;
+    }
 
-	private static class StateQtyPair
-	{
-		public StateQtyPair(
-				int state,
-				int qty )
-		{
-			this.qty = qty;
-			this.state = state;
-		}
+    private static class StateQtyPair {
+        public StateQtyPair(
+                int state,
+                int qty) {
+            this.qty = qty;
+            this.state = state;
+        }
 
-		int qty;
-		int state;
-	};
+        int qty;
+        int state;
+    }
 
-	public void sort()
-	{
-		List<StateQtyPair> stacks = new ArrayList<StateQtyPair>();
+    ;
 
-		for ( int x = 0; x < stackSlots.length; ++x )
-		{
-			int state = inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID];
-			int qty = inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY];
+    public void sort() {
+        List<StateQtyPair> stacks = new ArrayList<StateQtyPair>();
 
-			if ( state > 0 && qty > 0 )
-			{
-				stacks.add( new StateQtyPair( state, qty ) );
-			}
-		}
+        for (int x = 0; x < stackSlots.length; ++x) {
+            int state = inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID];
+            int qty = inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY];
 
-		stacks.sort( new Comparator<StateQtyPair>() {
+            if (state > 0 && qty > 0) {
+                stacks.add(new StateQtyPair(state, qty));
+            }
+        }
 
-			@Override
-			public int compare(
-					StateQtyPair o1,
-					StateQtyPair o2 )
-			{
-				if ( o1.state < o2.state )
-					return 1;
+        stacks.sort(new Comparator<StateQtyPair>() {
 
-				if ( o1.state > o2.state )
-					return -1;
+            @Override
+            public int compare(
+                    StateQtyPair o1,
+                    StateQtyPair o2) {
+                if (o1.state < o2.state)
+                    return 1;
 
-				if ( o1.qty < o2.qty )
-					return 1;
+                if (o1.state > o2.state)
+                    return -1;
 
-				if ( o1.qty > o2.qty )
-					return -1;
+                if (o1.qty < o2.qty)
+                    return 1;
 
-				return 0;
-			}
-		} );
+                if (o1.qty > o2.qty)
+                    return -1;
 
-		for ( int x = 0; x < stacks.size() - 1; x++ )
-		{
-			StateQtyPair a = stacks.get( x );
-			StateQtyPair b = stacks.get( x + 1 );
+                return 0;
+            }
+        });
 
-			if ( a.state == b.state )
-			{
-				if ( a.qty < getInventoryStackLimit() )
-				{
-					int shiftSize = getInventoryStackLimit() - a.qty;
-					shiftSize = Math.min( shiftSize, b.qty );
+        for (int x = 0; x < stacks.size() - 1; x++) {
+            StateQtyPair a = stacks.get(x);
+            StateQtyPair b = stacks.get(x + 1);
 
-					a.qty += shiftSize;
-					b.qty -= shiftSize;
+            if (a.state == b.state) {
+                if (a.qty < getMaxStackSize()) {
+                    int shiftSize = getMaxStackSize() - a.qty;
+                    shiftSize = Math.min(shiftSize, b.qty);
 
-					if ( b.qty <= 0 )
-						stacks.remove( x + 1 );
+                    a.qty += shiftSize;
+                    b.qty -= shiftSize;
 
-					--x;
-				}
-			}
-		}
+                    if (b.qty <= 0)
+                        stacks.remove(x + 1);
 
-		for ( int x = 0; x < stackSlots.length; ++x )
-		{
-			int state = 0;
-			int qty = 0;
+                    --x;
+                }
+            }
+        }
 
-			if ( stacks.size() > x )
-			{
-				state = stacks.get( x ).state;
-				qty = stacks.get( x ).qty;
-			}
+        for (int x = 0; x < stackSlots.length; ++x) {
+            int state = 0;
+            int qty = 0;
 
-			inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID] = state;
-			inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY] = qty;
+            if (stacks.size() > x) {
+                state = stacks.get(x).state;
+                qty = stacks.get(x).qty;
+            }
 
-			stackSlots[x] = ModUtil.getEmptyStack();
-		}
+            inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID] = state;
+            inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY] = qty;
 
-		inv.onChange();
-	}
+            stackSlots[x] = ModUtil.getEmptyStack();
+        }
 
-	public void clear(
-			final ItemStack stack )
-	{
-		for ( int x = 0; x < stackSlots.length; ++x )
-		{
-			if ( matches( stack, stackSlots[x] ) )
-			{
-				stackSlots[x] = ModUtil.getEmptyStack();
-				inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID] = 0;
-				inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY] = 0;
-			}
-		}
+        inv.onChange();
+    }
 
-		inv.onChange();
-	}
+    public void clear(
+            final ItemStack stack) {
+        for (int x = 0; x < stackSlots.length; ++x) {
+            if (matches(stack, stackSlots[x])) {
+                stackSlots[x] = ModUtil.getEmptyStack();
+                inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID] = 0;
+                inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_QUANTITY] = 0;
+            }
+        }
 
-	public boolean matches(
-			final ItemStack cmpStack,
-			final ItemStack invStack )
-	{
-		if ( ModUtil.isEmpty( cmpStack ) || invStack == null )
-		{
-			return true;
-		}
+        inv.onChange();
+    }
 
-		return cmpStack.getItem() == invStack.getItem() && ItemStack.areItemStackTagsEqual( cmpStack, invStack );
-	}
+    public boolean matches(
+            final ItemStack cmpStack,
+            final ItemStack invStack) {
+        if (ModUtil.isEmpty(cmpStack) || invStack == null) {
+            return true;
+        }
 
-	public ItemStack restockItem(
-			final ItemStack target,
-			final ItemStack targetType )
-	{
-		int outSize = ModUtil.getStackSize( target );
+        return cmpStack.getItem() == invStack.getItem() && ItemStack.tagMatches(cmpStack, invStack);
+    }
 
-		for ( int x = getSizeInventory() - 1; x >= 0; x-- )
-		{
-			if ( ItemChiseledBit.sameBit( targetType, getStateInSlot( x ) ) )
-			{
-				final ItemStack is = getStackInSlot( x );
+    public ItemStack restockItem(
+            final ItemStack target,
+            final ItemStack targetType) {
+        int outSize = ModUtil.getStackSize(target);
 
-				outSize += ModUtil.getStackSize( is );
-				final int total = outSize;
-				outSize = Math.min( is.getMaxStackSize(), outSize );
-				final int overage = total - outSize;
+        for (int x = getContainerSize() - 1; x >= 0; x--) {
+            if (ItemChiseledBit.sameBit(targetType, getStateInSlot(x))) {
+                final ItemStack is = getItem(x);
 
-				if ( overage > 0 )
-				{
-					ModUtil.setStackSize( is, overage );
-				}
-				else
-				{
-					setInventorySlotContents( x, ModUtil.getEmptyStack() );
-				}
+                outSize += ModUtil.getStackSize(is);
+                final int total = outSize;
+                outSize = Math.min(is.getMaxStackSize(), outSize);
+                final int overage = total - outSize;
 
-				markDirty();
+                if (overage > 0) {
+                    ModUtil.setStackSize(is, overage);
+                } else {
+                    setItem(x, ModUtil.getEmptyStack());
+                }
 
-				if ( outSize == is.getMaxStackSize() )
-				{
-					// done!
-					break;
-				}
-			}
-		}
+                setChanged();
 
-		final ItemStack out = ModUtil.copy( targetType );
-		ModUtil.setStackSize( out, outSize );
-		return out;
-	}
+                if (outSize == is.getMaxStackSize()) {
+                    // done!
+                    break;
+                }
+            }
+        }
 
-	public @Nonnull ItemStack insertItem(
-			final @Nonnull ItemStack which )
-	{
-		for ( int x = 0; x < getSizeInventory(); x++ )
-		{
-			final ItemStack is = getStackInSlot( x );
-			if ( !ModUtil.isEmpty( is ) && ItemChiseledBit.getStackState( which ) == ItemChiseledBit.getStackState( is ) )
-			{
-				ModUtil.adjustStackSize( is, ModUtil.getStackSize( which ) );
-				final int total = ModUtil.getStackSize( is );
-				ModUtil.setStackSize( is, Math.min( getInventoryStackLimit(), ModUtil.getStackSize( is ) ) );
-				final int overage = total - ModUtil.getStackSize( is );
-				if ( overage > 0 )
-				{
-					ModUtil.setStackSize( which, overage );
-					markDirty();
-				}
-				else
-				{
-					markDirty();
-					return ModUtil.getEmptyStack();
-				}
-			}
-			else if ( ModUtil.isEmpty( is ) )
-			{
-				setInventorySlotContents( x, which );
-				markDirty();
-				return ModUtil.getEmptyStack();
-			}
-		}
+        final ItemStack out = ModUtil.copy(targetType);
+        ModUtil.setStackSize(out, outSize);
+        return out;
+    }
 
-		return which;
-	}
+    public @Nonnull
+    ItemStack insertItem(
+            final @Nonnull ItemStack which) {
+        for (int x = 0; x < getContainerSize(); x++) {
+            final ItemStack is = getItem(x);
+            if (!ModUtil.isEmpty(is) && ItemChiseledBit.getStackState(which) == ItemChiseledBit.getStackState(is)) {
+                ModUtil.adjustStackSize(is, ModUtil.getStackSize(which));
+                final int total = ModUtil.getStackSize(is);
+                ModUtil.setStackSize(is, Math.min(getMaxStackSize(), ModUtil.getStackSize(is)));
+                final int overage = total - ModUtil.getStackSize(is);
+                if (overage > 0) {
+                    ModUtil.setStackSize(which, overage);
+                    setChanged();
+                } else {
+                    setChanged();
+                    return ModUtil.getEmptyStack();
+                }
+            } else if (ModUtil.isEmpty(is)) {
+                setItem(x, which);
+                setChanged();
+                return ModUtil.getEmptyStack();
+            }
+        }
 
-	public int extractBit(
-			final int bitMeta,
-			int total )
-	{
-		int used = 0;
+        return which;
+    }
 
-		for ( int index = stackSlots.length - 1; index >= 0; index-- )
-		{
-			final int qty_idx = ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY;
+    public int extractBit(
+            final int bitMeta,
+            int total) {
+        int used = 0;
 
-			final int qty = inv.contents[qty_idx];
-			final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
+        for (int index = stackSlots.length - 1; index >= 0; index--) {
+            final int qty_idx = ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY;
 
-			if ( id == bitMeta && qty > 0 )
-			{
-				inv.contents[qty_idx] -= total;
+            final int qty = inv.contents[qty_idx];
+            final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
 
-				if ( inv.contents[qty_idx] < 0 )
-				{
-					inv.contents[qty_idx] = 0;
-				}
+            if (id == bitMeta && qty > 0) {
+                inv.contents[qty_idx] -= total;
 
-				inv.onChange();
+                if (inv.contents[qty_idx] < 0) {
+                    inv.contents[qty_idx] = 0;
+                }
 
-				final int diff = qty - inv.contents[qty_idx];
-				used += diff;
-				total -= diff;
+                inv.onChange();
 
-				if ( 0 == total )
-				{
-					return used;
-				}
-			}
-		}
+                final int diff = qty - inv.contents[qty_idx];
+                used += diff;
+                total -= diff;
 
-		return used;
-	}
+                if (0 == total) {
+                    return used;
+                }
+            }
+        }
 
-	@OnlyIn( Dist.CLIENT )
-	public List<ITextComponent> listContents(
-			final List<ITextComponent> details )
-	{
-		final TreeMap<String, Integer> contents = new TreeMap<>();
+        return used;
+    }
 
-		for ( int x = 0; x < getSizeInventory(); x++ )
-		{
-			final ItemStack is = getStackInSlot( x );
-			if ( !ModUtil.isEmpty( is ) )
-			{
-				final BlockState state = ModUtil.getStateById( ItemChiseledBit.getStackState( is ) );
-				if ( state == null )
-				{
-					continue;
-				}
+    @OnlyIn(Dist.CLIENT)
+    public List<Component> listContents(
+            final List<Component> details) {
+        final TreeMap<String, Integer> contents = new TreeMap<>();
 
-				final ITextComponent name = ItemChiseledBit.getBitStateName( state );
+        for (int x = 0; x < getContainerSize(); x++) {
+            final ItemStack is = getItem(x);
+            if (!ModUtil.isEmpty(is)) {
+                final BlockState state = ModUtil.getStateById(ItemChiseledBit.getStackState(is));
+                if (state == null) {
+                    continue;
+                }
 
-				if ( name != null )
-				{
-					Integer count = contents.get( name.getString() );
-					if ( count == null )
-					{
-						count = ModUtil.getStackSize( is );
-					}
-					else
-					{
-						count += ModUtil.getStackSize( is );
-					}
+                final Component name = ItemChiseledBit.getBitStateName(state);
 
-					contents.put( name.getString(), count );
-				}
-			}
-		}
+                if (name != null) {
+                    Integer count = contents.get(name.getString());
+                    if (count == null) {
+                        count = ModUtil.getStackSize(is);
+                    } else {
+                        count += ModUtil.getStackSize(is);
+                    }
 
-		if ( contents.isEmpty() )
-		{
-			details.add( new StringTextComponent( LocalStrings.Empty.getLocal() ) );
-		}
+                    contents.put(name.getString(), count);
+                }
+            }
+        }
 
-		final List<Entry<String, Integer>> list = new ArrayList<>();
-		list.addAll( contents.entrySet() );
+        if (contents.isEmpty()) {
+            details.add(new TextComponent(LocalStrings.Empty.getLocal()));
+        }
 
-		Collections.sort( list, (o1, o2) -> {
+        final List<Entry<String, Integer>> list = new ArrayList<>();
+        list.addAll(contents.entrySet());
+
+        Collections.sort(list, (o1, o2) -> {
             final int y = o1.getValue();
             final int x = o2.getValue();
 
             return Integer.compare(x, y);
         });
 
-		for ( final Entry<String, Integer> e : list )
-		{
-            details.add( new StringTextComponent(e.getValue().toString()).appendString( " " ).appendString( e.getKey() ) );
-		}
+        for (final Entry<String, Integer> e : list) {
+            details.add(new TextComponent(e.getValue().toString()).append(" ").append(e.getKey()));
+        }
 
-		return details;
-	}
+        return details;
+    }
 
-	@Override
-	public void clear()
-	{
-		clear( null );
-	}
+    @Override
+    public void clearContent() {
+        clear(null);
+    }
 
-	@Override
-	public boolean isEmpty()
-	{
-		for ( final ItemStack itemstack : stackSlots )
-		{
-			if ( !itemstack.isEmpty() )
-			{
-				return false;
-			}
-		}
+    @Override
+    public boolean isEmpty() {
+        for (final ItemStack itemstack : stackSlots) {
+            if (!itemstack.isEmpty()) {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
 }

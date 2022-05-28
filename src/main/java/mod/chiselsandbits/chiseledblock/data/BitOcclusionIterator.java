@@ -2,7 +2,7 @@ package mod.chiselsandbits.chiseledblock.data;
 
 import java.util.List;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public class BitOcclusionIterator extends BitCollisionIterator
 {
@@ -12,10 +12,10 @@ public class BitOcclusionIterator extends BitCollisionIterator
     private float physicalStartX = 0.0f;
 	private boolean lastSetting = false;
 
-	final List<AxisAlignedBB> o;
+	final List<AABB> o;
 
 	public BitOcclusionIterator(
-			final List<AxisAlignedBB> out )
+			final List<AABB> out )
 	{
 		o = out;
 	}
@@ -54,7 +54,7 @@ public class BitOcclusionIterator extends BitCollisionIterator
 			final double addition )
 	{
         final double xFullMinusEpsilon = 1.0 - epsilon;
-        final AxisAlignedBB newBox = new AxisAlignedBB(
+        final AABB newBox = new AABB(
 				physicalStartX < epsilon ? physicalStartX : physicalStartX + epsilon,
 				y == 0 ? physicalY : physicalY + epsilon,
 				z == 0 ? physicalZ : physicalZ + epsilon,
@@ -65,11 +65,11 @@ public class BitOcclusionIterator extends BitCollisionIterator
 		if ( !o.isEmpty() )
 		{
 			int offset = o.size() - 1;
-			AxisAlignedBB lastBox = o.get( offset );
+			AABB lastBox = o.get( offset );
 
 			if ( isBelow( newBox, lastBox ) )
 			{
-				AxisAlignedBB combined = lastBox.union( newBox );
+				AABB combined = lastBox.minmax( newBox );
 				o.remove( offset );
 
 				if ( !o.isEmpty() )
@@ -78,7 +78,7 @@ public class BitOcclusionIterator extends BitCollisionIterator
 					lastBox = o.get( offset );
 					if ( !o.isEmpty() && isNextTo( combined, lastBox ) )
 					{
-						combined = lastBox.union( combined );
+						combined = lastBox.minmax( combined );
 						o.remove( offset );
 					}
 
@@ -94,8 +94,8 @@ public class BitOcclusionIterator extends BitCollisionIterator
 	}
 
 	private boolean isNextTo(
-			final AxisAlignedBB newBox,
-			final AxisAlignedBB lastBox )
+			final AABB newBox,
+			final AABB lastBox )
 	{
 		final boolean sameX = newBox.minX == lastBox.minX && newBox.maxX == lastBox.maxX;
 		final boolean sameY = newBox.minY == lastBox.minY && newBox.maxY == lastBox.maxY;
@@ -105,8 +105,8 @@ public class BitOcclusionIterator extends BitCollisionIterator
 	}
 
 	private boolean isBelow(
-			final AxisAlignedBB newBox,
-			final AxisAlignedBB lastBox )
+			final AABB newBox,
+			final AABB lastBox )
 	{
 		final boolean sameX = newBox.minX == lastBox.minX && newBox.maxX == lastBox.maxX;
 		final boolean sameZ = newBox.minZ == lastBox.minZ && newBox.maxZ == lastBox.maxZ;

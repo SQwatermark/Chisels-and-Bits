@@ -1,6 +1,6 @@
 package mod.chiselsandbits.chiseledblock.data;
 
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public final class IntegerBox
 {
@@ -33,12 +33,12 @@ public final class IntegerBox
 			final Direction side,
 			final int scale )
 	{
-		minX += side.getXOffset() * scale;
-		maxX += side.getXOffset() * scale;
-		minY += side.getYOffset() * scale;
-		maxY += side.getYOffset() * scale;
-		minZ += side.getZOffset() * scale;
-		maxZ += side.getZOffset() * scale;
+		minX += side.getStepX() * scale;
+		maxX += side.getStepX() * scale;
+		minY += side.getStepY() * scale;
+		maxY += side.getStepY() * scale;
+		minZ += side.getStepZ() * scale;
+		maxZ += side.getStepZ() * scale;
 	}
 
 	public boolean isBadBitPositions()

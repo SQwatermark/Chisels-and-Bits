@@ -1,6 +1,6 @@
 package mod.chiselsandbits.render.cache;
 
-import net.minecraft.client.renderer.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class FormatInfo
 {

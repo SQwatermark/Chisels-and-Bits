@@ -1,8 +1,8 @@
 package mod.chiselsandbits.api;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -10,12 +10,12 @@ import net.minecraftforge.eventbus.api.Event;
 public class EventFullBlockRestoration extends Event
 {
 
-	private final World      w;
+	private final Level      w;
 	private final BlockPos   pos;
 	private final BlockState restoredState;
 
 	public EventFullBlockRestoration(
-			final World w,
+			final Level w,
 			final BlockPos pos,
 			final BlockState restoredState )
 	{
@@ -25,7 +25,7 @@ public class EventFullBlockRestoration extends Event
 		this.restoredState = restoredState;
 	}
 
-	public World getWorld()
+	public Level getWorld()
 	{
 		return w;
 	}

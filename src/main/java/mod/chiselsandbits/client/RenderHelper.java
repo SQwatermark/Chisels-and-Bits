@@ -1,23 +1,18 @@
 package mod.chiselsandbits.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
+import com.mojang.blaze3d.vertex.*;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -29,10 +24,10 @@ public class RenderHelper
     public static Random RENDER_RANDOM = new Random();
 
     public static void drawSelectionBoundingBoxIfExists(
-      final MatrixStack matrixStack,
-      final AxisAlignedBB bb,
+      final PoseStack matrixStack,
+      final AABB bb,
       final BlockPos blockPos,
-      final PlayerEntity player,
+      final Player player,
       final float partialTicks,
       final boolean NormalBoundingBox)
     {
@@ -40,10 +35,10 @@ public class RenderHelper
     }
 
     public static void drawSelectionBoundingBoxIfExistsWithColor(
-      final MatrixStack matrixStack,
-      final AxisAlignedBB bb,
+      final PoseStack matrixStack,
+      final AABB bb,
       final BlockPos blockPos,
-      final PlayerEntity player,
+      final Player player,
       final float partialTicks,
       final boolean NormalBoundingBox,
       final int red,
@@ -56,18 +51,18 @@ public class RenderHelper
         {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-            GL11.glLineWidth(2.0F);
+//            GL11.glLineWidth(2.0F);
             RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
 
             if (!NormalBoundingBox)
             {
-                RenderHelper.renderBoundingBox(matrixStack, bb.expand(0.002D, 0.002D, 0.002D).offset(blockPos.getX(), blockPos.getY(), blockPos.getZ()), red, green, blue, alpha);
+                RenderHelper.renderBoundingBox(matrixStack, bb.expandTowards(0.002D, 0.002D, 0.002D).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()), red, green, blue, alpha);
             }
 
             RenderSystem.disableDepthTest();
 
-            RenderHelper.renderBoundingBox(matrixStack, bb.expand(0.002D, 0.002D, 0.002D).offset(blockPos.getX(), blockPos.getY(), blockPos.getZ()),
+            RenderHelper.renderBoundingBox(matrixStack, bb.expandTowards(0.002D, 0.002D, 0.002D).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()),
               red,
               green,
               blue,
@@ -81,11 +76,11 @@ public class RenderHelper
     }
 
     public static void drawLineWithColor(
-      final MatrixStack matrixStack,
-      final Vector3d a,
-      final Vector3d b,
+      final PoseStack matrixStack,
+      final Vec3 a,
+      final Vec3 b,
       final BlockPos blockPos,
-      final PlayerEntity player,
+      final Player player,
       final float partialTicks,
       final boolean NormalBoundingBox,
       final int red,
@@ -98,13 +93,15 @@ public class RenderHelper
         {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-            GL11.glLineWidth(2.0F);
+//            GL11.glLineWidth(2.0F);
             RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
-            RenderSystem.shadeModel(GL11.GL_FLAT);
+            // TODO
+//            GL11.glShadeModel(GL11.GL_FLAT);
+//            RenderSystem.shadeModel(GL11.GL_FLAT);
 
-            final Vector3d a2 = a.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-            final Vector3d b2 = b.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            final Vec3 a2 = a.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            final Vec3 b2 = b.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             if (!NormalBoundingBox)
             {
                 RenderHelper.renderLine(matrixStack, a2, b2, red, green, blue, alpha);
@@ -114,7 +111,8 @@ public class RenderHelper
 
             RenderHelper.renderLine(matrixStack, a2, b2, red, green, blue, seeThruAlpha);
 
-            RenderSystem.shadeModel(Minecraft.isAmbientOcclusionEnabled() ? GL11.GL_SMOOTH : GL11.GL_FLAT);
+//            GL11.glShadeModel(Minecraft.useAmbientOcclusion() ? GL11.GL_SMOOTH : GL11.GL_FLAT);
+//            RenderSystem.shadeModel(Minecraft.useAmbientOcclusion() ? GL11.GL_SMOOTH : GL11.GL_FLAT);
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(true);
             RenderSystem.enableTexture();
@@ -123,11 +121,11 @@ public class RenderHelper
     }
 
     public static void renderQuads(
-      final MatrixStack matrixStack,
+      final PoseStack matrixStack,
       final int alpha,
       final BufferBuilder renderer,
       final List<BakedQuad> quads,
-      final World worldObj,
+      final Level worldObj,
       final BlockPos blockPos,
       int combinedLightIn,
       int combinedOverlayIn)
@@ -143,23 +141,18 @@ public class RenderHelper
             float cr = (color >>> 16) & 0xFF;
             float ca = (color >>> 24) & 0xFF;
 
-            renderer.addVertexData(matrixStack.getLast(), bakedquad, cb, cg, cr, ca, combinedLightIn, combinedOverlayIn, false);
+            renderer.putBulkData(matrixStack.last(), bakedquad, cb, cg, cr, ca, combinedLightIn, combinedOverlayIn, false);
         }
     }
 
     // Custom replacement of 1.9.4 -> 1.10's method that changed.
-    public static void renderBoundingBox(
-      final MatrixStack matrixStack, final AxisAlignedBB boundingBox,
-      final int red,
-      final int green,
-      final int blue,
-      final int alpha)
-    {
-        GL11.glPushAttrib(8256);
-        final Tessellator tess = Tessellator.getInstance();
-        final BufferBuilder bufferBuilder = tess.getBuffer();
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        bufferBuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+    public static void renderBoundingBox(final PoseStack matrixStack, final AABB boundingBox, final int red, final int green, final int blue, final int alpha) {
+//        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_LIGHTING_BIT );
+        final Tesselator tess = Tesselator.getInstance();
+        final BufferBuilder bufferBuilder = tess.getBuilder();
+//        GL11.glShadeModel(GL11.GL_FLAT);
+//        RenderSystem.shadeModel(GL11.GL_FLAT);
+        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         final float minX = (float) boundingBox.minX;
         final float minY = (float) boundingBox.minY;
@@ -169,20 +162,20 @@ public class RenderHelper
         final float maxZ = (float) boundingBox.maxZ;
 
         // lower ring ( starts to 0 / 0 )
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
 
         // Y line at 0 / 0
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
 
         // upper ring ( including previous point to draw 4 lines )
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
 
         /*
          * the next 3 Y Lines use flat shading to render invisible lines to
@@ -190,60 +183,61 @@ public class RenderHelper
          */
 
         // Y line at 1 / 0
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, minY, minZ).color(red, green, blue, 0).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, minZ).color(red, green, blue, 0).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
 
         // Y line at 0 / 1
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, minY, maxZ).color(red, green, blue, 0).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, maxZ).color(red, green, blue, 0).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
 
         // Y line at 1 / 1
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, minY, maxZ).color(red, green, blue, 0).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, maxZ).color(red, green, blue, 0).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
 
-        tess.draw();
-        GL11.glPopAttrib();
+        tess.end();
+//        GL11.glPopAttrib();
     }
 
     public static void renderLine(
-      final MatrixStack matrixStack,
-      final Vector3d a,
-      final Vector3d b,
+      final PoseStack matrixStack,
+      final Vec3 a,
+      final Vec3 b,
       final int red,
       final int green,
       final int blue,
       final int alpha)
     {
-        final Tessellator tess = Tessellator.getInstance();
-        final BufferBuilder bufferBuilder = tess.getBuffer();
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        bufferBuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), (float) a.x, (float) a.y, (float) a.z).color(red, green, blue, alpha).endVertex();
-        bufferBuilder.pos(matrixStack.getLast().getMatrix(), (float) b.x, (float) b.y, (float) b.z).color(red, green, blue, alpha).endVertex();
-        tess.draw();
+        final Tesselator tess = Tesselator.getInstance();
+        final BufferBuilder bufferBuilder = tess.getBuilder();
+//        GL11.glShadeModel(GL11.GL_FLAT);
+//        RenderSystem.shadeModel(GL11.GL_FLAT);
+        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(matrixStack.last().pose(), (float) a.x, (float) a.y, (float) a.z).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.vertex(matrixStack.last().pose(), (float) b.x, (float) b.y, (float) b.z).color(red, green, blue, alpha).endVertex();
+        tess.end();
     }
 
     public static int getTint(
       final int alpha,
       final int tintIndex,
-      final World worldObj,
+      final Level worldObj,
       final BlockPos blockPos)
     {
         return alpha | Minecraft.getInstance().getBlockColors().getColor(ModBlocks.getChiseledDefaultState(), worldObj, blockPos, tintIndex);
     }
 
     public static void renderModel(
-      final MatrixStack matrixStack,
-      final IBakedModel model,
-      final World worldObj,
+      final PoseStack matrixStack,
+      final BakedModel model,
+      final Level worldObj,
       final BlockPos blockPos,
       final int alpha,
       final int combinedLightmap,
       final int combinedOverlay)
     {
-        final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        final Tesselator tessellator = Tesselator.getInstance();
+        final BufferBuilder buffer = tessellator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
         for (final Direction enumfacing : Direction.values())
         {
@@ -251,21 +245,21 @@ public class RenderHelper
         }
 
         renderQuads(matrixStack, alpha, buffer, model.getQuads(null, null, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
-        tessellator.draw();
+        tessellator.end();
     }
 
     public static void renderGhostModel(
-      final MatrixStack matrixStack,
-      final IBakedModel baked,
-      final World worldObj,
+      final PoseStack matrixStack,
+      final BakedModel baked,
+      final Level worldObj,
       final BlockPos blockPos,
       final boolean isUnplaceable,
       final int combinedLightmap,
       final int combinedOverlay)
     {
         final int alpha = isUnplaceable ? 0x22000000 : 0xaa000000;
-        Minecraft.getInstance().getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         RenderSystem.enableBlend();
         RenderSystem.enableTexture();

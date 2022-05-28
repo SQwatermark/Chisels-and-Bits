@@ -2,12 +2,11 @@ package mod.chiselsandbits.network.packets;
 
 import mod.chiselsandbits.interfaces.IVoxelBlobItem;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Rotation;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Rotation;
 
 public class PacketRotateVoxelBlob extends ModPacket
 {
@@ -15,7 +14,7 @@ public class PacketRotateVoxelBlob extends ModPacket
 	private Direction.Axis axis;
     private Rotation  rotation;
 
-    public PacketRotateVoxelBlob(PacketBuffer buffer)
+    public PacketRotateVoxelBlob(FriendlyByteBuf buffer)
     {
         readPayload(buffer);
     }
@@ -28,9 +27,9 @@ public class PacketRotateVoxelBlob extends ModPacket
 
     @Override
 	public void server(
-			final ServerPlayerEntity player )
+			final ServerPlayer player )
 	{
-		final ItemStack is = player.getHeldItemMainhand();
+		final ItemStack is = player.getMainHandItem();
 		if ( is != null && is.getItem() instanceof IVoxelBlobItem )
 		{
 			( (IVoxelBlobItem) is.getItem() ).rotate( is, axis, rotation );
@@ -39,18 +38,18 @@ public class PacketRotateVoxelBlob extends ModPacket
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-		buffer.writeEnumValue( axis );
-		buffer.writeEnumValue( rotation );
+		buffer.writeEnum( axis );
+		buffer.writeEnum( rotation );
 	}
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-		axis = buffer.readEnumValue( Direction.Axis.class );
-		rotation = buffer.readEnumValue( Rotation.class );
+		axis = buffer.readEnum( Direction.Axis.class );
+		rotation = buffer.readEnum( Rotation.class );
 	}
 
     public Direction.Axis getAxis()

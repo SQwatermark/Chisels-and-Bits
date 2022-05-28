@@ -8,12 +8,12 @@ import java.util.Optional;
 
 import mod.chiselsandbits.core.Log;
 import mod.chiselsandbits.helpers.ModUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.state.Property;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class StringStates
@@ -40,7 +40,7 @@ public class StringStates
 			return 0;
 		}
 
-		BlockState state = blk.getDefaultState();
+		BlockState state = blk.defaultBlockState();
 
 		if ( state == null )
 		{
@@ -79,7 +79,7 @@ public class StringStates
 			final Block blk,
 			final String[] nameval )
 	{
-		final Property<?> prop = blk.getStateContainer().getProperty(nameval[0]);
+		final Property<?> prop = blk.getStateDefinition().getProperty(nameval[0]);
 		if ( prop == null )
 		{
 			Log.info( nameval[0] + " is not a valid property for " + blk.getRegistryName() );
@@ -90,10 +90,10 @@ public class StringStates
 	}
 
 	public static <T extends Comparable<T>> BlockState setPropValue(BlockState blockState, Property<T> property, String value) {
-        final Optional<T> pv = property.parseValue( value );
+        final Optional<T> pv = property.getValue( value );
         if ( pv.isPresent() )
         {
-            return blockState.with( property, pv.get());
+            return blockState.setValue( property, pv.get());
         }
         else
         {
@@ -116,7 +116,7 @@ public class StringStates
 			stateName.append( '?' );
 
 			boolean first = true;
-			for ( final Property<?> p : state.getBlock().getStateContainer().getProperties() )
+			for ( final Property<?> p : state.getBlock().getStateDefinition().getProperties() )
 			{
 				if ( !first )
 				{
@@ -125,12 +125,12 @@ public class StringStates
 
 				first = false;
 
-				final Comparable<?> propVal = state.get(p);
+				final Comparable<?> propVal = state.getValue(p);
 
 				String saveAs;
-				if ( propVal instanceof IStringSerializable )
+				if ( propVal instanceof StringRepresentable )
 				{
-					saveAs = ( (IStringSerializable) propVal ).getString();
+					saveAs = ( (StringRepresentable) propVal ).getSerializedName();
 				}
 				else
 				{

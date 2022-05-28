@@ -8,7 +8,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 
@@ -33,9 +33,9 @@ public class NetheriteBitSawRecipeGenerator extends AbstractRecipeGenerator
           "stt",
           "   ",
           "s",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.RODS_BLAZE.getName().toString(), true)),
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.RODS_BLAZE.location().toString(), true)),
           "t",
-          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.INGOTS_NETHERITE.getName().toString(), true))
+          new RecipeIngredientKeyJson(new RecipeIngredientJson(Tags.Items.INGOTS_NETHERITE.location().toString(), true))
         );
     }
 }

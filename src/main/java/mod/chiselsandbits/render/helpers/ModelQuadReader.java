@@ -1,9 +1,9 @@
 package mod.chiselsandbits.render.helpers;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.Direction;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.core.Direction;
 
 import java.util.Arrays;
 
@@ -66,8 +66,8 @@ public class ModelQuadReader extends BaseModelReader
 			pos_uv[index][0] = Math.round( pos[0] * 16 );
 			pos_uv[index][1] = Math.round( pos[1] * 16 );
 			pos_uv[index][2] = Math.round( pos[2] * 16 );
-			pos_uv[index][3] = Math.round( ( uv[0] - sprite.getMinU() ) / ( sprite.getMaxU() - sprite.getMinU() ) * 16 );
-			pos_uv[index][4] = Math.round( ( uv[1] - sprite.getMinV() ) / ( sprite.getMaxV() - sprite.getMinV() ) * 16 );
+			pos_uv[index][3] = Math.round( ( uv[0] - sprite.getU0() ) / ( sprite.getU1() - sprite.getU0() ) * 16 );
+			pos_uv[index][4] = Math.round( ( uv[1] - sprite.getV0() ) / ( sprite.getV1() - sprite.getV0() ) * 16 );
 
 			minX = Math.min( minX, pos_uv[index][0] );
 			minY = Math.min( minY, pos_uv[index][1] );
@@ -99,7 +99,7 @@ public class ModelQuadReader extends BaseModelReader
 			}
 		}
 
-		if ( faceQuad.getHorizontalIndex() > 1 )
+		if ( faceQuad.get2DDataValue() > 1 )
 		{
 			final int tempU = U1;
 			U1 = U2;
@@ -115,14 +115,14 @@ public class ModelQuadReader extends BaseModelReader
 		if ( cull == null )
 		{
 			return new StringBuilder( "{ \"from\": [" ).append( minX ).append( "," ).append( minY ).append( "," ).append( minZ ).append( "], \"to\": [" ).append( maxX ).append( "," ).append( maxY ).append( "," ).append( maxZ )
-					.append( "], \"faces\": { \"" ).append( face.getString() ).append( "\":  { \"uv\": [" ).append( U1 ).append( "," ).append( V1 ).append( "," ).append( U2 ).append( "," ).append( V2 ).append( "], \"texture\": \"" )
+					.append( "], \"faces\": { \"" ).append( face.getSerializedName() ).append( "\":  { \"uv\": [" ).append( U1 ).append( "," ).append( V1 ).append( "," ).append( U2 ).append( "," ).append( V2 ).append( "], \"texture\": \"" )
 					.append( texture ).append( "\" } } },\n" ).toString();
 		}
 		else
 		{
 			return new StringBuilder( "{ \"from\": [" ).append( minX ).append( "," ).append( minY ).append( "," ).append( minZ ).append( "], \"to\": [" ).append( maxX ).append( "," ).append( maxY ).append( "," ).append( maxZ )
-					.append( "], \"faces\": { \"" ).append( face.getString() ).append( "\":  { \"uv\": [" ).append( U1 ).append( "," ).append( V1 ).append( "," ).append( U2 ).append( "," ).append( V2 ).append( "], \"texture\": \"" )
-					.append( texture ).append( "\", \"cullface\": \"" ).append( cull.getString() ).append( "\" } } },\n" ).toString();
+					.append( "], \"faces\": { \"" ).append( face.getSerializedName() ).append( "\":  { \"uv\": [" ).append( U1 ).append( "," ).append( V1 ).append( "," ).append( U2 ).append( "," ).append( V2 ).append( "], \"texture\": \"" )
+					.append( texture ).append( "\", \"cullface\": \"" ).append( cull.getSerializedName() ).append( "\" } } },\n" ).toString();
 		}
 	}
 

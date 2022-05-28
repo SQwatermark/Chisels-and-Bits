@@ -1,15 +1,15 @@
 package mod.chiselsandbits.bitbag;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class SlotReadonly extends Slot
 {
 
 	public SlotReadonly(
-			final IInventory inventoryIn,
+			final Container inventoryIn,
 			final int index,
 			final int xPosition,
 			final int yPosition )
@@ -18,15 +18,15 @@ public class SlotReadonly extends Slot
 	}
 
 	@Override
-	public boolean isItemValid(
+	public boolean mayPlace(
 			final ItemStack stack )
 	{
 		return false;
 	}
 
 	@Override
-	public boolean canTakeStack(
-			final PlayerEntity playerIn )
+	public boolean mayPickup(
+			final Player playerIn )
 	{
 		return false;
 	}

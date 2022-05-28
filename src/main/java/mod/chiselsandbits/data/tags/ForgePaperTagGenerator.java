@@ -5,19 +5,19 @@ import com.ldtteam.datagenerators.tags.TagJson;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.item.Items;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.HashCache;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = ChiselsAndBits.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ForgePaperTagGenerator implements IDataProvider
+public class ForgePaperTagGenerator implements DataProvider
 {
     @SubscribeEvent
     public static void dataGeneratorSetup(final GatherDataEvent event)
@@ -30,7 +30,7 @@ public class ForgePaperTagGenerator implements IDataProvider
     private ForgePaperTagGenerator(final DataGenerator generator) {this.generator = generator;}
 
     @Override
-    public void act(final DirectoryCache cache) throws IOException
+    public void run(final HashCache cache) throws IOException
     {
         final TagJson tagJson = new TagJson();
         tagJson.setReplace(false);
@@ -39,7 +39,7 @@ public class ForgePaperTagGenerator implements IDataProvider
         final Path forgeTagFolder = this.generator.getOutputFolder().resolve(Constants.DataGenerator.FORGE_ITEM_TAGS_DIR);
         final Path forgePaperTagPath = forgeTagFolder.resolve("paper.json");
 
-        IDataProvider.save(Constants.DataGenerator.GSON, cache, tagJson.serialize(), forgePaperTagPath);
+        DataProvider.save(Constants.DataGenerator.GSON, cache, tagJson.serialize(), forgePaperTagPath);
     }
 
     @Override

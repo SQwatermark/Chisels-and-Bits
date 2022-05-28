@@ -5,11 +5,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import mod.chiselsandbits.api.APIExceptions.SpaceOccupied;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.BlockPos;
 
 /**
  * Do not implement, acquire from {@link IChiselAndBitsAPI}

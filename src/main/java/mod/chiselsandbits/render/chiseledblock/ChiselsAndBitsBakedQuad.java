@@ -1,17 +1,15 @@
 package mod.chiselsandbits.render.chiseledblock;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import mod.chiselsandbits.render.cache.FormatInfo;
-import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChiselsAndBitsBakedQuad extends BakedQuad
 {
@@ -39,11 +37,11 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 	public void pipe(
 			final IVertexConsumer consumer )
 	{
-		final int[] eMap = LightUtil.mapFormats( consumer.getVertexFormat(), DefaultVertexFormats.BLOCK );
+		final int[] eMap = LightUtil.mapFormats( consumer.getVertexFormat(), DefaultVertexFormat.BLOCK );
 
 		consumer.setTexture( sprite );
 		consumer.setQuadTint( getTintIndex() );
-		consumer.setQuadOrientation( getFace() );
+		consumer.setQuadOrientation( getDirection() );
 		consumer.setApplyDiffuseLighting( true );
 
 		for ( int v = 0; v < 4; v++ )
@@ -66,23 +64,23 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 			int v,
 			int i )
 	{
-		return formatData.get( DefaultVertexFormats.BLOCK ).unpack( vertexData, v, i );
+		return formatData.get( DefaultVertexFormat.BLOCK ).unpack( vertices, v, i );
 	}
 
 	@Override
-	public int[] getVertexData()
+	public int[] getVertices()
 	{
         return this.processedVertexData;
 	}
 
 	private int[] buildProcessedVertexData() {
-        int[] packed = new int[DefaultVertexFormats.BLOCK.getIntegerSize() * 4];
+        int[] packed = new int[DefaultVertexFormat.BLOCK.getIntegerSize() * 4];
 
         for ( int v = 0; v < 4; v++ )
         {
-            for ( int e = 0; e < DefaultVertexFormats.BLOCK.getElements().size(); e++ )
+            for ( int e = 0; e < DefaultVertexFormat.BLOCK.getElements().size(); e++ )
             {
-                LightUtil.pack( getRawPart( v, e ), packed, DefaultVertexFormats.BLOCK, v, e );
+                LightUtil.pack( getRawPart( v, e ), packed, DefaultVertexFormat.BLOCK, v, e );
             }
         }
 
@@ -95,7 +93,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 			final Direction orientation,
 			final TextureAtlasSprite sprite)
 	{
-		super( packData( DefaultVertexFormats.BLOCK, unpackedData ), tint, orientation, sprite, true );
+		super( packData( DefaultVertexFormat.BLOCK, unpackedData ), tint, orientation, sprite, true );
         processedVertexData = buildProcessedVertexData();
     }
 

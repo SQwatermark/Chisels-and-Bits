@@ -1,8 +1,8 @@
 package mod.chiselsandbits.config;
 
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class CommonConfiguration extends AbstractConfiguration
 
     public void helpText(
       final LocalStrings string,
-      final List<ITextComponent> tooltip,
+      final List<Component> tooltip,
       final String... variables )
     {
         if ( enableHelp.get() )
@@ -52,7 +52,7 @@ public class CommonConfiguration extends AbstractConfiguration
                     }
                 }
 
-                tooltip.add( new StringTextComponent(a));
+                tooltip.add( new TextComponent(a));
             }
         }
     }

@@ -1,17 +1,17 @@
 package mod.chiselsandbits.api;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Event;
 
 public class EventBlockBitPostModification extends Event
 {
 
-	private final World w;
+	private final Level w;
 	private final BlockPos pos;
 
 	public EventBlockBitPostModification(
-			final World w,
+			final Level w,
 			final BlockPos pos )
 	{
 
@@ -19,7 +19,7 @@ public class EventBlockBitPostModification extends Event
 		this.pos = pos;
 	}
 
-	public World getWorld()
+	public Level getWorld()
 	{
 		return w;
 	}

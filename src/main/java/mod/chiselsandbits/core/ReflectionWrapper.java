@@ -2,9 +2,9 @@ package mod.chiselsandbits.core;
 
 import mod.chiselsandbits.helpers.ModUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -57,7 +57,7 @@ public class ReflectionWrapper
 	/**
 	 * CLASS: net.minecraft.client.gui.GuiIngame
 	 *
-	 * SRG: field_92016_l
+	 * SRG: lastToolHighlight
 	 *
 	 * NAME: highlightingItemStack
 	 */
@@ -67,11 +67,11 @@ public class ReflectionWrapper
 	{
 		try
 		{
-			final Object o = Minecraft.getInstance().ingameGUI;
+			final Object o = Minecraft.getInstance().gui;
 
 			if ( highlightingItemStack == null )
 			{
-				highlightingItemStack = findField( o.getClass(), "highlightingItemStack", "field_92016_l" );
+				highlightingItemStack = findField( o.getClass(), "highlightingItemStack", "lastToolHighlight" );
 			}
 
 			highlightingItemStack.setAccessible( true );
@@ -93,7 +93,7 @@ public class ReflectionWrapper
 	@OnlyIn( Dist.CLIENT )
 	public void endHighlightedStack()
 	{
-		setHighlightStack( Minecraft.getInstance().player.getHeldItemMainhand() );
+		setHighlightStack( Minecraft.getInstance().player.getMainHandItem() );
 	}
 
 	/**
@@ -106,13 +106,13 @@ public class ReflectionWrapper
 	@SuppressWarnings( "unchecked" )
 	@OnlyIn( Dist.CLIENT )
 	public Map<String, TextureAtlasSprite> getRegSprite(
-			final AtlasTexture map )
+			final TextureAtlas map )
 	{
 		try
 		{
 			if ( mapRegSprites == null )
 			{
-				mapRegSprites = findField( map.getClass(), "mapUploadedSprites", "field_94252_e" );
+				mapRegSprites = findField( map.getClass(), "mapUploadedSprites", "texturesByName" );
 			}
 
 			mapRegSprites.setAccessible( true );

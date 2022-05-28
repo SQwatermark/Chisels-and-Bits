@@ -3,8 +3,8 @@ package mod.chiselsandbits.core.api;
 import com.mojang.datafixers.util.Pair;
 import mod.chiselsandbits.client.ModConflictContext;
 import mod.chiselsandbits.core.Log;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.InterModComms;
 
 import java.util.function.Supplier;

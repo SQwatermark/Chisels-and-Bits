@@ -1,10 +1,10 @@
 package mod.chiselsandbits.helpers;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
-public class NullInventory implements IInventory
+public class NullInventory implements Container
 {
 
 	final int size;
@@ -16,20 +16,20 @@ public class NullInventory implements IInventory
 	}
 
 	@Override
-	public int getSizeInventory()
+	public int getContainerSize()
 	{
 		return size;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(
+	public ItemStack getItem(
 			final int index )
 	{
 		return ModUtil.getEmptyStack();
 	}
 
 	@Override
-	public ItemStack decrStackSize(
+	public ItemStack removeItem(
 			final int index,
 			final int count )
 	{
@@ -37,14 +37,14 @@ public class NullInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(
+	public ItemStack removeItemNoUpdate(
 			final int index )
 	{
 		return ModUtil.getEmptyStack();
 	}
 
 	@Override
-	public void setInventorySlotContents(
+	public void setItem(
 			final int index,
 			final ItemStack stack )
 	{
@@ -52,39 +52,39 @@ public class NullInventory implements IInventory
 	}
 
 	@Override
-	public int getInventoryStackLimit()
+	public int getMaxStackSize()
 	{
 		return 64;
 	}
 
 	@Override
-	public void markDirty()
+	public void setChanged()
 	{
 
 	}
 
     @Override
-    public boolean isUsableByPlayer(final PlayerEntity player)
+    public boolean stillValid(final Player player)
     {
         return false;
     }
 
 	@Override
-	public void openInventory(
-			final PlayerEntity player )
+	public void startOpen(
+			final Player player )
 	{
 
 	}
 
 	@Override
-	public void closeInventory(
-			final PlayerEntity player )
+	public void stopOpen(
+			final Player player )
 	{
 
 	}
 
 	@Override
-	public boolean isItemValidForSlot(
+	public boolean canPlaceItem(
 			final int index,
 			final ItemStack stack )
 	{
@@ -92,7 +92,7 @@ public class NullInventory implements IInventory
 	}
 
 	@Override
-	public void clear()
+	public void clearContent()
 	{
 
 	}

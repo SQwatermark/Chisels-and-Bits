@@ -9,21 +9,22 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemChiseledBit;
+import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
-import mod.chiselsandbits.registry.ModTileEntityTypes;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import mod.chiselsandbits.registry.ModBlockEntityTypes;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class TileEntityBitStorage extends TileEntity implements IItemHandler, IFluidHandler
+public class TileEntityBitStorage extends BlockEntity implements IItemHandler, IFluidHandler
 {
 
     public LazyOptional<IItemHandler> itemHandler = LazyOptional.of(() -> this);
@@ -53,42 +54,47 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 
 	private int oldLV = -1;
 
-    public TileEntityBitStorage()
+    public TileEntityBitStorage() {
+        this(BlockPos.ZERO, ModBlocks.BIT_STORAGE_BLOCK.get().defaultBlockState());
+    }
+
+    public TileEntityBitStorage(BlockPos pos, BlockState state)
     {
-        super(ModTileEntityTypes.BIT_STORAGE.get());
+        super(ModBlockEntityTypes.BIT_STORAGE.get(), pos, state);
     }
 
     @Override
 	public void onDataPacket(
-			final NetworkManager net,
-			final SUpdateTileEntityPacket pkt )
+			final Connection net,
+			final ClientboundBlockEntityDataPacket pkt )
 	{
-		read(null, pkt.getNbtCompound() );
+		load( pkt.getTag() );
 	}
 
 	@Override
-	public CompoundNBT getUpdateTag()
+	public CompoundTag getUpdateTag()
 	{
-		final CompoundNBT nbttagcompound = new CompoundNBT();
-		return write( nbttagcompound );
+		final CompoundTag nbttagcompound = new CompoundTag();
+        saveAdditional(nbttagcompound);
+		return nbttagcompound;
 	}
 
 	@Override
-	public SUpdateTileEntityPacket getUpdatePacket()
+	public ClientboundBlockEntityDataPacket getUpdatePacket()
 	{
-		final CompoundNBT t = new CompoundNBT();
-		return new SUpdateTileEntityPacket( getPos(), 0, write(t) );
+		final CompoundTag t = new CompoundTag();
+        saveAdditional(t);
+		return new ClientboundBlockEntityDataPacket( getBlockPos(), ModBlockEntityTypes.BIT_STORAGE.get(), t );
 	}
 
     @Override
-    public void read(final BlockState state, final CompoundNBT nbt)
-    {
-        super.read(state, nbt);
-        final String fluid = nbt.getString( "fluid" );
+    public void load(CompoundTag p_155245_) {
+        super.load( p_155245_);
+        final String fluid = p_155245_.getString( "fluid" );
 
         if (fluid.equals( "" ))
         {
-            final int rawState = nbt.getInt("blockstate");
+            final int rawState = p_155245_.getInt("blockstate");
             if (rawState != -1)
             {
                 this.state = ModUtil.getStateById(rawState);
@@ -103,19 +109,16 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
             myFluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluid));
         }
 
-        bits = nbt.getInt( "bits" );
+        bits = p_155245_.getInt( "bits" );
     }
 
     @Override
-    public CompoundNBT write(final CompoundNBT compound)
-    {
-        final CompoundNBT nbt = super.write(compound);
-        nbt.putString( "fluid", myFluid == null ? "" : Objects.requireNonNull(myFluid.getRegistryName()).toString() );
-        nbt.putInt("blockstate", myFluid != null || state == null ? -1 : ModUtil.getStateId(state));
-        nbt.putInt( "bits", bits );
-        return nbt;
+    protected void saveAdditional(CompoundTag p_187471_) {
+        super.saveAdditional(p_187471_);
+        p_187471_.putString( "fluid", myFluid == null ? "" : Objects.requireNonNull(myFluid.getRegistryName()).toString() );
+        p_187471_.putInt("blockstate", myFluid != null || state == null ? -1 : ModUtil.getStateId(state));
+        p_187471_.putInt( "bits", bits );
     }
-
 
 	@SuppressWarnings( "unchecked" )
 	@Override
@@ -170,14 +173,14 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 			return ModUtil.getEmptyStack();
 		}
 
-        return ItemChiseledBit.createStack( ModUtil.getStateId( liquid.getDefaultState().getBlockState() ), amount, false );
+        return ItemChiseledBit.createStack( ModUtil.getStateId( liquid.defaultFluidState().createLegacyBlock() ), amount, false );
 	}
 
     public @Nonnull ItemStack getBlockBitStack(
       final BlockState blockState,
       final int amount )
     {
-        if ( blockState == null || blockState.getBlockState() == null )
+        if ( blockState == null )
         {
             return ModUtil.getEmptyStack();
         }
@@ -226,7 +229,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
         Fluid f = null;
         for ( final Fluid fl : ForgeRegistries.FLUIDS )
         {
-            if ( fl.getDefaultState().getBlockState().getBlock() == blk.getBlock() )
+            if ( fl.defaultFluidState().createLegacyBlock().getBlock() == blk.getBlock() )
             {
                 f = fl;
                 break;
@@ -239,7 +242,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
         }
 
         final ItemStack bitItem = getFluidBitStack( myFluid, bits );
-        final boolean canInsert = ModUtil.isEmpty( bitItem ) || ItemStack.areItemStackTagsEqual( bitItem, stack) && bitItem.getItem() == stack.getItem() || state == null;
+        final boolean canInsert = ModUtil.isEmpty( bitItem ) || ItemStack.tagMatches( bitItem, stack) && bitItem.getItem() == stack.getItem() || state == null;
 
         if ( canInsert )
         {
@@ -280,7 +283,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
         Fluid f = null;
         for ( final Fluid fl : ForgeRegistries.FLUIDS )
         {
-            if ( fl.getDefaultState().getBlockState().getBlock() == blk.getBlock() )
+            if ( fl.defaultFluidState().createLegacyBlock().getBlock() == blk.getBlock() )
             {
                 f = fl;
                 break;
@@ -293,7 +296,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
         }
 
         final ItemStack bitItem = getBlockBitStack( blk, bits );
-        final boolean canInsert = ModUtil.isEmpty( bitItem ) || ItemStack.areItemStackTagsEqual( bitItem, stack) && bitItem.getItem() == stack.getItem();
+        final boolean canInsert = ModUtil.isEmpty( bitItem ) || ItemStack.tagMatches( bitItem, stack) && bitItem.getItem() == stack.getItem();
 
         if ( canInsert )
         {
@@ -330,16 +333,16 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 
     private void saveAndUpdate()
 	{
-	    if (world == null || getWorld() == null)
+	    if (level == null || getLevel() == null)
 	        return;
 
-		markDirty();
-		ModUtil.sendUpdate( world, getPos() );
+		setChanged();
+		ModUtil.sendUpdate( level, getBlockPos() );
 
 		final int lv = getLightValue();
 		if ( oldLV != lv )
 		{
-			getWorld().getLightManager().checkBlock( getPos() );
+			getLevel().getLightEngine().checkBlock( getBlockPos() );
 			oldLV = lv;
 		}
 	}
@@ -429,7 +432,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 
 	public int getLightValue()
 	{
-	    final BlockState workingState = myFluid == null ? state : myFluid.getDefaultState().getBlockState();
+	    final BlockState workingState = myFluid == null ? state : myFluid.defaultFluidState().createLegacyBlock();
 		if (workingState == null)
         {
             return 0;
@@ -439,18 +442,18 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 	}
 
 	boolean extractBits(
-			final PlayerEntity playerIn,
+			final Player playerIn,
 			final double hitX,
 			final double hitY,
 			final double hitZ,
 			final BlockPos pos )
 	{
-		if ( !playerIn.isSneaking() )
+		if ( !playerIn.isShiftKeyDown() )
 		{
 			final ItemStack is = extractItem( 0, 64, false );
 			if ( !is.isEmpty() )
 			{
-				ChiselsAndBits.getApi().giveBitToPlayer( playerIn, is, new Vector3d( hitX + pos.getX(), hitY + pos.getY(), hitZ + pos.getZ() ) );
+				ChiselsAndBits.getApi().giveBitToPlayer( playerIn, is, new Vec3( hitX + pos.getX(), hitY + pos.getY(), hitZ + pos.getZ() ) );
 			}
 			return true;
 		}
@@ -459,17 +462,17 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 	}
 
 	boolean addAllPossibleBits(
-			final PlayerEntity playerIn )
+			final Player playerIn )
 	{
-		if ( playerIn.isSneaking() )
+		if ( playerIn.isShiftKeyDown() )
 		{
 			boolean change = false;
-			for ( int x = 0; x < playerIn.inventory.getSizeInventory(); x++ )
+			for ( int x = 0; x < playerIn.getInventory().getContainerSize(); x++ )
 			{
-				final ItemStack stackInSlot = ModUtil.nonNull( playerIn.inventory.getStackInSlot( x ) );
+				final ItemStack stackInSlot = ModUtil.nonNull( playerIn.getInventory().getItem( x ) );
 				if ( ChiselsAndBits.getApi().getItemType( stackInSlot ) == ItemType.CHISLED_BIT )
 				{
-					playerIn.inventory.setInventorySlotContents( x, insertItem( 0, stackInSlot, false ) );
+					playerIn.getInventory().setItem( x, insertItem( 0, stackInSlot, false ) );
 					change = true;
 				}
 
@@ -492,7 +495,7 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 
 			if ( change )
 			{
-				playerIn.inventory.markDirty();
+				playerIn.getInventory().setChanged();
 			}
 
 			return change;
@@ -503,16 +506,16 @@ public class TileEntityBitStorage extends TileEntity implements IItemHandler, IF
 
 	boolean addHeldBits(
 			final @Nonnull ItemStack current,
-			final PlayerEntity playerIn )
+			final Player playerIn )
 	{
-		if ( playerIn.isSneaking() || this.bits == 0 )
+		if ( playerIn.isShiftKeyDown() || this.bits == 0 )
 		{
 			if ( ChiselsAndBits.getApi().getItemType( current ) == ItemType.CHISLED_BIT || BlockBitInfo.canChisel(current) )
 			{
 			    final ItemStack resultStack = insertItem( 0, current, false );
                 if (!playerIn.isCreative()) {
-                    playerIn.inventory.setInventorySlotContents( playerIn.inventory.currentItem, resultStack );
-                    playerIn.inventory.markDirty();
+                    playerIn.getInventory().setItem( playerIn.getInventory().selected, resultStack );
+                    playerIn.getInventory().setChanged();
                 }
 				return true;
 			}

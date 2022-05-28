@@ -1,13 +1,13 @@
 package mod.chiselsandbits.chiseledblock.serialization;
 
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class CrossWorldBlobSerializer extends BlobSerializer
 {
 
 	public CrossWorldBlobSerializer(
-			final PacketBuffer toInflate )
+			final FriendlyByteBuf toInflate )
 	{
 		super( toInflate );
 	}
@@ -20,20 +20,20 @@ public class CrossWorldBlobSerializer extends BlobSerializer
 
 	@Override
 	protected int readStateID(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
-		final String name = buffer.readString();
+		final String name = buffer.readUtf();
 		return StringStates.getStateIDFromName( name );
 	}
 
 	@Override
 	protected void writeStateID(
-			final PacketBuffer buffer,
+			final FriendlyByteBuf buffer,
 			final int key )
 	{
 		final String sname = StringStates.getNameFromStateID( key );
 
-		buffer.writeString( sname );
+		buffer.writeUtf( sname );
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package mod.chiselsandbits.chiseledblock.iterators;
 
 import mod.chiselsandbits.chiseledblock.data.IntegerBox;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public abstract class BaseChiselIterator implements ChiselIterator
 {
@@ -52,7 +52,7 @@ public abstract class BaseChiselIterator implements ChiselIterator
 	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox(
+	public AABB getBoundingBox(
 			final VoxelBlob vb,
 			final boolean boundSolids )
 	{
@@ -61,7 +61,7 @@ public abstract class BaseChiselIterator implements ChiselIterator
 
 		if ( box != null )
 		{
-			return new AxisAlignedBB( box.minX * One16thf, box.minY * One16thf, box.minZ * One16thf, ( box.maxX + 1 ) * One16thf, ( box.maxY + 1 ) * One16thf, ( box.maxZ + 1 ) * One16thf );
+			return new AABB( box.minX * One16thf, box.minY * One16thf, box.minZ * One16thf, ( box.maxX + 1 ) * One16thf, ( box.maxY + 1 ) * One16thf, ( box.maxZ + 1 ) * One16thf );
 		}
 		else
 		{

@@ -1,7 +1,7 @@
 package mod.chiselsandbits.bitstorage;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
@@ -10,33 +10,39 @@ import mod.chiselsandbits.render.chiseledblock.ChiseledBlockBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.utils.FluidCuboidHelper;
 import mod.chiselsandbits.utils.SimpleMaxSizedCache;
-import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.Objects;
 
-public class TileEntitySpecialRenderBitStorage extends TileEntityRenderer<TileEntityBitStorage>
+public class TileEntitySpecialRenderBitStorage implements BlockEntityRenderer<TileEntityBitStorage>, BlockEntityRendererProvider<TileEntityBitStorage>
 {
 
     private static final SimpleMaxSizedCache<CacheKey, VoxelBlob> STORAGE_CONTENTS_BLOB_CACHE = new SimpleMaxSizedCache<>(ChiselsAndBits.getConfig().getClient().bitStorageContentCacheSize.get());
 
-    public TileEntitySpecialRenderBitStorage(TileEntityRendererDispatcher dispatcher)
+    @Override
+    public BlockEntityRenderer<TileEntityBitStorage> create(Context p_173571_) {
+        return this;
+    }
+
+    public TileEntitySpecialRenderBitStorage()
     {
-        super(dispatcher);
+        super();
     }
 
     @Override
     public void render(
       final TileEntityBitStorage te,
       final float partialTicks,
-      final MatrixStack matrixStackIn,
-      final IRenderTypeBuffer buffer,
+      final PoseStack matrixStackIn,
+      final MultiBufferSource buffer,
       final int combinedLightIn,
       final int combinedOverlayIn)
     {
@@ -44,14 +50,14 @@ public class TileEntitySpecialRenderBitStorage extends TileEntityRenderer<TileEn
             final FluidStack fluidStack = te.getBitsAsFluidStack();
             if (fluidStack != null)
             {
-                RenderType.getBlockRenderTypes().forEach(renderType -> {
-                    if (!RenderTypeLookup.canRenderInLayer(fluidStack.getFluid().getDefaultState(), renderType))
+                RenderType.chunkBufferLayers().forEach(renderType -> {
+                    if (!ItemBlockRenderTypes.canRenderInLayer(fluidStack.getFluid().defaultFluidState(), renderType))
                         return;
 
-                    if (renderType == RenderType.getTranslucent() && Minecraft.isFabulousGraphicsEnabled())
-                        renderType = Atlases.getTranslucentCullBlockType();
+                    if (renderType == RenderType.translucent() && Minecraft.useShaderTransparency())
+                        renderType = Sheets.translucentCullBlockSheet();
 
-                    final IVertexBuilder builder = buffer.getBuffer(renderType);
+                    final VertexConsumer builder = buffer.getBuffer(renderType);
 
                     final float fullness = (float) fluidStack.getAmount() / (float) TileEntityBitStorage.MAX_CONTENTS;
 
@@ -71,7 +77,7 @@ public class TileEntitySpecialRenderBitStorage extends TileEntityRenderer<TileEn
         }
 
         final int bits = te.getBits();
-        final BlockState state = te.getMyFluid() == null ? te.getState() : te.getMyFluid().getDefaultState().getBlockState();
+        final BlockState state = te.getMyFluid() == null ? te.getState() : te.getMyFluid().defaultFluidState().createLegacyBlock();
         if (bits <= 0 || state == null)
             return;
 
@@ -82,17 +88,17 @@ public class TileEntitySpecialRenderBitStorage extends TileEntityRenderer<TileEn
             STORAGE_CONTENTS_BLOB_CACHE.put(new CacheKey(ModUtil.getStateId(state), bits), innerModelBlob);
         }
 
-        matrixStackIn.push();
+        matrixStackIn.pushPose();
         matrixStackIn.translate(2/16f, 2/16f, 2/16f);
         matrixStackIn.scale(12/16f, 12/16f, 12/16f);
         final VoxelBlob finalInnerModelBlob = innerModelBlob;
-        RenderType.getBlockRenderTypes().forEach(renderType -> {
+        RenderType.chunkBufferLayers().forEach(renderType -> {
             final ChiseledBlockBakedModel innerModel = ChiseledBlockSmartModel.getCachedModel(
               ModUtil.getStateId(state),
               finalInnerModelBlob,
               ChiselRenderType.fromLayer(renderType, te.getMyFluid() != null),
-              DefaultVertexFormats.BLOCK,
-              Objects.requireNonNull(te.getWorld()).getRandom()
+              DefaultVertexFormat.BLOCK,
+              Objects.requireNonNull(te.getLevel()).getRandom()
             );
 
             if (!innerModel.isEmpty())
@@ -101,11 +107,11 @@ public class TileEntitySpecialRenderBitStorage extends TileEntityRenderer<TileEn
                 final float g = te.getMyFluid() == null ? 1f : ((te.getMyFluid().getAttributes().getColor() >> 8) & 0xff) / 255f;
                 final float b = te.getMyFluid() == null ? 1f : ((te.getMyFluid().getAttributes().getColor()) & 0xff) / 255f;
 
-                Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelRenderer().renderModel(matrixStackIn.getLast(), buffer.getBuffer(renderType), state, innerModel, r, g, b, combinedLightIn, combinedOverlayIn,
+                Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(matrixStackIn.last(), buffer.getBuffer(renderType), state, innerModel, r, g, b, combinedLightIn, combinedOverlayIn,
                   EmptyModelData.INSTANCE);
             }
         });
-        matrixStackIn.pop();
+        matrixStackIn.popPose();
     }
 
     private static final class CacheKey {

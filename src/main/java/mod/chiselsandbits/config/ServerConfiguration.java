@@ -1,6 +1,6 @@
 package mod.chiselsandbits.config;
 import com.google.common.collect.Lists;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.List;

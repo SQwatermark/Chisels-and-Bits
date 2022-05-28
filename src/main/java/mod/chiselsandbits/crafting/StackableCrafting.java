@@ -7,16 +7,16 @@ import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
-public class StackableCrafting extends SpecialRecipe
+public class StackableCrafting extends CustomRecipe
 {
 
 	public StackableCrafting(
@@ -27,14 +27,14 @@ public class StackableCrafting extends SpecialRecipe
 
 	@Override
 	public boolean matches(
-			final CraftingInventory craftingInv,
-			final World worldIn )
+			final CraftingContainer craftingInv,
+			final Level worldIn )
 	{
 		ItemStack target = null;
 
-		for ( int x = 0; x < craftingInv.getSizeInventory(); x++ )
+		for ( int x = 0; x < craftingInv.getContainerSize(); x++ )
 		{
-			final ItemStack f = craftingInv.getStackInSlot( x );
+			final ItemStack f = craftingInv.getItem( x );
 			if ( ModUtil.isEmpty( f ) )
 			{
 				continue;
@@ -59,14 +59,14 @@ public class StackableCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public ItemStack getCraftingResult(
-			final CraftingInventory craftingInv )
+	public ItemStack assemble(
+			final CraftingContainer craftingInv )
 	{
 		ItemStack target = null;
 
-		for ( int x = 0; x < craftingInv.getSizeInventory(); x++ )
+		for ( int x = 0; x < craftingInv.getContainerSize(); x++ )
 		{
-			final ItemStack f = craftingInv.getStackInSlot( x );
+			final ItemStack f = craftingInv.getItem( x );
 			if ( ModUtil.isEmpty( f ) )
 			{
 				continue;
@@ -147,7 +147,7 @@ public class StackableCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public boolean canFit(
+	public boolean canCraftInDimensions(
 			final int width,
 			final int height )
 	{
@@ -155,20 +155,20 @@ public class StackableCrafting extends SpecialRecipe
 	}
 
 	@Override
-	public ItemStack getRecipeOutput()
+	public ItemStack getResultItem()
 	{
 		return ModUtil.getEmptyStack(); // nope
 	}
 
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(
-			final CraftingInventory inv )
+			final CraftingContainer inv )
 	{
-		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( inv.getSizeInventory(), ItemStack.EMPTY );
+		final NonNullList<ItemStack> aitemstack = NonNullList.withSize( inv.getContainerSize(), ItemStack.EMPTY );
 
 		for ( int i = 0; i < aitemstack.size(); ++i )
 		{
-			final ItemStack itemstack = ModUtil.nonNull( inv.getStackInSlot( i ) );
+			final ItemStack itemstack = ModUtil.nonNull( inv.getItem( i ) );
 			aitemstack.set( i, net.minecraftforge.common.ForgeHooks.getContainerItem( itemstack ) );
 		}
 
@@ -176,7 +176,7 @@ public class StackableCrafting extends SpecialRecipe
 	}
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.STACKABLE_CRAFTING.get();
     }

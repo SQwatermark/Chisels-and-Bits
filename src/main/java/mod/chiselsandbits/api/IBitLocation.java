@@ -1,8 +1,7 @@
 package mod.chiselsandbits.api;
 
-import mod.chiselsandbits.chiseledblock.data.BitLocation;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 /**
  * Do not implement, acquire from {@link IChiselAndBitsAPI}

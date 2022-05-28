@@ -2,7 +2,7 @@ package mod.chiselsandbits.core.api;
 
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.Log;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.fml.InterModComms;
 
 import java.util.HashMap;

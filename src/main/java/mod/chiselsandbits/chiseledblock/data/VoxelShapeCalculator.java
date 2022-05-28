@@ -1,10 +1,10 @@
 package mod.chiselsandbits.chiseledblock.data;
 
 import mod.chiselsandbits.api.BoxType;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,19 +23,19 @@ public class VoxelShapeCalculator {
         return calculateFromBB(reference.getBoxes(type));
     }
 
-    private static VoxelShape calculateFromBB(final Collection<AxisAlignedBB> bbList) {
+    private static VoxelShape calculateFromBB(final Collection<AABB> bbList) {
         return bbList.stream().reduce(
-          VoxelShapes.empty(),
+          Shapes.empty(),
           (voxelShape, axisAlignedBB) -> {
-              final VoxelShape bbShape = VoxelShapes.create(axisAlignedBB);
-              return VoxelShapes.combine(voxelShape, bbShape, IBooleanFunction.OR);
+              final VoxelShape bbShape = Shapes.create(axisAlignedBB);
+              return Shapes.joinUnoptimized(voxelShape, bbShape, BooleanOp.OR);
           },
-          (voxelShape, voxelShape2) -> VoxelShapes.combine(voxelShape, voxelShape2, IBooleanFunction.OR)
-        ).simplify();
+          (voxelShape, voxelShape2) -> Shapes.joinUnoptimized(voxelShape, voxelShape2, BooleanOp.OR)
+        ).optimize();
     }
 
     private static VoxelShape calculateFromBlob(final VoxelBlob blob) {
-        VoxelShape collisionShape = VoxelShapes.empty();
+        VoxelShape collisionShape = Shapes.empty();
         int x1 = 15, y1 = 15, z1 = 15, x2 = 0, y2 = 0, z2 = 0;
 
         // For every x/z coordinate we build shapes from the bottom up
@@ -55,7 +55,7 @@ public class VoxelShapeCalculator {
                         }
                     } else if (start != -1) {
                         //If this is air and we were working on a box we end it
-                        collisionShape = VoxelShapes.or(collisionShape, VoxelShapes.create(dx, start / 16.0d, dz, dx + bitDimension, y / 16.0d, dz + bitDimension));
+                        collisionShape = Shapes.or(collisionShape, Shapes.box(dx, start / 16.0d, dz, dx + bitDimension, y / 16.0d, dz + bitDimension));
                         start = -1;
                         if (x < x1) x1 = x;
                         if (z < z1) z1 = z;
@@ -66,7 +66,7 @@ public class VoxelShapeCalculator {
                 }
                 if (start != -1) {
                     //If we ended with a box we add that too
-                    collisionShape = VoxelShapes.or(collisionShape, VoxelShapes.create(dx, start / 16.0d, dz, dx + bitDimension, 1.0d, dz + bitDimension));
+                    collisionShape = Shapes.or(collisionShape, Shapes.box(dx, start / 16.0d, dz, dx + bitDimension, 1.0d, dz + bitDimension));
                     y2 = 15;
                     if (x < x1) x1 = x;
                     if (z < z1) z1 = z;

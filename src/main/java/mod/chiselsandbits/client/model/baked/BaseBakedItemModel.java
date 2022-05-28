@@ -5,20 +5,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel implements IBakedModel
+public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel implements BakedModel
 {
 	protected ArrayList<BakedQuad> list = new ArrayList<BakedQuad>();
 
 	@Override
-	final public boolean isAmbientOcclusion()
+	final public boolean useAmbientOcclusion()
 	{
 		return true;
 	}
@@ -30,7 +30,7 @@ public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel imple
 	}
 
 	@Override
-	final public boolean isBuiltInRenderer()
+	final public boolean isCustomRenderer()
 	{
 		return false;
 	}
@@ -47,14 +47,14 @@ public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel imple
     }
 
 	@Override
-	final public ItemCameraTransforms getItemCameraTransforms()
+	final public ItemTransforms getTransforms()
 	{
-		return ItemCameraTransforms.DEFAULT;
+		return ItemTransforms.NO_TRANSFORMS;
 	}
 
 	@Override
-	public ItemOverrideList getOverrides()
+	public ItemOverrides getOverrides()
 	{
-		return ItemOverrideList.EMPTY;
+		return ItemOverrides.EMPTY;
 	}
 }

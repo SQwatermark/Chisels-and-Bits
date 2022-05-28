@@ -2,7 +2,7 @@ package mod.chiselsandbits.helpers;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 public class IItemHandlerSlot implements IItemInInventory
@@ -47,7 +47,7 @@ public class IItemHandlerSlot implements IItemInInventory
 	public boolean consume()
 	{
 		ItemStack is = internal.extractItem( zz, 1, true );
-		if ( is != null && ItemStack.areItemStackTagsEqual( is, stack ) && ItemStack.areItemStackTagsEqual( is, stack ) )
+		if ( is != null && ItemStack.tagMatches( is, stack ) && ItemStack.tagMatches( is, stack ) )
 		{
 			internal.extractItem( zz, 1, false );
 			ModUtil.adjustStackSize( stack, -1 );

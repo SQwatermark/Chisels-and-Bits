@@ -1,28 +1,27 @@
 package mod.chiselsandbits.helpers;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
 
-public class PlayerCopiedInventory implements IInventory
+public class PlayerCopiedInventory implements Container
 {
 
-    PlayerInventory logicBase;
+    Inventory logicBase;
 	ItemStack[] slots;
 
 	public PlayerCopiedInventory(
-			final PlayerInventory original )
+			final Inventory original )
 	{
 		logicBase = original;
-		slots = new ItemStack[original.getSizeInventory()];
+		slots = new ItemStack[original.getContainerSize()];
 
 		for ( int x = 0; x < slots.length; ++x )
 		{
-			slots[x] = original.getStackInSlot( x );
+			slots[x] = original.getItem( x );
 
 			if ( slots[x] != null )
 			{
@@ -38,26 +37,26 @@ public class PlayerCopiedInventory implements IInventory
     }
 
     @Override
-    public boolean isUsableByPlayer(final PlayerEntity player)
+    public boolean stillValid(final Player player)
     {
         return true;
     }
 
     @Override
-	public int getSizeInventory()
+	public int getContainerSize()
 	{
 		return slots.length;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(
+	public ItemStack getItem(
 			final int index )
 	{
 		return slots[index];
 	}
 
 	@Override
-	public ItemStack decrStackSize(
+	public ItemStack removeItem(
 			final int index,
 			final int count )
 	{
@@ -65,7 +64,7 @@ public class PlayerCopiedInventory implements IInventory
 		{
 			if ( ModUtil.getStackSize( slots[index] ) <= count )
 			{
-				return removeStackFromSlot( index );
+				return removeItemNoUpdate( index );
 			}
 			else
 			{
@@ -77,7 +76,7 @@ public class PlayerCopiedInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(
+	public ItemStack removeItemNoUpdate(
 			final int index )
 	{
 		final ItemStack r = slots[index];
@@ -86,7 +85,7 @@ public class PlayerCopiedInventory implements IInventory
 	}
 
 	@Override
-	public void setInventorySlotContents(
+	public void setItem(
 			final int index,
 			final ItemStack stack )
 	{
@@ -94,25 +93,25 @@ public class PlayerCopiedInventory implements IInventory
 	}
 
 	@Override
-	public int getInventoryStackLimit()
+	public int getMaxStackSize()
 	{
-		return logicBase.getInventoryStackLimit();
+		return logicBase.getMaxStackSize();
 	}
 
 	@Override
-	public void markDirty()
+	public void setChanged()
 	{
 	}
 
 	@Override
-	public boolean isItemValidForSlot(
+	public boolean canPlaceItem(
 			final int index,
 			final ItemStack stack )
 	{
-		return logicBase.isItemValidForSlot( index, stack );
+		return logicBase.canPlaceItem( index, stack );
 	}
 	@Override
-	public void clear()
+	public void clearContent()
 	{
 		for ( int x = 0; x < slots.length; ++x )
 		{

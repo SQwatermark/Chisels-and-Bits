@@ -1,7 +1,7 @@
 package mod.chiselsandbits.client.gui;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import mod.chiselsandbits.api.ReplacementStateHandler;
 import mod.chiselsandbits.core.ClientSide;
@@ -10,16 +10,13 @@ import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.helpers.LocalStrings;
 import mod.chiselsandbits.modes.IToolMode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -40,7 +37,7 @@ public class ChiselsAndBitsMenu extends Screen
 
     protected ChiselsAndBitsMenu()
     {
-        super(new StringTextComponent("Menu"));
+        super(new TextComponent("Menu"));
     }
 
     private float clampVis(
@@ -164,16 +161,16 @@ public class ChiselsAndBitsMenu extends Screen
 	};
 
     @Override
-    public void render(final MatrixStack matrixStack, final int mouseX, final int mouseY, final float partialTicks)
+    public void render(final PoseStack matrixStack, final int mouseX, final int mouseY, final float partialTicks)
     {
-        final ChiselToolType tool = ClientSide.instance.getHeldToolType( Hand.MAIN_HAND );
+        final ChiselToolType tool = ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND );
 
         if ( tool == null )
         {
             return;
         }
 
-        matrixStack.push();
+        matrixStack.pushPose();
         //matrixStack.translate( 0.0F, 0.0F, 200.0F );
 
         final int start = (int) ( visibility * 98 ) << 24;
@@ -183,13 +180,14 @@ public class ChiselsAndBitsMenu extends Screen
 
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
+//        RenderSystem.disableAlphaTest();
         RenderSystem.blendFuncSeparate( GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0 );
-        RenderSystem.shadeModel( GL11.GL_SMOOTH );
-        final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuffer();
+//        GL11.glShadeModel(GL11.GL_SMOOTH);
+//        RenderSystem.shadeModel( GL11.GL_SMOOTH );
+        final Tesselator tessellator = Tesselator.getInstance();
+        final BufferBuilder buffer = tessellator.getBuilder();
 
-        buffer.begin( GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR );
+        buffer.begin( VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR );
 
         final double vecX = mouseX - width / 2;
         final double vecY = (mouseY - height / 2);
@@ -250,7 +248,7 @@ public class ChiselsAndBitsMenu extends Screen
                     textSide = Direction.DOWN;
                 }
 
-                btns.add( new MenuButton( "chiselsandbits.color." + color.getTranslationKey(), action, bntPos, underring, color.getColorValue(), textSide ) );
+                btns.add( new MenuButton( "chiselsandbits.color." + color.getName(), action, bntPos, underring, color.getMaterialColor().col, textSide ) );
                 bntPos += bntSize;
             }
         }
@@ -314,10 +312,10 @@ public class ChiselsAndBitsMenu extends Screen
                     switchTo = mnuRgn.mode;
                 }
 
-                buffer.pos( middle_x + x1m1, middle_y + y1m1, 0 ).color( f, f, f, a ).endVertex();
-                buffer.pos( middle_x + x2m1, middle_y + y2m1, 0 ).color( f, f, f, a ).endVertex();
-                buffer.pos( middle_x + x2m2, middle_y + y2m2, 0 ).color( f, f, f, a ).endVertex();
-                buffer.pos( middle_x + x1m2, middle_y + y1m2, 0 ).color( f, f, f, a ).endVertex();
+                buffer.vertex( middle_x + x1m1, middle_y + y1m1, 0 ).color( f, f, f, a ).endVertex();
+                buffer.vertex( middle_x + x2m1, middle_y + y2m1, 0 ).color( f, f, f, a ).endVertex();
+                buffer.vertex( middle_x + x2m2, middle_y + y2m2, 0 ).color( f, f, f, a ).endVertex();
+                buffer.vertex( middle_x + x1m2, middle_y + y1m2, 0 ).color( f, f, f, a ).endVertex();
 
                 currentMode++;
             }
@@ -335,24 +333,25 @@ public class ChiselsAndBitsMenu extends Screen
                 doAction = btn.action;
             }
 
-            buffer.pos( middle_x + btn.x1, middle_y + btn.y1, 0 ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + btn.x1, middle_y + btn.y2, 0 ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + btn.x2, middle_y + btn.y2, 0 ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + btn.x2, middle_y + btn.y1, 0 ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + btn.x1, middle_y + btn.y1, 0 ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + btn.x1, middle_y + btn.y2, 0 ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + btn.x2, middle_y + btn.y2, 0 ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + btn.x2, middle_y + btn.y1, 0 ).color( f, f, f, a ).endVertex();
         }
 
-        tessellator.draw();
+        tessellator.end();
 
-        RenderSystem.shadeModel( GL11.GL_FLAT );
+//        GL11.glShadeModel(GL11.GL_FLAT);
+//        RenderSystem.shadeModel( GL11.GL_FLAT );
 
         //matrixStack.translate( 0.0F, 0.0F, 5.0F );
         RenderSystem.enableTexture();
-        RenderSystem.color4f( 1, 1, 1, 1.0f );
+        RenderSystem.setShaderColor( 1, 1, 1, 1.0f );
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.bindTexture( Minecraft.getInstance().getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).getGlTextureId() );
+//        RenderSystem.enableAlphaTest();// TODO
+        RenderSystem.bindTexture( Minecraft.getInstance().getTextureManager().getTexture(InventoryMenu.BLOCK_ATLAS).getId() );
 
-        buffer.begin( GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR );
+        buffer.begin( VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR );
 
         for ( final MenuRegion mnuRgn : modes )
         {
@@ -378,10 +377,10 @@ public class ChiselsAndBitsMenu extends Screen
             final double v1 = sip.top * 16.0;
             final double v2 = ( sip.top + sip.height ) * 16.0;
 
-            buffer.pos( middle_x + x1, middle_y + y1, 0 ).tex( sprite.getInterpolatedU( u1 ), sprite.getInterpolatedV( v1 ) ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + x1, middle_y + y2, 0 ).tex( sprite.getInterpolatedU( u1 ), sprite.getInterpolatedV( v2 ) ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + x2, middle_y + y2, 0 ).tex( sprite.getInterpolatedU( u2 ), sprite.getInterpolatedV( v2 ) ).color( f, f, f, a ).endVertex();
-            buffer.pos( middle_x + x2, middle_y + y1, 0 ).tex( sprite.getInterpolatedU( u2 ), sprite.getInterpolatedV( v1 ) ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + x1, middle_y + y1, 0 ).uv( sprite.getU( u1 ), sprite.getV( v1 ) ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + x1, middle_y + y2, 0 ).uv( sprite.getU( u1 ), sprite.getV( v2 ) ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + x2, middle_y + y2, 0 ).uv( sprite.getU( u2 ), sprite.getV( v2 ) ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + x2, middle_y + y1, 0 ).uv( sprite.getU( u2 ), sprite.getV( v1 ) ).color( f, f, f, a ).endVertex();
         }
 
         for ( final MenuButton btn : btns )
@@ -405,13 +404,13 @@ public class ChiselsAndBitsMenu extends Screen
             final float green = f * ( ( btn.color >> 8 & 0xff ) / 255.0f );
             final float blue = f * ( ( btn.color & 0xff ) / 255.0f );
 
-            buffer.pos( middle_x + btnx1, middle_y + btny1, 0 ).tex( sprite.getInterpolatedU( u1 ), sprite.getInterpolatedV( v1 ) ).color( red, green, blue, a ).endVertex();
-            buffer.pos( middle_x + btnx1, middle_y + btny2, 0 ).tex( sprite.getInterpolatedU( u1 ), sprite.getInterpolatedV( v2 ) ).color( red, green, blue, a ).endVertex();
-            buffer.pos( middle_x + btnx2, middle_y + btny2, 0 ).tex( sprite.getInterpolatedU( u2 ), sprite.getInterpolatedV( v2 ) ).color( red, green, blue, a ).endVertex();
-            buffer.pos( middle_x + btnx2, middle_y + btny1, 0 ).tex( sprite.getInterpolatedU( u2 ), sprite.getInterpolatedV( v1 ) ).color( red, green, blue, a ).endVertex();
+            buffer.vertex( middle_x + btnx1, middle_y + btny1, 0 ).uv( sprite.getU( u1 ), sprite.getV( v1 ) ).color( red, green, blue, a ).endVertex();
+            buffer.vertex( middle_x + btnx1, middle_y + btny2, 0 ).uv( sprite.getU( u1 ), sprite.getV( v2 ) ).color( red, green, blue, a ).endVertex();
+            buffer.vertex( middle_x + btnx2, middle_y + btny2, 0 ).uv( sprite.getU( u2 ), sprite.getV( v2 ) ).color( red, green, blue, a ).endVertex();
+            buffer.vertex( middle_x + btnx2, middle_y + btny1, 0 ).uv( sprite.getU( u2 ), sprite.getV( v1 ) ).color( red, green, blue, a ).endVertex();
         }
 
-        tessellator.draw();
+        tessellator.end();
 
         for ( final MenuRegion mnuRgn : modes )
         {
@@ -426,14 +425,14 @@ public class ChiselsAndBitsMenu extends Screen
 
                 if ( x <= -0.2 )
                 {
-                    fixed_x -= font.getStringWidth( text );
+                    fixed_x -= font.width( text );
                 }
                 else if ( -0.2 <= x && x <= 0.2 )
                 {
-                    fixed_x -= font.getStringWidth( text ) / 2;
+                    fixed_x -= font.width( text ) / 2;
                 }
 
-                font.drawStringWithShadow(matrixStack, text, (int) middle_x + fixed_x, (int) middle_y + fixed_y, 0xffffffff );
+                font.drawShadow(matrixStack, text, (int) middle_x + fixed_x, (int) middle_y + fixed_y, 0xffffffff );
             }
         }
 
@@ -445,25 +444,25 @@ public class ChiselsAndBitsMenu extends Screen
 
                 if ( btn.textSide == Direction.WEST )
                 {
-                    font.drawStringWithShadow(matrixStack, text, (int) ( middle_x + btn.x1 - 8 ) - font.getStringWidth( text ), (int) ( middle_y + btn.y1 + 6 ), 0xffffffff );
+                    font.drawShadow(matrixStack, text, (int) ( middle_x + btn.x1 - 8 ) - font.width( text ), (int) ( middle_y + btn.y1 + 6 ), 0xffffffff );
                 }
                 else if ( btn.textSide == Direction.EAST )
                 {
-                    font.drawStringWithShadow(matrixStack, text, (int) ( middle_x + btn.x2 + 8 ), (int) ( middle_y + btn.y1 + 6 ), 0xffffffff );
+                    font.drawShadow(matrixStack, text, (int) ( middle_x + btn.x2 + 8 ), (int) ( middle_y + btn.y1 + 6 ), 0xffffffff );
                 }
                 else if ( btn.textSide == Direction.UP )
                 {
-                    font.drawStringWithShadow(matrixStack, text, (int) ( middle_x + ( btn.x1 + btn.x2 ) * 0.5 - font.getStringWidth( text ) * 0.5 ), (int) ( middle_y + btn.y1 - 14 ), 0xffffffff );
+                    font.drawShadow(matrixStack, text, (int) ( middle_x + ( btn.x1 + btn.x2 ) * 0.5 - font.width( text ) * 0.5 ), (int) ( middle_y + btn.y1 - 14 ), 0xffffffff );
                 }
                 else if ( btn.textSide == Direction.DOWN )
                 {
-                    font.drawStringWithShadow(matrixStack, text, (int) ( middle_x + ( btn.x1 + btn.x2 ) * 0.5 - font.getStringWidth( text ) * 0.5 ), (int) ( middle_y + btn.y1 + 24 ), 0xffffffff );
+                    font.drawShadow(matrixStack, text, (int) ( middle_x + ( btn.x1 + btn.x2 ) * 0.5 - font.width( text ) * 0.5 ), (int) ( middle_y + btn.y1 + 24 ), 0xffffffff );
                 }
 
             }
         }
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 	private boolean inTriangle(
 			final double x1,
@@ -492,13 +491,13 @@ public class ChiselsAndBitsMenu extends Screen
     {
         this.visibility = 0f;
         canRaise = false;
-        this.minecraft.displayGuiScreen( null );
+        this.minecraft.setScreen( null );
 
-        if ( this.minecraft.currentScreen == null )
+        if ( this.minecraft.screen == null )
         {
-            this.minecraft.setGameFocused(true);
-            this.minecraft.getSoundHandler().resume();
-            this.minecraft.mouseHelper.grabMouse();
+            this.minecraft.setWindowActive(true);
+            this.minecraft.getSoundManager().resume();
+            this.minecraft.mouseHandler.grabMouse();
         }
         return true;
     }

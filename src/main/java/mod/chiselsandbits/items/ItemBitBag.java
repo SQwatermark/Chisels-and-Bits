@@ -10,23 +10,23 @@ import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.network.packets.PacketOpenBagGui;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.render.helpers.SimpleInstanceCache;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -44,41 +44,41 @@ public class ItemBitBag extends Item
     public static final int OFFSET_STATE_ID   = 0;
     public static final int OFFSET_QUANTITY   = 1;
 
-    SimpleInstanceCache<ItemStack, List<ITextComponent>> tooltipCache = new SimpleInstanceCache<>(null, new ArrayList<>());
+    SimpleInstanceCache<ItemStack, List<Component>> tooltipCache = new SimpleInstanceCache<>(null, new ArrayList<>());
 
     public ItemBitBag(Item.Properties properties)
     {
-        super(properties.maxStackSize(1));
+        super(properties.stacksTo(1));
     }
 
     @Override
     public ICapabilityProvider initCapabilities(
       final ItemStack stack,
-      final CompoundNBT nbt)
+      final CompoundTag nbt)
     {
         return new BagCapabilityProvider(stack, nbt);
     }
 
     @Override
-    public ITextComponent getDisplayName(final ItemStack stack)
+    public Component getName(final ItemStack stack)
     {
         DyeColor color = getDyedColor(stack);
-        final ITextComponent parent = super.getDisplayName(stack);
-        if (parent instanceof IFormattableTextComponent && color != null)
+        final Component parent = super.getName(stack);
+        if (parent instanceof MutableComponent && color != null)
         {
-            return ((IFormattableTextComponent) parent).appendString(" - ").append(new TranslationTextComponent("chiselsandbits.color." + color.getTranslationKey()));
+            return ((MutableComponent) parent).append(" - ").append(new TranslatableComponent("chiselsandbits.color." + color.getName()));
         }
         else
         {
-            return super.getDisplayName(stack);
+            return super.getName(stack);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World worldIn, final List<ITextComponent> tooltip, final ITooltipFlag flagIn)
+    public void appendHoverText(final ItemStack stack, @Nullable final Level worldIn, final List<Component> tooltip, final TooltipFlag flagIn)
     {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         ChiselsAndBits.getConfig().getCommon().helpText(LocalStrings.HelpBitBag, tooltip);
 
         if (tooltipCache.needsUpdate(stack))
@@ -87,31 +87,31 @@ public class ItemBitBag extends Item
             tooltipCache.updateCachedValue(bi.listContents(new ArrayList<>()));
         }
 
-        final List<ITextComponent> details = tooltipCache.getCached();
+        final List<Component> details = tooltipCache.getCached();
         if (details.size() <= 2 || ClientSide.instance.holdingShift())
         {
             tooltip.addAll(details);
         }
         else
         {
-            tooltip.add(new StringTextComponent(LocalStrings.ShiftDetails.getLocal()));
+            tooltip.add(new TextComponent(LocalStrings.ShiftDetails.getLocal()));
         }
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
-      final World worldIn,
-      final PlayerEntity playerIn,
-      final Hand hand)
+    public InteractionResultHolder<ItemStack> use(
+      final Level worldIn,
+      final Player playerIn,
+      final InteractionHand hand)
     {
-        final ItemStack itemStackIn = playerIn.getHeldItem(hand);
+        final ItemStack itemStackIn = playerIn.getItemInHand(hand);
 
-        if (worldIn.isRemote)
+        if (worldIn.isClientSide)
         {
             ChiselsAndBits.getNetworkChannel().sendToServer(new PacketOpenBagGui());
         }
 
-        return new ActionResult<ItemStack>(ActionResultType.SUCCESS, itemStackIn);
+        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStackIn);
     }
 
     public static class BagPos
@@ -128,25 +128,25 @@ public class ItemBitBag extends Item
     ;
 
     static public void cleanupInventory(
-      final PlayerEntity player,
+      final Player player,
       final ItemStack is)
     {
         if (is != null && is.getItem() instanceof ItemChiseledBit)
         {
             // time to clean up your inventory...
-            final IInventory inv = player.inventory;
+            final Container inv = player.getInventory();
             final List<ItemBitBag.BagPos> bags = ItemBitBag.getBags(inv);
 
             int firstSeen = -1;
-            for (int slot = 0; slot < inv.getSizeInventory(); slot++)
+            for (int slot = 0; slot < inv.getContainerSize(); slot++)
             {
                 int actingSlot = slot;
                 @Nonnull
-                ItemStack which = ModUtil.nonNull(inv.getStackInSlot(actingSlot));
+                ItemStack which = ModUtil.nonNull(inv.getItem(actingSlot));
 
                 if (which != null && which.getItem() == is.getItem() && (ItemChiseledBit.sameBit(which, ItemChiseledBit.getStackState(is))))
                 {
-                    if (actingSlot == player.inventory.currentItem)
+                    if (actingSlot == player.getInventory().selected)
                     {
                         if (firstSeen != -1)
                         {
@@ -158,7 +158,7 @@ public class ItemBitBag extends Item
                         }
                     }
 
-                    which = ModUtil.nonNull(inv.getStackInSlot(actingSlot));
+                    which = ModUtil.nonNull(inv.getItem(actingSlot));
 
                     if (firstSeen == -1)
                     {
@@ -171,7 +171,7 @@ public class ItemBitBag extends Item
                             which = i.inv.insertItem(which);
                             if (ModUtil.isEmpty(which))
                             {
-                                inv.setInventorySlotContents(actingSlot, which);
+                                inv.setItem(actingSlot, which);
                                 break;
                             }
                         }
@@ -182,12 +182,12 @@ public class ItemBitBag extends Item
     }
 
     public static List<BagPos> getBags(
-      final IInventory inv)
+      final Container inv)
     {
         final ArrayList<BagPos> bags = new ArrayList<BagPos>();
-        for (int x = 0; x < inv.getSizeInventory(); x++)
+        for (int x = 0; x < inv.getContainerSize(); x++)
         {
-            final ItemStack which = inv.getStackInSlot(x);
+            final ItemStack which = inv.getItem(x);
             if (which != null && which.getItem() instanceof ItemBitBag)
             {
                 bags.add(new BagPos(new BagInventory(which)));
@@ -197,9 +197,7 @@ public class ItemBitBag extends Item
     }
 
     @Override
-    public boolean showDurabilityBar(
-      final ItemStack stack)
-    {
+    public boolean isBarVisible(ItemStack stack) {
         final Object o = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
         if (o instanceof BagStorage)
@@ -211,27 +209,42 @@ public class ItemBitBag extends Item
         return false;
     }
 
+//    @Override
+//    public int getUseDuration(ItemStack stack) {
+//        final Object o = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//
+//        if (o instanceof BagStorage)
+//        {
+//            final int qty = ((BagStorage) o).getSlotsUsed();
+//
+//            final double value = qty / (float) BagStorage.BAG_STORAGE_SLOTS;
+//            return Math.min(1.0d, Math.max(0.0d, ChiselsAndBits.getConfig().getClient().invertBitBagFullness.get() ? value : 1.0 - value));
+//        }
+//
+//        return 0;
+//    }
+
+//    @Override
+//    public double getDurabilityForDisplay(
+//      final ItemStack stack)
+//    {
+//        final Object o = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//
+//        if (o instanceof BagStorage)
+//        {
+//            final int qty = ((BagStorage) o).getSlotsUsed();
+//
+//            final double value = qty / (float) BagStorage.BAG_STORAGE_SLOTS;
+//            return Math.min(1.0d, Math.max(0.0d, ChiselsAndBits.getConfig().getClient().invertBitBagFullness.get() ? value : 1.0 - value));
+//        }
+//
+//        return 0;
+//    }
+
     @Override
-    public double getDurabilityForDisplay(
-      final ItemStack stack)
+    public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items)
     {
-        final Object o = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-
-        if (o instanceof BagStorage)
-        {
-            final int qty = ((BagStorage) o).getSlotsUsed();
-
-            final double value = qty / (float) BagStorage.BAG_STORAGE_SLOTS;
-            return Math.min(1.0d, Math.max(0.0d, ChiselsAndBits.getConfig().getClient().invertBitBagFullness.get() ? value : 1.0 - value));
-        }
-
-        return 0;
-    }
-
-    @Override
-    public void fillItemGroup(final ItemGroup group, final NonNullList<ItemStack> items)
-    {
-        if (this.isInGroup(group))
+        if (this.allowdedIn(group))
         {
             if (this == ModItems.ITEM_BIT_BAG_DEFAULT.get())
             {
@@ -255,7 +268,7 @@ public class ItemBitBag extends Item
 
         if (!copy.hasTag())
         {
-            copy.setTag(new CompoundNBT());
+            copy.setTag(new CompoundTag());
         }
 
         if (color == null && bag.getItem() == ModItems.ITEM_BIT_BAG_DYED.get())
@@ -274,7 +287,7 @@ public class ItemBitBag extends Item
                 coloredStack.setTag(copy.getTag());
             }
 
-            coloredStack.getTag().putString("color", color.getTranslationKey());
+            coloredStack.getTag().putString("color", color.getName());
             return coloredStack;
         }
 
@@ -294,7 +307,7 @@ public class ItemBitBag extends Item
             String name = stack.getTag().getString("color");
             for (DyeColor color : DyeColor.values())
             {
-                if (name.equals(color.getString()))
+                if (name.equals(color.getSerializedName()))
                 {
                     return color;
                 }

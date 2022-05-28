@@ -3,18 +3,18 @@ package mod.chiselsandbits.bitstorage;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -38,10 +38,10 @@ public class ItemBlockBitStorage extends BlockItem
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(
-      final ItemStack stack, @Nullable final World worldIn, final List<ITextComponent> tooltip, final ITooltipFlag flagIn)
+    public void appendHoverText(
+      final ItemStack stack, @Nullable final Level worldIn, final List<Component> tooltip, final TooltipFlag flagIn)
     {
-        super.addInformation( stack, worldIn, tooltip, flagIn );
+        super.appendHoverText( stack, worldIn, tooltip, flagIn );
         if (CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY == null)
             return;
 
@@ -61,20 +61,20 @@ public class ItemBlockBitStorage extends BlockItem
 
     @Nullable
     @Override
-    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundNBT nbt)
+    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundTag nbt)
     {
         return new FluidHandlerItemStack(stack, FluidAttributes.BUCKET_VOLUME);
     }
 
     @Override
-    protected boolean onBlockPlaced(
-      final BlockPos pos, final World worldIn, @Nullable final PlayerEntity player, final ItemStack stack, final BlockState state)
+    protected boolean updateCustomBlockEntityTag(
+      final BlockPos pos, final Level worldIn, @Nullable final Player player, final ItemStack stack, final BlockState state)
     {
-         super.onBlockPlaced(pos, worldIn, player, stack, state);
-         if (worldIn.isRemote)
+         super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);
+         if (worldIn.isClientSide)
              return false;
 
-         final TileEntity tileEntity = worldIn.getTileEntity(pos);
+         final BlockEntity tileEntity = worldIn.getBlockEntity(pos);
          if (!(tileEntity instanceof TileEntityBitStorage))
              return false;
 

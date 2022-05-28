@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
 import java.util.zip.Deflater;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class BlobSerilizationCache
 {
@@ -13,7 +13,7 @@ public class BlobSerilizationCache
 	private static ThreadLocal<BitStream> bitbuffer = new ThreadLocal<BitStream>();
 	private static ThreadLocal<Deflater> deflater = new ThreadLocal<Deflater>();
 	private static ThreadLocal<ByteBuffer> buffer = new ThreadLocal<ByteBuffer>();
-	private static ThreadLocal<PacketBuffer> pbuffer = new ThreadLocal<PacketBuffer>();
+	private static ThreadLocal<FriendlyByteBuf> pbuffer = new ThreadLocal<FriendlyByteBuf>();
 
 	public static BitStream getCacheBitStream()
 	{
@@ -55,13 +55,13 @@ public class BlobSerilizationCache
 		return bb;
 	}
 
-	public static PacketBuffer getCachePacketBuffer()
+	public static FriendlyByteBuf getCachePacketBuffer()
 	{
-		PacketBuffer bb = pbuffer.get();
+		FriendlyByteBuf bb = pbuffer.get();
 
 		if ( bb == null )
 		{
-			bb = new PacketBuffer( Unpooled.buffer() );
+			bb = new FriendlyByteBuf( Unpooled.buffer() );
 			pbuffer.set( bb );
 		}
 

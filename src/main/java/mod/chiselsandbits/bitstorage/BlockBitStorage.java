@@ -4,22 +4,26 @@ import com.google.common.collect.Lists;
 import mod.chiselsandbits.core.Log;
 import mod.chiselsandbits.helpers.ExceptionNoTileEntity;
 import mod.chiselsandbits.helpers.ModUtil;
-import net.minecraft.block.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
@@ -30,38 +34,37 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class BlockBitStorage extends Block implements ITileEntityProvider
+public class BlockBitStorage extends Block implements EntityBlock
 {
 
-    private static final Property<Direction> FACING = HorizontalBlock.HORIZONTAL_FACING;
+    private static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
 
-    public BlockBitStorage(AbstractBlock.Properties properties)
+    public BlockBitStorage(BlockBehaviour.Properties properties)
     {
         super(properties);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(final BlockItemUseContext context)
+    public BlockState getStateForPlacement(final BlockPlaceContext context)
     {
-        return getDefaultState().with(FACING, context.getPlacementHorizontalFacing());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
 
     @Override
-    protected void fillStateContainer(final StateContainer.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder)
     {
         builder.add(FACING);
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(final IBlockReader worldIn)
-    {
-        return new TileEntityBitStorage();
+    public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
+        return new TileEntityBitStorage(p_153215_, p_153216_);
     }
 
     public TileEntityBitStorage getTileEntity(
-      final TileEntity te) throws ExceptionNoTileEntity
+      final BlockEntity te) throws ExceptionNoTileEntity
     {
         if (te instanceof TileEntityBitStorage)
         {
@@ -71,45 +74,45 @@ public class BlockBitStorage extends Block implements ITileEntityProvider
     }
 
     public TileEntityBitStorage getTileEntity(
-      final IBlockReader world,
+      final BlockGetter world,
       final BlockPos pos) throws ExceptionNoTileEntity
     {
-        return getTileEntity(world.getTileEntity(pos));
+        return getTileEntity(world.getBlockEntity(pos));
     }
 
     @Override
-    public ActionResultType onBlockActivated(
-      final BlockState state, final World worldIn, final BlockPos pos, final PlayerEntity player, final Hand handIn, final BlockRayTraceResult hit)
+    public InteractionResult use(
+      final BlockState state, final Level worldIn, final BlockPos pos, final Player player, final InteractionHand handIn, final BlockHitResult hit)
     {
         try
         {
             final TileEntityBitStorage tank = getTileEntity(worldIn, pos);
-            final ItemStack current = ModUtil.nonNull(player.inventory.getCurrentItem());
+            final ItemStack current = ModUtil.nonNull(player.getInventory().getSelected());
 
             if (!ModUtil.isEmpty(current))
             {
                 final IFluidHandler wrappedTank = tank;
                 if (FluidUtil.interactWithFluidHandler(player, handIn, wrappedTank))
                 {
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
 
                 if (tank.addHeldBits(current, player))
                 {
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
             else
             {
                 if (tank.addAllPossibleBits(player))
                 {
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
 
-            if (tank.extractBits(player, hit.getHitVec().x, hit.getHitVec().y, hit.getHitVec().z, pos))
+            if (tank.extractBits(player, hit.getLocation().x, hit.getLocation().y, hit.getLocation().z, pos))
             {
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
         catch (final ExceptionNoTileEntity e)
@@ -117,16 +120,16 @@ public class BlockBitStorage extends Block implements ITileEntityProvider
             Log.noTileError(e);
         }
 
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public float getAmbientOcclusionLightValue(BlockState state, IBlockReader worldIn, BlockPos pos)
+    public float getShadeBrightness(BlockState state, BlockGetter worldIn, BlockPos pos)
     {
         return 1.0F;
     }
 
-    public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos)
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos)
     {
         return true;
     }
@@ -134,12 +137,12 @@ public class BlockBitStorage extends Block implements ITileEntityProvider
     @Override
     public List<ItemStack> getDrops(final BlockState state, final LootContext.Builder builder)
     {
-        if (builder.get(LootParameters.BLOCK_ENTITY) == null)
+        if (builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY) == null)
         {
             return Lists.newArrayList();
         }
 
-        return Lists.newArrayList(getTankDrop((TileEntityBitStorage) builder.get(LootParameters.BLOCK_ENTITY)));
+        return Lists.newArrayList(getTankDrop((TileEntityBitStorage) builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)));
     }
 
     public ItemStack getTankDrop(final TileEntityBitStorage bitTank)

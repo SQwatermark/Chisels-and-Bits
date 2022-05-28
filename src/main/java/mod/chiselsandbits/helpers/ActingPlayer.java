@@ -3,45 +3,45 @@ package mod.chiselsandbits.helpers;
 import javax.annotation.Nonnull;
 
 import mod.chiselsandbits.api.EventBlockBitModification;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.function.Consumer;
 
 public class ActingPlayer
 {
-	private final IInventory storage;
+	private final Container storage;
 
 	// used to test permission and stuff...
-	private final PlayerEntity innerPlayer;
+	private final Player innerPlayer;
 	private final boolean realPlayer; // are we a real player?
-	private final Hand hand;
+	private final InteractionHand hand;
 
 	private ActingPlayer(
-			final PlayerEntity player,
+			final Player player,
 			final boolean realPlayer,
-			final Hand hand )
+			final InteractionHand hand )
 	{
 		innerPlayer = player;
 		this.hand = hand;
 		this.realPlayer = realPlayer;
-		storage = realPlayer ? player.inventory : new PlayerCopiedInventory( player.inventory );
+		storage = realPlayer ? player.getInventory() : new PlayerCopiedInventory( player.getInventory() );
 	}
 
-	public IInventory getInventory()
+	public Container getInventory()
 	{
 		return storage;
 	}
 
 	public int getCurrentItem()
 	{
-		return innerPlayer.inventory.currentItem;
+		return innerPlayer.getInventory().selected;
 	}
 
 	public boolean isCreative()
@@ -51,7 +51,7 @@ public class ActingPlayer
 
 	public ItemStack getCurrentEquippedItem()
 	{
-		return storage.getStackInSlot( getCurrentItem() );
+		return storage.getItem( getCurrentItem() );
 	}
 
 	// permission check cache.
@@ -73,9 +73,9 @@ public class ActingPlayer
 			lastPlacement = placement;
 			lastPermissionBit = is;
 
-			if ( innerPlayer.canPlayerEdit( pos, side, is ) && innerPlayer.getEntityWorld().isBlockModifiable( innerPlayer, pos ) )
+			if ( innerPlayer.mayUseItemAt( pos, side, is ) && innerPlayer.getCommandSenderWorld().mayInteract( innerPlayer, pos ) )
 			{
-				final EventBlockBitModification event = new EventBlockBitModification( innerPlayer.getEntityWorld(), pos, innerPlayer, hand, is, placement );
+				final EventBlockBitModification event = new EventBlockBitModification( innerPlayer.getCommandSenderWorld(), pos, innerPlayer, hand, is, placement );
 				permissionResult = !MinecraftForge.EVENT_BUS.post( event );
 			}
 			else
@@ -93,17 +93,17 @@ public class ActingPlayer
 	{
 		if ( realPlayer )
 		{
-			stack.damageItem(amount, innerPlayer, playerEntity -> {});
+			stack.hurtAndBreak(amount, innerPlayer, playerEntity -> {});
 		}
 		else
 		{
-			stack.setDamage( stack.getDamage() + amount );
+			stack.setDamageValue( stack.getDamageValue() + amount );
 		}
 	}
 
 	public void playerDestroyItem(
 			final @Nonnull ItemStack stack,
-			final Hand hand )
+			final InteractionHand hand )
 	{
 		if ( realPlayer )
 		{
@@ -113,29 +113,29 @@ public class ActingPlayer
 
 	@Nonnull
 	public static ActingPlayer actingAs(
-			final PlayerEntity player,
-			final Hand hand )
+			final Player player,
+			final InteractionHand hand )
 	{
 		return new ActingPlayer( player, true, hand );
 	}
 
 	@Nonnull
 	public static ActingPlayer testingAs(
-			final PlayerEntity player,
-			final Hand hand )
+			final Player player,
+			final InteractionHand hand )
 	{
 		return new ActingPlayer( player, false, hand );
 	}
 
-	public World getWorld()
+	public Level getWorld()
 	{
-		return innerPlayer.getEntityWorld();
+		return innerPlayer.getCommandSenderWorld();
 	}
 
 	/**
 	 * only call this is you require a player, and only as a last resort.
 	 */
-	public PlayerEntity getPlayer()
+	public Player getPlayer()
 	{
 		return innerPlayer;
 	}
@@ -148,7 +148,7 @@ public class ActingPlayer
 	/**
 	 * @return the hand
 	 */
-	public Hand getHand()
+	public InteractionHand getHand()
 	{
 		return hand;
 	}

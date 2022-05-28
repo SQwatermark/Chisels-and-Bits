@@ -12,8 +12,8 @@ import java.util.Set;
 
 import mod.chiselsandbits.helpers.IVoxelSrc;
 import mod.chiselsandbits.modes.ChiselMode;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.AxisDirection;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.AxisDirection;
 
 public class ChiselExtrudeIterator extends BaseChiselIterator implements ChiselIterator
 {
@@ -105,7 +105,7 @@ public class ChiselExtrudeIterator extends BaseChiselIterator implements ChiselI
 		final Set<Integer> possiblepositions = new HashSet<Integer>();
 		final List<Integer> selectedpositions = new ArrayList<Integer>();
 
-		final int tx = side.getXOffset(), ty = side.getYOffset(), tz = side.getZOffset();
+		final int tx = side.getStepX(), ty = side.getStepY(), tz = side.getStepZ();
 		int placeoffset = 0;
 
 		int x = sx, y = sy, z = sz;

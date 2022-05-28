@@ -1,8 +1,8 @@
 package mod.chiselsandbits.client;
 
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 
 public class UndoStep
 {

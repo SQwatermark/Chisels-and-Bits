@@ -8,21 +8,21 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreativeClipboardTab extends ItemGroup implements ICacheClearable
+public class CreativeClipboardTab extends CreativeModeTab implements ICacheClearable
 {
 	static boolean                   renewMappings = true;
 	static private List<ItemStack>   myWorldItems  = new ArrayList<ItemStack>();
-	static private List<CompoundNBT> myCrossItems  = new ArrayList<CompoundNBT>();
+	static private List<CompoundTag> myCrossItems  = new ArrayList<CompoundTag>();
 	static private ClipboardStorage  clipStorage   = null;
 
 	public static void load(
@@ -53,7 +53,7 @@ public class CreativeClipboardTab extends ItemGroup implements ICacheClearable
 			}
 
 			// remove duplicates if they exist...
-			for ( final CompoundNBT isa : myCrossItems )
+			for ( final CompoundTag isa : myCrossItems )
 			{
 				if ( isa.equals( is.getTag() ) )
 				{
@@ -84,20 +84,20 @@ public class CreativeClipboardTab extends ItemGroup implements ICacheClearable
 	}
 
     @Override
-    public ItemStack createIcon()
+    public ItemStack makeIcon()
     {
         return new ItemStack(ModItems.ITEM_MIRROR_PRINT_WRITTEN.get() );
     }
 
     @Override
-    public void fill(final NonNullList<ItemStack> items)
+    public void fillItemList(final NonNullList<ItemStack> items)
     {
         if ( renewMappings )
         {
             myWorldItems.clear();
             renewMappings = false;
 
-            for ( final CompoundNBT nbt : myCrossItems )
+            for ( final CompoundTag nbt : myCrossItems )
             {
                 final NBTBlobConverter c = new NBTBlobConverter();
                 c.readChisleData( nbt.getCompound( ModUtil.NBT_BLOCKENTITYTAG ), VoxelBlob.VERSION_ANY );

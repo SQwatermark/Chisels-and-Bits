@@ -1,7 +1,5 @@
 package mod.chiselsandbits.utils;
 
-import mod.chiselsandbits.core.ChiselsAndBits;
-
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Set;

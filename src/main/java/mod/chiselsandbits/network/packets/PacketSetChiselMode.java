@@ -7,11 +7,11 @@ import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class PacketSetChiselMode extends ModPacket
 {
@@ -20,7 +20,7 @@ public class PacketSetChiselMode extends ModPacket
     private ChiselToolType type = ChiselToolType.CHISEL;
     private boolean chatNotification = false;
 
-    public PacketSetChiselMode(PacketBuffer buffer)
+    public PacketSetChiselMode(FriendlyByteBuf buffer)
     {
         readPayload(buffer);
     }
@@ -34,9 +34,9 @@ public class PacketSetChiselMode extends ModPacket
 
     @Override
 	public void server(
-			final ServerPlayerEntity player )
+			final ServerPlayer player )
 	{
-		final ItemStack ei = player.getHeldItemMainhand();
+		final ItemStack ei = player.getMainHandItem();
 		if ( ei != null && ei.getItem() instanceof IChiselModeItem )
 		{
 			final IToolMode originalMode = type.getMode( ei );
@@ -44,38 +44,38 @@ public class PacketSetChiselMode extends ModPacket
 
 			if ( originalMode != mode && chatNotification )
 			{
-				player.sendMessage( new TranslationTextComponent( mode.getName().toString() ), Util.DUMMY_UUID);
+				player.sendMessage( new TranslatableComponent( mode.getName().toString() ), Util.NIL_UUID);
 			}
         }
 	}
 
 	@Override
 	public void getPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		buffer.writeBoolean( chatNotification );
-		buffer.writeEnumValue( type );
-		buffer.writeEnumValue( (Enum<?>) mode );
+		buffer.writeEnum( type );
+		buffer.writeEnum( (Enum<?>) mode );
 	}
 
 	@Override
 	public void readPayload(
-			final PacketBuffer buffer )
+			final FriendlyByteBuf buffer )
 	{
 		chatNotification = buffer.readBoolean();
-		type = buffer.readEnumValue( ChiselToolType.class );
+		type = buffer.readEnum( ChiselToolType.class );
 
 		if ( type == ChiselToolType.BIT || type == ChiselToolType.CHISEL )
 		{
-			mode = buffer.readEnumValue( ChiselMode.class );
+			mode = buffer.readEnum( ChiselMode.class );
 		}
 		else if ( type == ChiselToolType.POSITIVEPATTERN )
 		{
-			mode = buffer.readEnumValue( PositivePatternMode.class );
+			mode = buffer.readEnum( PositivePatternMode.class );
 		}
 		else if ( type == ChiselToolType.TAPEMEASURE )
 		{
-			mode = buffer.readEnumValue( TapeMeasureModes.class );
+			mode = buffer.readEnum( TapeMeasureModes.class );
 		}
 	}
 
