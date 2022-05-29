@@ -24,15 +24,10 @@ public class RenderHelper
 
     public static Random RENDER_RANDOM = new Random();
 
-    public static void drawSelectionBoundingBoxIfExists(
-      final PoseStack matrixStack,
-      final AABB bb,
-      final BlockPos blockPos,
-      final Player player,
-      final float partialTicks,
-      final boolean NormalBoundingBox)
-    {
-        drawSelectionBoundingBoxIfExistsWithColor(matrixStack, bb, blockPos, player, partialTicks, NormalBoundingBox, 0, 0, 0, 102, 32);
+    public static void drawSelectionBoundingBoxIfExists(final PoseStack matrixStack, final AABB bb, final BlockPos blockPos,
+                                                        final Player player, final float partialTicks, final boolean NormalBoundingBox) {
+        drawSelectionBoundingBoxIfExistsWithColor(matrixStack, bb, blockPos, player, partialTicks, NormalBoundingBox,
+                0, 0, 0, 102, 32);
     }
 
     public static void drawSelectionBoundingBoxIfExistsWithColor(
@@ -238,7 +233,7 @@ public class RenderHelper
       final int combinedLightmap,
       final int combinedOverlay)
     {
-        RenderSystem.setShader(GameRenderer::getBlockShader);
+        RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
         final Tesselator tessellator = Tesselator.getInstance();
         final BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);

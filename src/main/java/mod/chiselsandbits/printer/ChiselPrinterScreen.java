@@ -39,7 +39,7 @@ public class ChiselPrinterScreen extends AbstractContainerScreen<ChiselPrinterCo
 
         //noinspection deprecation Required.
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        Objects.requireNonNull(this.minecraft).getTextureManager().bindForSetup(GUI_TEXTURES);
+        RenderSystem.setShaderTexture(0, GUI_TEXTURES);
         this.blit(matrixStack, this.leftPos, this.topPos,0, 0, this.imageWidth, this.imageHeight);
 
         if (this.menu.getToolStack().isEmpty())
@@ -48,7 +48,7 @@ public class ChiselPrinterScreen extends AbstractContainerScreen<ChiselPrinterCo
         // TODO
         this.itemRenderer.renderAndDecorateItem(Objects.requireNonNull(this.minecraft.player), this.menu.getToolStack(), this.leftPos + 81, this.topPos + 47, 0);
 
-        Objects.requireNonNull(this.minecraft).getTextureManager().bindForSetup(GUI_TEXTURES);
+        RenderSystem.setShaderTexture(0, GUI_TEXTURES);
         int scaledProgress = this.menu.getChiselProgressionScaled();
         matrixStack.pushPose();
         matrixStack.translate(0,0,400);
