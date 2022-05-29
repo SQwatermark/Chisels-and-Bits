@@ -148,7 +148,7 @@ public class ClientSide
     }
 
     @SubscribeEvent
-    public static void reg(EntityRenderersEvent.RegisterRenderers event) {
+    public static void registerTESR(EntityRenderersEvent.RegisterRenderers event) {
         // TODO
         event.registerBlockEntityRenderer(ModBlockEntityTypes.BIT_STORAGE.get(), new TileEntitySpecialRenderBitStorage());
     }
@@ -156,7 +156,6 @@ public class ClientSide
     public void init(final ChiselsAndBits chiselsandbits) {
         readyState = readyState.updateState(ReadyState.TRIGGER_INIT);
 
-//        ClientRegistry.bindTileEntityRenderer(ModTileEntityTypes.BIT_STORAGE.get(), TileEntitySpecialRenderBitStorage::new);
         ItemBlockRenderTypes.setRenderLayer(ModBlocks.BIT_STORAGE_BLOCK.get(), RenderType.cutoutMipped());
 
         ModBlocks.getMaterialToBlockConversions().values()

@@ -18,8 +18,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class ItemStackSpecialRendererBitStorage extends BlockEntityWithoutLevelRenderer
-{
+public class ItemStackSpecialRendererBitStorage extends BlockEntityWithoutLevelRenderer {
 
     public ItemStackSpecialRendererBitStorage(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
         super(p_172550_, p_172551_);
@@ -27,34 +26,25 @@ public class ItemStackSpecialRendererBitStorage extends BlockEntityWithoutLevelR
 
     @Override
     public void renderByItem(
-      final ItemStack stack,
-      final ItemTransforms.TransformType p_239207_2_,
-      final PoseStack matrixStack,
-      final MultiBufferSource buffer,
-      final int combinedLight,
-      final int combinedOverlay)
-    {
+            final ItemStack stack,
+            final ItemTransforms.TransformType p_239207_2_,
+            final PoseStack matrixStack,
+            final MultiBufferSource buffer,
+            final int combinedLight,
+            final int combinedOverlay) {
 
-        final BakedModel model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(ModBlocks.BIT_STORAGE_BLOCK.getId(), "facing=east"));
+        final BakedModel model = Minecraft.getInstance().getModelManager()
+                .getModel(new ModelResourceLocation(ModBlocks.BIT_STORAGE_BLOCK.getId(), "facing=east"));
 
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(matrixStack.last(), buffer.getBuffer(RenderType.translucent()), ModBlocks.BIT_STORAGE_BLOCK
-                                                                                                                                                                         .get().defaultBlockState(), model, 1f,1f,1f, combinedLight, combinedOverlay,
-          EmptyModelData.INSTANCE);
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer()
+                .renderModel(matrixStack.last(), buffer.getBuffer(RenderType.translucent()), ModBlocks.BIT_STORAGE_BLOCK.get().defaultBlockState(),
+                        model, 1f, 1f, 1f, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
 
         final TileEntityBitStorage tileEntity = new TileEntityBitStorage(null, null);
         tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
-          .ifPresent(t -> t
-                            .fill(
-                              stack.getCapability(
-                                CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY
-                              )
-                                .map(s -> s
-                                            .drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE)
-                                )
-                                .orElse(FluidStack.EMPTY),
-                              IFluidHandler.FluidAction.EXECUTE
-                            )
-          );
+                .ifPresent(t -> t.fill(stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY)
+                        .map(s -> s.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE))
+                                .orElse(FluidStack.EMPTY), IFluidHandler.FluidAction.EXECUTE));
 
         this.blockEntityRenderDispatcher.renderItem(tileEntity, matrixStack, buffer, combinedLight, combinedOverlay);
     }

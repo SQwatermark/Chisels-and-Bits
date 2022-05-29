@@ -115,39 +115,29 @@ public class ChiselsAndBits
 		ChiselsAndBits.getApi().addEquivilantMaterial( Material.EXPLOSIVE, Material.STONE );
 	}
 
-    public void clientSetup(
-      final FMLClientSetupEvent event )
-    {
+    public void clientSetup(final FMLClientSetupEvent event) {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Mod.EventBusSubscriber.Bus.MOD.bus().get().addListener(ChiseledBlockSmartModel::onConfigurationReload));
     }
 
 	boolean idsHaveBeenMapped = false;
 
-	public void handleIdMapping(
-			final RegistryEvent.IdMappingEvent event )
-	{
+	public void handleIdMapping(final RegistryEvent.IdMappingEvent event) {
 		idsHaveBeenMapped = true;
 		BlockBitInfo.recalculate();
 		clearCache();
 	}
 
-	public void clearCache()
-	{
-		if ( idsHaveBeenMapped )
-		{
-			for ( final ICacheClearable clearable : cacheClearables )
-			{
+	public void clearCache() {
+		if (idsHaveBeenMapped) {
+			for (final ICacheClearable clearable : cacheClearables) {
 				clearable.clearCache();
 			}
-
 			addClearable( UndoTracker.getInstance() );
 			VoxelBlob.clearCache();
 		}
 	}
 
-	public void addClearable(
-			final ICacheClearable cache )
-	{
+	public void addClearable(final ICacheClearable cache) {
 		if ( !cacheClearables.contains( cache ) )
 		{
 			cacheClearables.add( cache );

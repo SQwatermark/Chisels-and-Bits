@@ -65,9 +65,7 @@ public class ChiselsAndBitsClient
     @OnlyIn(Dist.CLIENT)
     public static void registerIconTextures(final TextureStitchEvent.Pre ev) {
         final TextureAtlas map = ev.getAtlas();
-        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS))
-            return;
-
+        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS)) return;
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/swap" ) );
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/place" ) );
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/undo" ) );
@@ -99,8 +97,7 @@ public class ChiselsAndBitsClient
       final TextureStitchEvent.Post ev )
     {
         final TextureAtlas map = ev.getAtlas();
-        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS))
-            return;
+        if (!map.location().equals(InventoryMenu.BLOCK_ATLAS)) return;
 
         ClientSide.swapIcon = map.getSprite( new ResourceLocation( "chiselsandbits", "icons/swap" ) );
         ClientSide.placeIcon = map.getSprite( new ResourceLocation( "chiselsandbits", "icons/place" ) );

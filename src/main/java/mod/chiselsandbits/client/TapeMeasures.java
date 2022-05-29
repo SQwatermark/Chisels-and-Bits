@@ -217,16 +217,14 @@ public class TapeMeasures
 		return player.getCommandSenderWorld().dimension().getRegistryName();
 	}
 
-	public void render(
-      final PoseStack matrixStack, final float partialTicks)
-	{
+	public void render(final PoseStack matrixStack, final float partialTicks) {
 		if ( !measures.isEmpty() || preview != null )
 		{
 			final Player player = ClientSide.instance.getPlayer();
 
 			if ( hasTapeMeasure( player.getInventory() ) )
 			{
-				final ArrayList<Measure> sortList = new ArrayList<Measure>( measures.size() + 1 );
+				final ArrayList<Measure> sortList = new ArrayList<>(measures.size() + 1);
 
 				if ( preview != null )
 				{
@@ -240,17 +238,7 @@ public class TapeMeasures
 					sortList.add( m );
 				}
 
-				Collections.sort( sortList, new Comparator<Measure>() {
-
-					@Override
-					public int compare(
-							final Measure a,
-							final Measure b )
-					{
-						return a.distance < b.distance ? 1 : a.distance > b.distance ? -1 : 0;
-					}
-
-				} );
+				sortList.sort((a, b) -> Double.compare(b.distance, a.distance));
 
 				for ( final Measure m : sortList )
 				{

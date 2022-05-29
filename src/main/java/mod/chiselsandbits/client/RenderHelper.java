@@ -146,58 +146,12 @@ public class RenderHelper
 
     // Custom replacement of 1.9.4 -> 1.10's method that changed.
     public static void renderBoundingBox(final PoseStack matrixStack, final AABB boundingBox, final int red, final int green, final int blue, final int alpha) {
-//        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_LIGHTING_BIT );
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         final Tesselator tess = Tesselator.getInstance();
         final BufferBuilder bufferBuilder = tess.getBuilder();
-
-//        GL11.glShadeModel(GL11.GL_FLAT);
-//        RenderSystem.shadeModel(GL11.GL_FLAT);
         bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
-
-//        final float minX = (float) boundingBox.minX;
-//        final float minY = (float) boundingBox.minY;
-//        final float minZ = (float) boundingBox.minZ;
-//        final float maxX = (float) boundingBox.maxX;
-//        final float maxY = (float) boundingBox.maxY;
-//        final float maxZ = (float) boundingBox.maxZ;
-
         LevelRenderer.renderLineBox(matrixStack, Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES), boundingBox, red, green, blue, alpha);
-//        // lower ring ( starts to 0 / 0 )
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-//
-//        // Y line at 0 / 0
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-//
-//        // upper ring ( including previous point to draw 4 lines )
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-//
-//        /*
-//         * the next 3 Y Lines use flat shading to render invisible lines to
-//         * enable doing this all in one pass.
-//         */
-//
-//        // Y line at 1 / 0
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, minZ).color(red, green, blue, 0).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-//
-//        // Y line at 0 / 1
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, minY, maxZ).color(red, green, blue, 0).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-//
-//        // Y line at 1 / 1
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, minY, maxZ).color(red, green, blue, 0).endVertex();
-//        bufferBuilder.vertex(matrixStack.last().pose(), maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-
         tess.end();
-//        GL11.glPopAttrib();
     }
 
     public static void renderLine(
@@ -214,7 +168,7 @@ public class RenderHelper
         final BufferBuilder bufferBuilder = tess.getBuilder();
 //        GL11.glShadeModel(GL11.GL_FLAT);
 //        RenderSystem.shadeModel(GL11.GL_FLAT);
-        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(matrixStack.last().pose(), (float) a.x, (float) a.y, (float) a.z).color(red, green, blue, alpha).endVertex();
         bufferBuilder.vertex(matrixStack.last().pose(), (float) b.x, (float) b.y, (float) b.z).color(red, green, blue, alpha).endVertex();
         tess.end();
