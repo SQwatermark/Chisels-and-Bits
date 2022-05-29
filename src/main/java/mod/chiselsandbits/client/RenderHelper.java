@@ -2,9 +2,13 @@ package mod.chiselsandbits.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -53,16 +57,16 @@ public class RenderHelper
 
             if (!NormalBoundingBox)
             {
-                RenderHelper.renderBoundingBox(matrixStack, bb.expandTowards(0.002D, 0.002D, 0.002D).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()), red, green, blue, alpha);
+                RenderHelper.renderBoundingBox(matrixStack,
+                        bb.expandTowards(0.002D, 0.002D, 0.002D)
+                                .move(blockPos.getX(), blockPos.getY(), blockPos.getZ()), red, green, blue, alpha);
             }
 
             RenderSystem.disableDepthTest();
 
-            RenderHelper.renderBoundingBox(matrixStack, bb.expandTowards(0.002D, 0.002D, 0.002D).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()),
-              red,
-              green,
-              blue,
-              seeThruAlpha);
+            RenderHelper.renderBoundingBox(matrixStack,
+                    bb.expandTowards(0.002D, 0.002D, 0.002D)
+                            .move(blockPos.getX(), blockPos.getY(), blockPos.getZ()), red, green, blue, seeThruAlpha);
 
             RenderSystem.enableDepthTest();
             RenderSystem.depthMask(true);
@@ -83,8 +87,7 @@ public class RenderHelper
       final int green,
       final int blue,
       final int alpha,
-      final int seeThruAlpha)
-    {
+      final int seeThruAlpha) {
         if (a != null && b != null)
         {
             RenderSystem.enableBlend();
@@ -147,9 +150,10 @@ public class RenderHelper
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         final Tesselator tess = Tesselator.getInstance();
         final BufferBuilder bufferBuilder = tess.getBuilder();
+
 //        GL11.glShadeModel(GL11.GL_FLAT);
 //        RenderSystem.shadeModel(GL11.GL_FLAT);
-        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
 
         final float minX = (float) boundingBox.minX;
         final float minY = (float) boundingBox.minY;
