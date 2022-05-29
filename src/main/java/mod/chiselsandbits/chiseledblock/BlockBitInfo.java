@@ -412,7 +412,6 @@ public class BlockBitInfo
 		try
 		{
 			Class<?> clz = blkClass.getMethod(methodName, args).getDeclaringClass();
-			System.out.println(clz);
 		    return clz;
 		}
 		catch ( final NoSuchMethodException e )
@@ -433,10 +432,7 @@ public class BlockBitInfo
 			return blkClass;
 		}
 
-		return getDeclaringClass(
-				blkClass.getSuperclass(),
-				methodName,
-				args );
+		return getDeclaringClass(blkClass.getSuperclass(), methodName, args );
 	}
 
 	public final boolean isCompatible;

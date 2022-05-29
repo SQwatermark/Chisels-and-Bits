@@ -1,8 +1,8 @@
 package mod.chiselsandbits.client.gui;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import mod.chiselsandbits.api.ReplacementStateHandler;
 import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.helpers.ChiselToolType;
@@ -11,12 +11,13 @@ import mod.chiselsandbits.helpers.LocalStrings;
 import mod.chiselsandbits.modes.IToolMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -78,10 +79,7 @@ public class ChiselsAndBitsMenu extends Screen
 		return visibility > 0.001;
 	}
 
-	public void configure(
-			final int scaledWidth,
-			final int scaledHeight )
-	{
+	public void configure(final int scaledWidth, final int scaledHeight ) {
 		width = scaledWidth;
 		height = scaledHeight;
 	}
@@ -105,14 +103,7 @@ public class ChiselsAndBitsMenu extends Screen
 		public String name;
 		public Direction textSide;
 
-		public MenuButton(
-				final String name,
-				final ButtonAction action,
-				final double x,
-				final double y,
-				final TextureAtlasSprite ico,
-				final Direction textSide )
-		{
+		public MenuButton(final String name, final ButtonAction action, final double x, final double y, final TextureAtlasSprite ico, final Direction textSide ) {
 			this.name = name;
 			this.action = action;
 			x1 = x;
@@ -124,14 +115,7 @@ public class ChiselsAndBitsMenu extends Screen
 			this.textSide = textSide;
 		}
 
-		public MenuButton(
-				final String name,
-				final ButtonAction action,
-				final double x,
-				final double y,
-				final int col,
-				final Direction textSide )
-		{
+		public MenuButton(final String name, final ButtonAction action, final double x, final double y, final int col, final Direction textSide ) {
 			this.name = name;
 			this.action = action;
 			x1 = x;
@@ -144,17 +128,13 @@ public class ChiselsAndBitsMenu extends Screen
 
 	};
 
-	static class MenuRegion
-	{
-
+	static class MenuRegion {
 		public final IToolMode mode;
 		public double x1, x2;
 		public double y1, y2;
 		public boolean highlighted;
 
-		public MenuRegion(
-				final IToolMode mode )
-		{
+		public MenuRegion(final IToolMode mode ) {
 			this.mode = mode;
 		}
 
@@ -165,8 +145,7 @@ public class ChiselsAndBitsMenu extends Screen
     {
         final ChiselToolType tool = ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND );
 
-        if ( tool == null )
-        {
+        if ( tool == null ) {
             return;
         }
 
@@ -184,6 +163,7 @@ public class ChiselsAndBitsMenu extends Screen
         RenderSystem.blendFuncSeparate( GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0 );
 //        GL11.glShadeModel(GL11.GL_SMOOTH);
 //        RenderSystem.shadeModel( GL11.GL_SMOOTH );
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         final Tesselator tessellator = Tesselator.getInstance();
         final BufferBuilder buffer = tessellator.getBuilder();
 
@@ -207,8 +187,8 @@ public class ChiselsAndBitsMenu extends Screen
         final double middle_x = width / 2;
         final double middle_y = height / 2;
 
-        final ArrayList<MenuRegion> modes = new ArrayList<MenuRegion>();
-        final ArrayList<MenuButton> btns = new ArrayList<MenuButton>();
+        final ArrayList<MenuRegion> modes = new ArrayList<>();
+        final ArrayList<MenuButton> btns = new ArrayList<>();
 
         if ( tool == ChiselToolType.BIT )
         {
@@ -348,9 +328,9 @@ public class ChiselsAndBitsMenu extends Screen
         RenderSystem.enableTexture();
         RenderSystem.setShaderColor( 1, 1, 1, 1.0f );
         RenderSystem.disableBlend();
-//        RenderSystem.enableAlphaTest();// TODO
-        RenderSystem.bindTexture( Minecraft.getInstance().getTextureManager().getTexture(InventoryMenu.BLOCK_ATLAS).getId() );
-
+//        RenderSystem.enableAlphaTest();
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
         buffer.begin( VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR );
 
         for ( final MenuRegion mnuRgn : modes )
@@ -377,7 +357,7 @@ public class ChiselsAndBitsMenu extends Screen
             final double v1 = sip.top * 16.0;
             final double v2 = ( sip.top + sip.height ) * 16.0;
 
-            buffer.vertex( middle_x + x1, middle_y + y1, 0 ).uv( sprite.getU( u1 ), sprite.getV( v1 ) ).color( f, f, f, a ).endVertex();
+            buffer.vertex( middle_x + x1, middle_y + y1, 0 ).uv( sprite.getU( u1 ), sprite.getV( v1 )).color( f, f, f, a ).endVertex();
             buffer.vertex( middle_x + x1, middle_y + y2, 0 ).uv( sprite.getU( u1 ), sprite.getV( v2 ) ).color( f, f, f, a ).endVertex();
             buffer.vertex( middle_x + x2, middle_y + y2, 0 ).uv( sprite.getU( u2 ), sprite.getV( v2 ) ).color( f, f, f, a ).endVertex();
             buffer.vertex( middle_x + x2, middle_y + y1, 0 ).uv( sprite.getU( u2 ), sprite.getV( v1 ) ).color( f, f, f, a ).endVertex();

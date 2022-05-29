@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -51,7 +52,7 @@ public class RenderHelper
         {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-//            GL11.glLineWidth(2.0F);
+            RenderSystem.lineWidth(2.0F);
             RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
 
@@ -93,7 +94,7 @@ public class RenderHelper
         {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-//            GL11.glLineWidth(2.0F);
+            RenderSystem.lineWidth(2.0F);
             RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
             // TODO
@@ -148,6 +149,7 @@ public class RenderHelper
     // Custom replacement of 1.9.4 -> 1.10's method that changed.
     public static void renderBoundingBox(final PoseStack matrixStack, final AABB boundingBox, final int red, final int green, final int blue, final int alpha) {
 //        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_LIGHTING_BIT );
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         final Tesselator tess = Tesselator.getInstance();
         final BufferBuilder bufferBuilder = tess.getBuilder();
 //        GL11.glShadeModel(GL11.GL_FLAT);
@@ -207,6 +209,7 @@ public class RenderHelper
       final int blue,
       final int alpha)
     {
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         final Tesselator tess = Tesselator.getInstance();
         final BufferBuilder bufferBuilder = tess.getBuilder();
 //        GL11.glShadeModel(GL11.GL_FLAT);
@@ -235,6 +238,7 @@ public class RenderHelper
       final int combinedLightmap,
       final int combinedOverlay)
     {
+        RenderSystem.setShader(GameRenderer::getBlockShader);
         final Tesselator tessellator = Tesselator.getInstance();
         final BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);

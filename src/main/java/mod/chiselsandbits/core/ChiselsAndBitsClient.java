@@ -41,7 +41,6 @@ public class ChiselsAndBitsClient
         //TODO: Load clipboard
         //CreativeClipboardTab.load( new File( configFile.getParent(), MODID + "_clipboard.cfg" ) );
 
-        System.out.println("守矢神社");
         ClientSide.instance.preinit( ChiselsAndBits.getInstance() );
         ClientSide.instance.init( ChiselsAndBits.getInstance() );
         ClientSide.instance.postinit( ChiselsAndBits.getInstance() );
@@ -78,7 +77,6 @@ public class ChiselsAndBitsClient
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/roll_x" ) );
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/roll_z" ) );
         ev.addSprite( new ResourceLocation( "chiselsandbits", "icons/white" ) );
-
         for ( final ChiselMode mode : ChiselMode.values() )
         {
             ev.addSprite(new ResourceLocation( "chiselsandbits", "icons/" + mode.name().toLowerCase() ));
