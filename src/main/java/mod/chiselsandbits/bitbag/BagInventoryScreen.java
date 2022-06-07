@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -22,12 +23,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.GuiUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class BagGui extends AbstractContainerScreen<BagContainer>
+public class BagInventoryScreen extends AbstractContainerScreen<BagInventoryMenu>
 {
 
 	private static final ResourceLocation BAG_GUI_TEXTURE = new ResourceLocation( ChiselsAndBits.MODID, "textures/gui/container/bitbag.png" );
@@ -37,98 +37,69 @@ public class BagGui extends AbstractContainerScreen<BagContainer>
 
     private Slot hoveredBitSlot = null;
 
-	public BagGui(
-			final BagContainer container,
-            final Inventory playerInventory,
-            final Component title
-    )
-	{
+	public BagInventoryScreen(final BagInventoryMenu container, final Inventory playerInventory, final Component title) {
 		super(container, playerInventory, title);
 		imageHeight = 239;
 	}
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         super.init();
-        trashBtn = addWidget(new GuiIconButton(leftPos - 18, topPos + 0, ClientSide.trashIcon, p_onPress_1_ -> {
-            if (requireConfirm)
-            {
+        trashBtn = addWidget(new GuiIconButton(leftPos - 18, topPos, ClientSide.trashIcon, p_onPress_1_ -> {
+            if (requireConfirm) {
                 dontThrow = true;
-                if (isValidBitItem())
-                {
+                if (isValidBitItem()) {
                     requireConfirm = false;
                 }
-            }
-            else
-            {
+            } else {
                 requireConfirm = true;
                 // server side!
                 ChiselsAndBits.getNetworkChannel().sendToServer(new PacketClearBagGui(getInHandItem()));
                 dontThrow = false;
             }
         }, (button, poseStack, p_onTooltip_3_, p_onTooltip_4_) -> {
-            if ( isValidBitItem() )
-            {
+            if (isValidBitItem()) {
                 final String msgNotConfirm = ModUtil.notEmpty( getInHandItem() ) ? LocalStrings.TrashItem.getLocal( getInHandItem().getHoverName().getString() ) : LocalStrings.Trash.getLocal();
                 final String msgConfirm = ModUtil.notEmpty( getInHandItem() ) ? LocalStrings.ReallyTrashItem.getLocal( getInHandItem().getHoverName().getString() ) : LocalStrings.ReallyTrash.getLocal();
 
-
                 final List<Component> text = Arrays.asList( new Component[] { new TextComponent(requireConfirm ? msgNotConfirm : msgConfirm) } );
+                this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
 //                GuiUtils.drawHoveringText(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font );
-            }
-            else
-            {
+            } else {
                 final List<Component> text = Arrays.asList( new Component[] { new TextComponent(LocalStrings.TrashInvalidItem.getLocal( getInHandItem().getHoverName().getString() )) } );
+                this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
 //                GuiUtils.drawHoveringText(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font );
             }
         }));
 
-        final GuiIconButton sortBtn = addWidget(new GuiIconButton(leftPos - 18, topPos + 18, ClientSide.sortIcon, new Button.OnPress()
-        {
-            @Override
-            public void onPress(final Button p_onPress_1_)
-            {
-                ChiselsAndBits.getNetworkChannel().sendToServer(new PacketSortBagGui());
-            }
-        },
-          (p_onTooltip_1_, p_onTooltip_2_, p_onTooltip_3_, p_onTooltip_4_) -> {
-              final List<Component> text = Arrays.asList(new Component[] {new TextComponent(LocalStrings.Sort.getLocal())});
+        final GuiIconButton sortBtn = addWidget(new GuiIconButton(leftPos - 18, topPos + 18, ClientSide.sortIcon, p_onPress_1_ ->
+                ChiselsAndBits.getNetworkChannel().sendToServer(new PacketSortBagGui()), (button, poseStack, p_onTooltip_3_, p_onTooltip_4_) -> {
+            final List<Component> text = Arrays.asList(new Component[] {new TextComponent(LocalStrings.Sort.getLocal())});
+            this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
 //              GuiUtils.drawHoveringText(p_onTooltip_2_, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font);
           }));
     }
 
-	BagContainer getBagContainer()
+	BagInventoryMenu getBagContainer()
 	{
-		return (BagContainer) menu;
+		return menu;
 	}
 
     @Override
-    public void render(
-      final PoseStack stack,
-      final int mouseX,
-      final int mouseY,
-      final float partialTicks )
-    {
+    public void render(final PoseStack stack, final int mouseX, final int mouseY, final float partialTicks ) {
         this.renderBackground(stack);
-        drawDefaultBackground(stack, partialTicks, mouseX, mouseY);
         super.render(stack, mouseX, mouseY, partialTicks );
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void renderBg(
-      final PoseStack stack,
-      final float partialTicks,
-      final int mouseX,
-      final int mouseY )
-    {
-        final int xOffset = ( width - imageWidth ) / 2;
-        final int yOffset = ( height - imageHeight ) / 2;
-
+    protected void renderBg(final PoseStack stack, final float partialTicks, final int mouseX, final int mouseY) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor( 1.0F, 1.0F, 1.0F, 1.0F );
         RenderSystem.setShaderTexture(0, BAG_GUI_TEXTURE);
-        this.blit(stack, xOffset, yOffset, 0, 0, imageWidth, imageHeight );
+        final int xOffset = (width - imageWidth) / 2;
+        final int yOffset = (height - imageHeight) / 2;
+        this.blit(stack, xOffset, yOffset, 0, 0, imageWidth, imageHeight);
 
         if ( specialFontRenderer == null )
         {
@@ -138,7 +109,7 @@ public class BagGui extends AbstractContainerScreen<BagContainer>
         hoveredBitSlot = null;
         for ( int slotIdx = 0; slotIdx < getBagContainer().customSlots.size(); ++slotIdx )
         {
-            final Slot slot = getBagContainer().customSlots.get( slotIdx );
+            final Slot slot = getBagContainer().customSlots.get(slotIdx);
 
             final Font defaultFontRenderer = font;
 
@@ -148,7 +119,7 @@ public class BagGui extends AbstractContainerScreen<BagContainer>
                 stack.pushPose();
                 stack.translate(leftPos, topPos, 0f);
                 renderSlot(stack, slot);
-                stack.pushPose();
+                stack.popPose();
             }
             finally
             {
@@ -161,12 +132,7 @@ public class BagGui extends AbstractContainerScreen<BagContainer>
                 final int yDisplayPos = this.topPos + slot.y;
                 hoveredBitSlot = slot;
 
-                RenderSystem.disableDepthTest();
-                RenderSystem.colorMask( true, true, true, false );
-                final int INNER_SLOT_SIZE = 16;
-                fillGradient(stack, xDisplayPos, yDisplayPos, xDisplayPos + INNER_SLOT_SIZE, yDisplayPos + INNER_SLOT_SIZE, -2130706433, -2130706433 );
-                RenderSystem.colorMask( true, true, true, true );
-                RenderSystem.enableDepthTest();
+                renderSlotHighlight(stack, xDisplayPos, yDisplayPos, this.getBlitOffset(), this.getSlotColor(0));
             }
         }
 
@@ -219,7 +185,4 @@ public class BagGui extends AbstractContainerScreen<BagContainer>
         font.draw(matrixStack, I18n.get( "container.inventory" ), 8, imageHeight - 93, 0x404040 );
     }
 
-    protected void drawDefaultBackground(final PoseStack matrixStack, final float partialTicks, final int x, final int y)
-    {
-    }
 }

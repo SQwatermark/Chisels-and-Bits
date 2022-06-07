@@ -22,36 +22,34 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BagContainer extends AbstractContainerMenu
+public class BagInventoryMenu extends AbstractContainerMenu
 {
 	static final int OUTER_SLOT_SIZE = 18;
 
-	final Player      thePlayer;
+	final Player thePlayer;
 	final TargetedInventory visibleInventory = new TargetedInventory();
 
 	BagInventory bagInv;
 	SlotReadonly bagSlot;
 
-	final public List<Slot>      customSlots      = new ArrayList<>();
+	final public List<Slot> customSlots = new ArrayList<>();
 	final public List<ItemStack> customSlotsItems = new ArrayList<>();
 
-	private void addCustomSlot(
-			final SlotBit newSlot )
-	{
+	private void addCustomSlot(final SlotBit newSlot) {
 		newSlot.index = customSlots.size();
-		customSlots.add( newSlot );
-		customSlotsItems.add( ModUtil.getEmptyStack() );
+		customSlots.add(newSlot);
+		customSlotsItems.add(ModUtil.getEmptyStack());
 	}
 
-    public BagContainer(final int id, final Inventory playerInventory)
+    public BagInventoryMenu(final int id, final Inventory playerInventory)
     {
         super(ModContainerTypes.BAG_CONTAINER.get(), id);
         thePlayer = playerInventory.player;
 
         final int playerInventoryOffset = ( 7 - 4 ) * OUTER_SLOT_SIZE;
 
-        final ItemStack is = thePlayer.getMainHandItem();
-        setBag( is );
+        final ItemStack stack = thePlayer.getMainHandItem();
+        setBag(stack);
 
         for ( int yOffset = 0; yOffset < 7; ++yOffset )
         {
@@ -83,17 +81,13 @@ public class BagContainer extends AbstractContainerMenu
     }
 
 
-	private void setBag(
-			final ItemStack bagItem )
-	{
+	private void setBag(final ItemStack bagItem) {
+
 		final Container inv;
 
-		if ( ModUtil.notEmpty( bagItem ) && bagItem.getItem() instanceof ItemBitBag )
-		{
+		if ( ModUtil.notEmpty( bagItem ) && bagItem.getItem() instanceof ItemBitBag ) {
 			inv = bagInv = new BagInventory( bagItem );
-		}
-		else
-		{
+		} else {
 			bagInv = null;
 			inv = new NullInventory( BagStorage.BAG_STORAGE_SLOTS );
 		}
@@ -102,15 +96,11 @@ public class BagContainer extends AbstractContainerMenu
 	}
 
 	@Override
-	public boolean stillValid(
-			final Player playerIn )
-	{
+	public boolean stillValid(final Player playerIn) {
 		return bagInv != null && playerIn == thePlayer && hasBagInHand( thePlayer );
 	}
 
-	private boolean hasBagInHand(
-			final Player player )
-	{
+	private boolean hasBagInHand(final Player player) {
 		if ( bagInv.getItemStack() != player.getMainHandItem() )
 		{
 			setBag( player.getMainHandItem() );
@@ -120,17 +110,11 @@ public class BagContainer extends AbstractContainerMenu
 	}
 
 	@Override
-	public ItemStack quickMoveStack(
-			final Player playerIn,
-			final int index )
-	{
+	public ItemStack quickMoveStack(final Player playerIn, final int index) {
 		return transferStack( index, true );
 	}
 
-	private ItemStack transferStack(
-			final int index,
-			final boolean normalToBag )
-	{
+	private ItemStack transferStack(final int index, final boolean normalToBag ) {
 		ItemStack someReturnValue = ModUtil.getEmptyStack();
 		boolean reverse = true;
 
@@ -204,7 +188,7 @@ public class BagContainer extends AbstractContainerMenu
 	@OnlyIn(Dist.CLIENT)
 	public static Object getGuiClass()
 	{
-		return BagGui.class;
+		return BagInventoryScreen.class;
 	}
 
 	public void handleCustomSlotAction(
@@ -353,8 +337,7 @@ public class BagContainer extends AbstractContainerMenu
 		}
 	}
 
-	public void clear(
-			final ItemStack stack )
+	public void clear(final ItemStack stack)
 	{
 		if ( ModUtil.notEmpty( stack ) && stack.getItem() == ModItems.ITEM_BLOCK_BIT.get() )
 		{
@@ -365,12 +348,14 @@ public class BagContainer extends AbstractContainerMenu
 		}
 
 		bagInv.clear( stack );
+		this.broadcastChanges(); // TODO
 //		( (ServerPlayer) thePlayer ).refreshContainer( this );
 	}
 
 	public void sort()
 	{
 		bagInv.sort();
+		this.broadcastChanges();
 //		( (ServerPlayer) thePlayer ).refreshContainer( this );
 	}
 

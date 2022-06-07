@@ -58,8 +58,7 @@ public class BagInventory implements Container {
         return stackSlots.length;
     }
 
-    private int getStateInSlot(
-            int index) {
+    private int getStateInSlot(int index) {
         final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
         final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
 
@@ -71,9 +70,7 @@ public class BagInventory implements Container {
     }
 
     @Override
-    public @Nonnull
-    ItemStack getItem(
-            final int index) {
+    public @Nonnull ItemStack getItem(final int index) {
         final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
         final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
 
@@ -91,9 +88,7 @@ public class BagInventory implements Container {
     }
 
     @Override
-    public ItemStack removeItem(
-            final int index,
-            int count) {
+    public ItemStack removeItem(final int index, int count) {
         final int qty = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_QUANTITY];
         final int id = inv.contents[ItemBitBag.INTS_PER_BIT_TYPE * index + ItemBitBag.OFFSET_STATE_ID];
 
@@ -116,15 +111,12 @@ public class BagInventory implements Container {
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(
-            final int index) {
+    public ItemStack removeItemNoUpdate(final int index) {
         return ModUtil.getEmptyStack();
     }
 
     @Override
-    public void setItem(
-            final int index,
-            final ItemStack stack) {
+    public void setItem(final int index, final ItemStack stack) {
         stackSlots[index] = ModUtil.getEmptyStack();
 
         if (stack != null && stack.getItem() instanceof ItemChiseledBit) {
@@ -160,26 +152,21 @@ public class BagInventory implements Container {
     }
 
     @Override
-    public void startOpen(
-            final Player player) {
+    public void startOpen(final Player player) {
     }
 
     @Override
-    public void stopOpen(
-            final Player player) {
+    public void stopOpen(final Player player) {
     }
 
     @Override
-    public boolean canPlaceItem(
-            final int index,
-            final ItemStack stack) {
+    public boolean canPlaceItem(final int index, final ItemStack stack) {
         return stack != null && stack.getItem() instanceof ItemChiseledBit;
     }
 
     private static class StateQtyPair {
-        public StateQtyPair(
-                int state,
-                int qty) {
+
+        public StateQtyPair(int state, int qty) {
             this.qty = qty;
             this.state = state;
         }
@@ -188,10 +175,8 @@ public class BagInventory implements Container {
         int state;
     }
 
-    ;
-
     public void sort() {
-        List<StateQtyPair> stacks = new ArrayList<StateQtyPair>();
+        List<StateQtyPair> stacks = new ArrayList<>();
 
         for (int x = 0; x < stackSlots.length; ++x) {
             int state = inv.contents[x * ItemBitBag.INTS_PER_BIT_TYPE + ItemBitBag.OFFSET_STATE_ID];
@@ -202,26 +187,20 @@ public class BagInventory implements Container {
             }
         }
 
-        stacks.sort(new Comparator<StateQtyPair>() {
+        stacks.sort((o1, o2) -> {
+            if (o1.state < o2.state)
+                return 1;
 
-            @Override
-            public int compare(
-                    StateQtyPair o1,
-                    StateQtyPair o2) {
-                if (o1.state < o2.state)
-                    return 1;
+            if (o1.state > o2.state)
+                return -1;
 
-                if (o1.state > o2.state)
-                    return -1;
+            if (o1.qty < o2.qty)
+                return 1;
 
-                if (o1.qty < o2.qty)
-                    return 1;
+            if (o1.qty > o2.qty)
+                return -1;
 
-                if (o1.qty > o2.qty)
-                    return -1;
-
-                return 0;
-            }
+            return 0;
         });
 
         for (int x = 0; x < stacks.size() - 1; x++) {
@@ -262,8 +241,7 @@ public class BagInventory implements Container {
         inv.onChange();
     }
 
-    public void clear(
-            final ItemStack stack) {
+    public void clear(final ItemStack stack) {
         for (int x = 0; x < stackSlots.length; ++x) {
             if (matches(stack, stackSlots[x])) {
                 stackSlots[x] = ModUtil.getEmptyStack();
@@ -275,9 +253,7 @@ public class BagInventory implements Container {
         inv.onChange();
     }
 
-    public boolean matches(
-            final ItemStack cmpStack,
-            final ItemStack invStack) {
+    public boolean matches(final ItemStack cmpStack, final ItemStack invStack) {
         if (ModUtil.isEmpty(cmpStack) || invStack == null) {
             return true;
         }
@@ -285,9 +261,7 @@ public class BagInventory implements Container {
         return cmpStack.getItem() == invStack.getItem() && ItemStack.tagMatches(cmpStack, invStack);
     }
 
-    public ItemStack restockItem(
-            final ItemStack target,
-            final ItemStack targetType) {
+    public ItemStack restockItem(final ItemStack target, final ItemStack targetType) {
         int outSize = ModUtil.getStackSize(target);
 
         for (int x = getContainerSize() - 1; x >= 0; x--) {
@@ -319,9 +293,7 @@ public class BagInventory implements Container {
         return out;
     }
 
-    public @Nonnull
-    ItemStack insertItem(
-            final @Nonnull ItemStack which) {
+    public @Nonnull ItemStack insertItem(final @Nonnull ItemStack which) {
         for (int x = 0; x < getContainerSize(); x++) {
             final ItemStack is = getItem(x);
             if (!ModUtil.isEmpty(is) && ItemChiseledBit.getStackState(which) == ItemChiseledBit.getStackState(is)) {
@@ -346,9 +318,7 @@ public class BagInventory implements Container {
         return which;
     }
 
-    public int extractBit(
-            final int bitMeta,
-            int total) {
+    public int extractBit(final int bitMeta, int total) {
         int used = 0;
 
         for (int index = stackSlots.length - 1; index >= 0; index--) {
@@ -380,8 +350,7 @@ public class BagInventory implements Container {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<Component> listContents(
-            final List<Component> details) {
+    public List<Component> listContents(final List<Component> details) {
         final TreeMap<String, Integer> contents = new TreeMap<>();
 
         for (int x = 0; x < getContainerSize(); x++) {
@@ -440,7 +409,6 @@ public class BagInventory implements Container {
                 return false;
             }
         }
-
         return true;
     }
 

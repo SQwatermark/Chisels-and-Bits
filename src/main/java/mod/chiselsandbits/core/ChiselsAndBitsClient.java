@@ -1,6 +1,6 @@
 package mod.chiselsandbits.core;
 
-import mod.chiselsandbits.bitbag.BagGui;
+import mod.chiselsandbits.bitbag.BagInventoryScreen;
 import mod.chiselsandbits.client.gui.SpriteIconPositioning;
 import mod.chiselsandbits.client.model.loader.ChiseledBlockModelLoader;
 import mod.chiselsandbits.modes.ChiselMode;
@@ -23,9 +23,6 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DeferredWorkQueue;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.awt.image.BufferedImage;
@@ -48,7 +45,7 @@ public class ChiselsAndBitsClient
         // TODO
         MenuScreens.register(
                 ModContainerTypes.BAG_CONTAINER.get(),
-                BagGui::new
+                BagInventoryScreen::new
         );
         MenuScreens.register(
                 ModContainerTypes.CHISEL_STATION_CONTAINER.get(),

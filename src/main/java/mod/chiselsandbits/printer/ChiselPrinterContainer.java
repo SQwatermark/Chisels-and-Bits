@@ -1,16 +1,15 @@
 package mod.chiselsandbits.printer;
 
-import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.registry.ModContainerTypes;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;

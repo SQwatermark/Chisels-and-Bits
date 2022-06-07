@@ -1,12 +1,12 @@
 package mod.chiselsandbits.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -14,12 +14,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 import java.util.Random;
@@ -161,7 +158,7 @@ public class RenderHelper
       final int combinedOverlay)
     {
 
-        VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.solid());
+        VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.translucent());
 
         for (final Direction direction : Direction.values())
         {
@@ -181,18 +178,8 @@ public class RenderHelper
       final int combinedOverlay)
     {
         final int alpha = isUnplaceable ? 0x22000000 : 0xaa000000;
-//        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
-//        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-//
-//        RenderSystem.enableBlend();
-//        RenderSystem.enableTexture();
-//        RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//        RenderSystem.colorMask(false, false, false, false);
 
         RenderHelper.renderModel(matrixStack, baked, worldObj, blockPos, alpha, combinedLightmap, combinedOverlay);
-//        RenderSystem.colorMask(true, true, true, true);
-//        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-//        RenderHelper.renderModel(matrixStack, baked, worldObj, blockPos, alpha, combinedLightmap, combinedOverlay);
 
         RenderSystem.disableBlend();
     }

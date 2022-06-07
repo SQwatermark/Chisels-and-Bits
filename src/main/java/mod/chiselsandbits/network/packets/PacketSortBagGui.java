@@ -1,6 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import mod.chiselsandbits.network.ModPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,9 +19,9 @@ public class PacketSortBagGui extends ModPacket
 	public void server(
 			final ServerPlayer player )
 	{
-		if ( player.containerMenu instanceof BagContainer )
+		if ( player.containerMenu instanceof BagInventoryMenu)
 		{
-			( (BagContainer) player.containerMenu ).sort();
+			( (BagInventoryMenu) player.containerMenu ).sort();
 		}
 	}
 

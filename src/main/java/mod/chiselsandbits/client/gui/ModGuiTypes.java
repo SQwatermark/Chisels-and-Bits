@@ -1,6 +1,6 @@
 package mod.chiselsandbits.client.gui;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 public enum ModGuiTypes
 {
 
-	BitBag( BagContainer.class );
+	BitBag( BagInventoryMenu.class );
 
     public final Constructor<?> container_construtor;
 	public final Constructor<?> gui_construtor;

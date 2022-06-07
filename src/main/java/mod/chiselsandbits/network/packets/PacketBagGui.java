@@ -1,6 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import mod.chiselsandbits.network.ModPacket;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,9 +38,9 @@ public class PacketBagGui extends ModPacket
 			final Player player )
 	{
 		final AbstractContainerMenu c = player.containerMenu;
-		if ( c instanceof BagContainer )
+		if ( c instanceof BagInventoryMenu)
 		{
-			final BagContainer bc = (BagContainer) c;
+			final BagInventoryMenu bc = (BagInventoryMenu) c;
 			bc.handleCustomSlotAction( slotNumber, mouseButton, duplicateButton, holdingShift );
 		}
 	}

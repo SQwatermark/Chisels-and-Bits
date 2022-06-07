@@ -1,6 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemChiseledBit;
@@ -29,9 +29,9 @@ public class PacketBagGuiStack extends ModPacket
 	public void client()
 	{
 		final AbstractContainerMenu cc = ClientSide.instance.getPlayer().containerMenu;
-		if ( cc instanceof BagContainer )
+		if ( cc instanceof BagInventoryMenu)
 		{
-			( (BagContainer) cc ).customSlots.get( index ).set( is );
+			( (BagInventoryMenu) cc ).customSlots.get( index ).set( is );
 		}
 	}
 

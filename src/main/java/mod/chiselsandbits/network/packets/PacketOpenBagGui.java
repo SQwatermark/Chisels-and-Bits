@@ -1,6 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import mod.chiselsandbits.network.ModPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
@@ -23,7 +23,7 @@ public class PacketOpenBagGui extends ModPacket
 			final ServerPlayer player )
 	{
 	    player.openMenu(new SimpleMenuProvider(
-          (id, playerInventory, playerEntity) -> new BagContainer(id, playerInventory),
+          (id, playerInventory, playerEntity) -> new BagInventoryMenu(id, playerInventory),
           new TextComponent("Bitbag")
         ));
 	}

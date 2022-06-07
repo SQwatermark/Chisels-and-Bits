@@ -1,6 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
-import mod.chiselsandbits.bitbag.BagContainer;
+import mod.chiselsandbits.bitbag.BagInventoryMenu;
 import mod.chiselsandbits.network.ModPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,9 +25,9 @@ public class PacketClearBagGui extends ModPacket
 	public void server(
       final ServerPlayer player )
 	{
-		if ( player.containerMenu instanceof BagContainer )
+		if ( player.containerMenu instanceof BagInventoryMenu)
 		{
-			( (BagContainer) player.containerMenu ).clear( stack );
+			( (BagInventoryMenu) player.containerMenu ).clear( stack );
 		}
 	}
 
