@@ -1,6 +1,6 @@
 package mod.chiselsandbits.printer;
 
-import mod.chiselsandbits.bitstorage.TileEntityBitStorage;
+import mod.chiselsandbits.bitstorage.BlockEntityBitStorage;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
@@ -404,9 +404,9 @@ public class ChiselPrinterTileEntity extends BlockEntity implements MenuProvider
     private int getStorageContents(final Direction targetedFacing)
     {
         final BlockEntity targetedTileEntity = this.getLevel().getBlockEntity(this.getBlockPos().relative(targetedFacing));
-        if (targetedTileEntity instanceof TileEntityBitStorage)
+        if (targetedTileEntity instanceof BlockEntityBitStorage)
         {
-            final TileEntityBitStorage storage = (TileEntityBitStorage) targetedTileEntity;
+            final BlockEntityBitStorage storage = (BlockEntityBitStorage) targetedTileEntity;
             return storage.getBits();
         }
 
@@ -437,9 +437,9 @@ public class ChiselPrinterTileEntity extends BlockEntity implements MenuProvider
     private BlockState getStorage(final Direction targetedFacing)
     {
         final BlockEntity targetedTileEntity = this.getLevel().getBlockEntity(this.getBlockPos().relative(targetedFacing));
-        if (targetedTileEntity instanceof TileEntityBitStorage)
+        if (targetedTileEntity instanceof BlockEntityBitStorage)
         {
-            final TileEntityBitStorage storage = (TileEntityBitStorage) targetedTileEntity;
+            final BlockEntityBitStorage storage = (BlockEntityBitStorage) targetedTileEntity;
             return storage.getState();
         }
 
@@ -470,9 +470,9 @@ public class ChiselPrinterTileEntity extends BlockEntity implements MenuProvider
     private void drainStorage(final int amount, final Direction targetedFacing)
     {
         final BlockEntity targetedTileEntity = this.getLevel().getBlockEntity(this.getBlockPos().relative(targetedFacing));
-        if (targetedTileEntity instanceof TileEntityBitStorage)
+        if (targetedTileEntity instanceof BlockEntityBitStorage)
         {
-            final TileEntityBitStorage storage = (TileEntityBitStorage) targetedTileEntity;
+            final BlockEntityBitStorage storage = (BlockEntityBitStorage) targetedTileEntity;
             storage.extractBits(0, amount, false);
         }
     }

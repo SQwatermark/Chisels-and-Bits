@@ -3,12 +3,15 @@ package mod.chiselsandbits.registry;
 import com.google.common.collect.Maps;
 import mod.chiselsandbits.bitstorage.BlockBitStorage;
 import mod.chiselsandbits.bitstorage.ItemBlockBitStorage;
+import mod.chiselsandbits.bitstorage.ItemStackSpecialRendererBitStorage;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.ItemBlockChiseled;
 import mod.chiselsandbits.chiseledblock.MaterialType;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.printer.ChiselPrinterBlock;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.client.IItemRenderProperties;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -25,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static mod.chiselsandbits.registry.ModItemGroups.CHISELS_AND_BITS;
 
@@ -50,17 +55,23 @@ public final class ModBlocks {
     );
 
     public static final RegistryObject<BlockItem> BIT_STORAGE_BLOCK_ITEM = BLOCK_ITEMS.register("bit_storage",
-            () -> new ItemBlockBitStorage(BIT_STORAGE_BLOCK.get(), new Item.Properties()
-                    .tab(CHISELS_AND_BITS)
-            )
+            () -> new ItemBlockBitStorage(BIT_STORAGE_BLOCK.get(), new Item.Properties().tab(CHISELS_AND_BITS)) {
+                @Override
+                public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+                    consumer.accept(new IItemRenderProperties() {
+                        @Override
+                        public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+                            Minecraft mc = Minecraft.getInstance();
+                            return new ItemStackSpecialRendererBitStorage(mc.getBlockEntityRenderDispatcher(), mc.getEntityModels());
+                        }
+                    });
+                }
+            }
     );
-//                .setISTER(() -> ItemStackSpecialRendererBitStorage::new)));
 
     public static final RegistryObject<ChiselPrinterBlock> CHISEL_PRINTER_BLOCK = BLOCKS.register("chisel_printer",
             () -> new ChiselPrinterBlock(BlockBehaviour.Properties.of(Material.STONE)
                     .strength(1.5f, 6f)
-//      .harvestLevel(1)
-//      .harvestTool(ToolType.PICKAXE)
                     .noOcclusion()
                     .isRedstoneConductor((p_test_1_, p_test_2_, p_test_3_) -> false)
                     .isViewBlocking((p_test_1_, p_test_2_, p_test_3_) -> false)

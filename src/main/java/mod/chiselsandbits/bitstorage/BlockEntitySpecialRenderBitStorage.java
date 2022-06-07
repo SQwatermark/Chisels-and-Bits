@@ -15,31 +15,30 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.Objects;
 
-public class TileEntitySpecialRenderBitStorage implements BlockEntityRenderer<TileEntityBitStorage>, BlockEntityRendererProvider<TileEntityBitStorage>
+public class BlockEntitySpecialRenderBitStorage implements BlockEntityRenderer<BlockEntityBitStorage>, BlockEntityRendererProvider<BlockEntityBitStorage>
 {
 
     private static final SimpleMaxSizedCache<CacheKey, VoxelBlob> STORAGE_CONTENTS_BLOB_CACHE = new SimpleMaxSizedCache<>(ChiselsAndBits.getConfig().getClient().bitStorageContentCacheSize.get());
 
     @Override
-    public BlockEntityRenderer<TileEntityBitStorage> create(Context p_173571_) {
+    public BlockEntityRenderer<BlockEntityBitStorage> create(Context p_173571_) {
         return this;
     }
 
-    public TileEntitySpecialRenderBitStorage()
+    public BlockEntitySpecialRenderBitStorage()
     {
         super();
     }
 
     @Override
     public void render(
-      final TileEntityBitStorage te,
+      final BlockEntityBitStorage te,
       final float partialTicks,
       final PoseStack matrixStackIn,
       final MultiBufferSource buffer,
@@ -59,7 +58,7 @@ public class TileEntitySpecialRenderBitStorage implements BlockEntityRenderer<Ti
 
                     final VertexConsumer builder = buffer.getBuffer(renderType);
 
-                    final float fullness = (float) fluidStack.getAmount() / (float) TileEntityBitStorage.MAX_CONTENTS;
+                    final float fullness = (float) fluidStack.getAmount() / (float) BlockEntityBitStorage.MAX_CONTENTS;
 
                     FluidCuboidHelper.renderScaledFluidCuboid(
                       fluidStack,

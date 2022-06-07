@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class TileEntityBitStorage extends BlockEntity implements IItemHandler, IFluidHandler
+public class BlockEntityBitStorage extends BlockEntity implements IItemHandler, IFluidHandler
 {
 
     public LazyOptional<IItemHandler> itemHandler = LazyOptional.of(() -> this);
@@ -54,11 +54,11 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
 
 	private int oldLV = -1;
 
-    public TileEntityBitStorage() {
+    public BlockEntityBitStorage() {
         this(BlockPos.ZERO, ModBlocks.BIT_STORAGE_BLOCK.get().defaultBlockState());
     }
 
-    public TileEntityBitStorage(BlockPos pos, BlockState state)
+    public BlockEntityBitStorage(BlockPos pos, BlockState state)
     {
         super(ModBlockEntityTypes.BIT_STORAGE.get(), pos, state);
     }
@@ -563,11 +563,11 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
             return 0;
         }
 
-        final int possibleAmount = resource.getAmount() - resource.getAmount() % TileEntityBitStorage.MB_PER_BIT_CONVERSION;
+        final int possibleAmount = resource.getAmount() - resource.getAmount() % BlockEntityBitStorage.MB_PER_BIT_CONVERSION;
 
         if ( possibleAmount > 0 )
         {
-            final int bitCount = possibleAmount * TileEntityBitStorage.BITS_PER_MB_CONVERSION / TileEntityBitStorage.MB_PER_BIT_CONVERSION;
+            final int bitCount = possibleAmount * BlockEntityBitStorage.BITS_PER_MB_CONVERSION / BlockEntityBitStorage.MB_PER_BIT_CONVERSION;
             final ItemStack bitItems = getFluidBitStack( resource.getFluid(), bitCount );
             final ItemStack leftOver = insertItem( 0, bitItems, action.simulate() );
 
@@ -579,9 +579,9 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
             int mbUsedUp = ModUtil.getStackSize( leftOver );
 
             // round up...
-            mbUsedUp *= TileEntityBitStorage.MB_PER_BIT_CONVERSION;
-            mbUsedUp += TileEntityBitStorage.BITS_PER_MB_CONVERSION - 1;
-            mbUsedUp /= TileEntityBitStorage.BITS_PER_MB_CONVERSION;
+            mbUsedUp *= BlockEntityBitStorage.MB_PER_BIT_CONVERSION;
+            mbUsedUp += BlockEntityBitStorage.BITS_PER_MB_CONVERSION - 1;
+            mbUsedUp /= BlockEntityBitStorage.BITS_PER_MB_CONVERSION;
 
             return resource.getAmount() - mbUsedUp;
         }
@@ -604,14 +604,14 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
         {
             final int aboutHowMuch = resource.getAmount();
 
-            final int mbThatCanBeRemoved = Math.min( a.getAmount(), aboutHowMuch - aboutHowMuch % TileEntityBitStorage.MB_PER_BIT_CONVERSION );
+            final int mbThatCanBeRemoved = Math.min( a.getAmount(), aboutHowMuch - aboutHowMuch % BlockEntityBitStorage.MB_PER_BIT_CONVERSION );
             if ( mbThatCanBeRemoved > 0 )
             {
                 a.setAmount(mbThatCanBeRemoved);
 
                 if ( action.execute() )
                 {
-                    final int bitCount = mbThatCanBeRemoved * TileEntityBitStorage.BITS_PER_MB_CONVERSION / TileEntityBitStorage.MB_PER_BIT_CONVERSION;
+                    final int bitCount = mbThatCanBeRemoved * BlockEntityBitStorage.BITS_PER_MB_CONVERSION / BlockEntityBitStorage.MB_PER_BIT_CONVERSION;
                     extractBits( 0, bitCount, false );
                 }
 
@@ -637,14 +637,14 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
         {
             final int aboutHowMuch = maxDrain;
 
-            final int mbThatCanBeRemoved = Math.min( a.getAmount(), aboutHowMuch - aboutHowMuch % TileEntityBitStorage.MB_PER_BIT_CONVERSION );
+            final int mbThatCanBeRemoved = Math.min( a.getAmount(), aboutHowMuch - aboutHowMuch % BlockEntityBitStorage.MB_PER_BIT_CONVERSION );
             if ( mbThatCanBeRemoved > 0 )
             {
                 a.setAmount(mbThatCanBeRemoved);
 
                 if ( action.execute() )
                 {
-                    final int bitCount = mbThatCanBeRemoved * TileEntityBitStorage.BITS_PER_MB_CONVERSION / TileEntityBitStorage.MB_PER_BIT_CONVERSION;
+                    final int bitCount = mbThatCanBeRemoved * BlockEntityBitStorage.BITS_PER_MB_CONVERSION / BlockEntityBitStorage.MB_PER_BIT_CONVERSION;
                     extractBits( 0, bitCount, false );
                 }
 
@@ -659,7 +659,7 @@ public class TileEntityBitStorage extends BlockEntity implements IItemHandler, I
 	public int getSlotLimit(
 			final int slot )
 	{
-		return TileEntityBitStorage.BITS_PER_MB_CONVERSION;
+		return BlockEntityBitStorage.BITS_PER_MB_CONVERSION;
 	}
 
     @Override

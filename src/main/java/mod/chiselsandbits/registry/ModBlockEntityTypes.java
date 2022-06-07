@@ -1,6 +1,6 @@
 package mod.chiselsandbits.registry;
 
-import mod.chiselsandbits.bitstorage.TileEntityBitStorage;
+import mod.chiselsandbits.bitstorage.BlockEntityBitStorage;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.core.ChiselsAndBits;
@@ -21,9 +21,9 @@ public final class ModBlockEntityTypes {
                                     ModBlocks.getMaterialToBlockConversions().values().stream().map(RegistryObject::get).toArray(BlockChiseled[]::new))
                             .build(null));
 
-    public static RegistryObject<BlockEntityType<TileEntityBitStorage>> BIT_STORAGE =
+    public static RegistryObject<BlockEntityType<BlockEntityBitStorage>> BIT_STORAGE =
             BLOCK_ENTITIES.register("bit_storage",
-                    () -> BlockEntityType.Builder.of(TileEntityBitStorage::new,
+                    () -> BlockEntityType.Builder.of(BlockEntityBitStorage::new,
                                     ModBlocks.BIT_STORAGE_BLOCK.get())
                             .build(null)
     );

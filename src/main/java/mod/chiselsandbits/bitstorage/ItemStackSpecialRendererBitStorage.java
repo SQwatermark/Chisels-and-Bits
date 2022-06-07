@@ -40,7 +40,7 @@ public class ItemStackSpecialRendererBitStorage extends BlockEntityWithoutLevelR
                 .renderModel(matrixStack.last(), buffer.getBuffer(RenderType.translucent()), ModBlocks.BIT_STORAGE_BLOCK.get().defaultBlockState(),
                         model, 1f, 1f, 1f, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
 
-        final TileEntityBitStorage tileEntity = new TileEntityBitStorage(null, null);
+        final BlockEntityBitStorage tileEntity = new BlockEntityBitStorage(BlockPos.ZERO, ModBlocks.BIT_STORAGE_BLOCK.get().defaultBlockState());
         tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .ifPresent(t -> t.fill(stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY)
                         .map(s -> s.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE))

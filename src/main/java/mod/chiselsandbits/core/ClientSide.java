@@ -8,7 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.*;
-import mod.chiselsandbits.bitstorage.TileEntitySpecialRenderBitStorage;
+import mod.chiselsandbits.bitstorage.BlockEntitySpecialRenderBitStorage;
 import mod.chiselsandbits.chiseledblock.*;
 import mod.chiselsandbits.chiseledblock.data.*;
 import mod.chiselsandbits.chiseledblock.iterators.ChiselIterator;
@@ -34,7 +34,6 @@ import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.registry.ModBlockEntityTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
@@ -150,7 +149,7 @@ public class ClientSide
     @SubscribeEvent
     public static void registerTESR(EntityRenderersEvent.RegisterRenderers event) {
         // TODO
-        event.registerBlockEntityRenderer(ModBlockEntityTypes.BIT_STORAGE.get(), new TileEntitySpecialRenderBitStorage());
+        event.registerBlockEntityRenderer(ModBlockEntityTypes.BIT_STORAGE.get(), new BlockEntitySpecialRenderBitStorage());
     }
 
     public void init(final ChiselsAndBits chiselsandbits) {

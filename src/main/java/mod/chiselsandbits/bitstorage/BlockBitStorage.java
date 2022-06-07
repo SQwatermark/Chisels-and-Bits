@@ -60,20 +60,20 @@ public class BlockBitStorage extends Block implements EntityBlock
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
-        return new TileEntityBitStorage(p_153215_, p_153216_);
+        return new BlockEntityBitStorage(p_153215_, p_153216_);
     }
 
-    public TileEntityBitStorage getTileEntity(
+    public BlockEntityBitStorage getTileEntity(
       final BlockEntity te) throws ExceptionNoTileEntity
     {
-        if (te instanceof TileEntityBitStorage)
+        if (te instanceof BlockEntityBitStorage)
         {
-            return (TileEntityBitStorage) te;
+            return (BlockEntityBitStorage) te;
         }
         throw new ExceptionNoTileEntity();
     }
 
-    public TileEntityBitStorage getTileEntity(
+    public BlockEntityBitStorage getTileEntity(
       final BlockGetter world,
       final BlockPos pos) throws ExceptionNoTileEntity
     {
@@ -86,7 +86,7 @@ public class BlockBitStorage extends Block implements EntityBlock
     {
         try
         {
-            final TileEntityBitStorage tank = getTileEntity(worldIn, pos);
+            final BlockEntityBitStorage tank = getTileEntity(worldIn, pos);
             final ItemStack current = ModUtil.nonNull(player.getInventory().getSelected());
 
             if (!ModUtil.isEmpty(current))
@@ -142,10 +142,10 @@ public class BlockBitStorage extends Block implements EntityBlock
             return Lists.newArrayList();
         }
 
-        return Lists.newArrayList(getTankDrop((TileEntityBitStorage) builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)));
+        return Lists.newArrayList(getTankDrop((BlockEntityBitStorage) builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)));
     }
 
-    public ItemStack getTankDrop(final TileEntityBitStorage bitTank)
+    public ItemStack getTankDrop(final BlockEntityBitStorage bitTank)
     {
         final ItemStack tankStack = new ItemStack(this);
         tankStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY)
