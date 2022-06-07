@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -95,7 +96,7 @@ public class RenderHelper
     public static void renderQuads(
       final PoseStack matrixStack,
       final int alpha,
-      final BufferBuilder renderer,
+      final VertexConsumer renderer,
       final List<BakedQuad> quads,
       final Level worldObj,
       final BlockPos blockPos,
@@ -108,12 +109,12 @@ public class RenderHelper
             final BakedQuad bakedquad = quads.get(i);
             final int color = bakedquad.getTintIndex() == -1 ? alpha | 0xffffff : getTint(alpha, bakedquad.getTintIndex(), worldObj, blockPos);
 
-            float cb = color & 0xFF;
-            float cg = (color >>> 8) & 0xFF;
-            float cr = (color >>> 16) & 0xFF;
-            float ca = (color >>> 24) & 0xFF;
+            float a = (float)((color >> 24) & 0xFF) / 255.0F;
+            float r = (float)(color >> 16 & 0xFF) / 255.0F;
+            float g = (float)(color >> 8 & 0xFF) / 255.0F;
+            float b = (float)(color & 0xFF) / 255.0F;
 
-            renderer.putBulkData(matrixStack.last(), bakedquad, cb, cg, cr, ca, combinedLightIn, combinedOverlayIn, false);
+            renderer.putBulkData(matrixStack.last(), bakedquad, r, g, b, a, combinedLightIn, combinedOverlayIn, false);
         }
     }
 
@@ -159,18 +160,15 @@ public class RenderHelper
       final int combinedLightmap,
       final int combinedOverlay)
     {
-        RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
-        final Tesselator tessellator = Tesselator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-        for (final Direction enumfacing : Direction.values())
+        VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.solid());
+
+        for (final Direction direction : Direction.values())
         {
-            renderQuads(matrixStack, alpha, buffer, model.getQuads(null, enumfacing, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
+            renderQuads(matrixStack, alpha, consumer, model.getQuads(null, direction, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
         }
 
-        renderQuads(matrixStack, alpha, buffer, model.getQuads(null, null, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
-        tessellator.end();
+        renderQuads(matrixStack, alpha, consumer, model.getQuads(null, null, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
     }
 
     public static void renderGhostModel(
@@ -183,18 +181,18 @@ public class RenderHelper
       final int combinedOverlay)
     {
         final int alpha = isUnplaceable ? 0x22000000 : 0xaa000000;
-        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        RenderSystem.enableBlend();
-        RenderSystem.enableTexture();
-        RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        RenderSystem.colorMask(false, false, false, false);
+//        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
+//        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+//
+//        RenderSystem.enableBlend();
+//        RenderSystem.enableTexture();
+//        RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//        RenderSystem.colorMask(false, false, false, false);
 
         RenderHelper.renderModel(matrixStack, baked, worldObj, blockPos, alpha, combinedLightmap, combinedOverlay);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-        RenderHelper.renderModel(matrixStack, baked, worldObj, blockPos, alpha, combinedLightmap, combinedOverlay);
+//        RenderSystem.colorMask(true, true, true, true);
+//        RenderSystem.depthFunc(GL11.GL_LEQUAL);
+//        RenderHelper.renderModel(matrixStack, baked, worldObj, blockPos, alpha, combinedLightmap, combinedOverlay);
 
         RenderSystem.disableBlend();
     }
