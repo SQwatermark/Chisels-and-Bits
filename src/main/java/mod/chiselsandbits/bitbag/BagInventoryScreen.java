@@ -13,6 +13,7 @@ import mod.chiselsandbits.registry.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
@@ -31,6 +32,8 @@ public class BagInventoryScreen extends AbstractContainerScreen<BagInventoryMenu
 {
 
 	private static final ResourceLocation BAG_GUI_TEXTURE = new ResourceLocation( ChiselsAndBits.MODID, "textures/gui/container/bitbag.png" );
+    private static final ResourceLocation TRASH_ICON = new ResourceLocation( ChiselsAndBits.MODID, "textures/icons/trash.png" );
+    private static final ResourceLocation SORT_ICON = new ResourceLocation( ChiselsAndBits.MODID, "textures/icons/sort.png" );
 
     private static GuiBagFontRenderer specialFontRenderer = null;
 	private GuiIconButton trashBtn;
@@ -45,7 +48,7 @@ public class BagInventoryScreen extends AbstractContainerScreen<BagInventoryMenu
     @Override
     protected void init() {
         super.init();
-        trashBtn = addWidget(new GuiIconButton(leftPos - 18, topPos, ClientSide.trashIcon, p_onPress_1_ -> {
+        trashBtn = this.addRenderableWidget(new GuiIconButton(leftPos - 18, topPos, TRASH_ICON, p_onPress_1_ -> {
             if (requireConfirm) {
                 dontThrow = true;
                 if (isValidBitItem()) {
@@ -62,21 +65,18 @@ public class BagInventoryScreen extends AbstractContainerScreen<BagInventoryMenu
                 final String msgNotConfirm = ModUtil.notEmpty( getInHandItem() ) ? LocalStrings.TrashItem.getLocal( getInHandItem().getHoverName().getString() ) : LocalStrings.Trash.getLocal();
                 final String msgConfirm = ModUtil.notEmpty( getInHandItem() ) ? LocalStrings.ReallyTrashItem.getLocal( getInHandItem().getHoverName().getString() ) : LocalStrings.ReallyTrash.getLocal();
 
-                final List<Component> text = Arrays.asList( new Component[] { new TextComponent(requireConfirm ? msgNotConfirm : msgConfirm) } );
-                this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
-//                GuiUtils.drawHoveringText(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font );
+                final Component text = new TextComponent(requireConfirm ? msgNotConfirm : msgConfirm);
+                this.renderTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_);
             } else {
-                final List<Component> text = Arrays.asList( new Component[] { new TextComponent(LocalStrings.TrashInvalidItem.getLocal( getInHandItem().getHoverName().getString() )) } );
-                this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
-//                GuiUtils.drawHoveringText(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font );
+                final Component text = new TextComponent(LocalStrings.TrashInvalidItem.getLocal(getInHandItem().getHoverName().getString()));
+                this.renderTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_);
             }
         }));
 
-        final GuiIconButton sortBtn = addWidget(new GuiIconButton(leftPos - 18, topPos + 18, ClientSide.sortIcon, p_onPress_1_ ->
+        final GuiIconButton sortBtn = addRenderableWidget(new GuiIconButton(leftPos - 18, topPos + 18, SORT_ICON, p_onPress_1_ ->
                 ChiselsAndBits.getNetworkChannel().sendToServer(new PacketSortBagGui()), (button, poseStack, p_onTooltip_3_, p_onTooltip_4_) -> {
-            final List<Component> text = Arrays.asList(new Component[] {new TextComponent(LocalStrings.Sort.getLocal())});
-            this.renderComponentTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_, Minecraft.getInstance().font);
-//              GuiUtils.drawHoveringText(p_onTooltip_2_, text, p_onTooltip_3_, p_onTooltip_4_, width, height, -1, Minecraft.getInstance().font);
+            final Component text = new TextComponent(LocalStrings.Sort.getLocal());
+            this.renderTooltip(poseStack, text, p_onTooltip_3_, p_onTooltip_4_);
           }));
     }
 
@@ -88,7 +88,7 @@ public class BagInventoryScreen extends AbstractContainerScreen<BagInventoryMenu
     @Override
     public void render(final PoseStack stack, final int mouseX, final int mouseY, final float partialTicks ) {
         this.renderBackground(stack);
-        super.render(stack, mouseX, mouseY, partialTicks );
+        super.render(stack, mouseX, mouseY, partialTicks);
     }
 
     @SuppressWarnings("deprecation")
