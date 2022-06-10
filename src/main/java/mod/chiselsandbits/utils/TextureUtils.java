@@ -13,12 +13,6 @@ import java.io.InputStream;
 public final class TextureUtils
 {
 
-    private TextureUtils()
-    {
-        throw new IllegalStateException("Tried to initialize: TextureUtils but this is a Utility class.");
-    }
-
-
     public static BufferedImage readBufferedImage(InputStream imageStream) throws IOException
     {
         BufferedImage bufferedimage;

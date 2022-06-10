@@ -6,12 +6,9 @@ import mod.chiselsandbits.modes.ChiselMode;
 import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
-import mod.chiselsandbits.printer.ChiselPrinterScreen;
-import mod.chiselsandbits.registry.ModContainerTypes;
 import mod.chiselsandbits.utils.Constants;
 import mod.chiselsandbits.utils.TextureUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -40,12 +37,6 @@ public class ChiselsAndBitsClient
         ClientSide.instance.preinit( ChiselsAndBits.getInstance() );
         ClientSide.instance.init( ChiselsAndBits.getInstance() );
         ClientSide.instance.postinit( ChiselsAndBits.getInstance() );
-
-        // TODO
-        MenuScreens.register(
-                ModContainerTypes.CHISEL_STATION_CONTAINER.get(),
-                ChiselPrinterScreen::new
-        );
     }
 
     @OnlyIn(Dist.CLIENT)

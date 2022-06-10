@@ -43,7 +43,6 @@ public class ChiselBlockItemModelGenerator implements DataProvider
             actOnBlockWithLoader(cache, blockChiseled, new ResourceLocation(Constants.MOD_ID, "chiseled_block"), materialType);
         }
 
-        actOnBlockWithParent(cache, ModBlocks.CHISEL_PRINTER_BLOCK.get(), Constants.DataGenerator.CHISEL_PRINTER_MODEL);
     }
 
     @Override

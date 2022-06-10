@@ -8,7 +8,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.*;
-import mod.chiselsandbits.bitstorage.BlockEntitySpecialRenderBitStorage;
 import mod.chiselsandbits.chiseledblock.*;
 import mod.chiselsandbits.chiseledblock.data.*;
 import mod.chiselsandbits.chiseledblock.iterators.ChiselIterator;
@@ -31,7 +30,6 @@ import mod.chiselsandbits.network.packets.PacketSetColor;
 import mod.chiselsandbits.network.packets.PacketSuppressInteraction;
 import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
-import mod.chiselsandbits.registry.ModBlockEntityTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -75,8 +73,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.DrawSelectionEvent;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
@@ -84,14 +85,12 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.RegistryObject;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -146,16 +145,8 @@ public class ClientSide
 
     }
 
-    @SubscribeEvent
-    public static void registerTESR(EntityRenderersEvent.RegisterRenderers event) {
-        // TODO
-        event.registerBlockEntityRenderer(ModBlockEntityTypes.BIT_STORAGE.get(), new BlockEntitySpecialRenderBitStorage());
-    }
-
     public void init(final ChiselsAndBits chiselsandbits) {
         readyState = readyState.updateState(ReadyState.TRIGGER_INIT);
-
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.BIT_STORAGE_BLOCK.get(), RenderType.cutoutMipped());
 
         ModBlocks.getMaterialToBlockConversions().values()
             .stream().map(RegistryObject::get)

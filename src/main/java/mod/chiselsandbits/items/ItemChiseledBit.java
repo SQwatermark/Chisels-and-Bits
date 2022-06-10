@@ -2,7 +2,6 @@ package mod.chiselsandbits.items;
 
 import com.google.common.base.Stopwatch;
 import mod.chiselsandbits.api.ReplacementStateHandler;
-import mod.chiselsandbits.bitstorage.BlockBitStorage;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.BlockChiseled.ReplaceWithChiseledValue;
@@ -292,15 +291,6 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
 		// forward interactions to tank...
 		final BlockState usedState = world.getBlockState( usedBlock );
-		final Block blk = usedState.getBlock();
-		if ( blk instanceof BlockBitStorage)
-		{
-			if ( blk.use( usedState, world, usedBlock, player, hand, rayTraceResult) == InteractionResult.SUCCESS)
-			{
-				return InteractionResult.SUCCESS;
-			}
-			return InteractionResult.FAIL;
-		}
 
 		if ( world.isClientSide )
 		{
