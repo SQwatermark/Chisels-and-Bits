@@ -507,55 +507,60 @@ public class ClientSide
         return getToolTypeForItem(is);
     }
 
-    private ChiselToolType getToolTypeForItem(
-      final ItemStack is)
-    {
-        if (is != null && is.getItem() instanceof ItemChisel)
+    private ChiselToolType getToolTypeForItem(ItemStack is) {
+
+        if (is == null) {
+            return null;
+        }
+
+        Item item = is.getItem();
+
+        if (item instanceof ItemChisel)
         {
             return ChiselToolType.CHISEL;
         }
 
-        if (is != null && is.getItem() instanceof ItemChiseledBit)
+        if (item instanceof ItemChiseledBit)
         {
             return ChiselToolType.BIT;
         }
 
-        if (is != null && is.getItem() instanceof ItemBlockChiseled)
+        if (item instanceof ItemBlockChiseled)
         {
             return ChiselToolType.CHISELED_BLOCK;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_TAPE_MEASURE.get())
+        if (item == ModItems.ITEM_TAPE_MEASURE.get())
         {
             return ChiselToolType.TAPEMEASURE;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_POSITIVE_PRINT.get())
+        if (item == ModItems.ITEM_POSITIVE_PRINT.get())
         {
             return ChiselToolType.POSITIVEPATTERN;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_POSITIVE_PRINT_WRITTEN.get())
+        if (item == ModItems.ITEM_POSITIVE_PRINT_WRITTEN.get())
         {
             return ChiselToolType.POSITIVEPATTERN;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_NEGATIVE_PRINT.get())
+        if (item == ModItems.ITEM_NEGATIVE_PRINT.get())
         {
             return ChiselToolType.NEGATIVEPATTERN;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_NEGATIVE_PRINT_WRITTEN.get())
+        if (item == ModItems.ITEM_NEGATIVE_PRINT_WRITTEN.get())
         {
             return ChiselToolType.NEGATIVEPATTERN;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_MIRROR_PRINT.get())
+        if (item == ModItems.ITEM_MIRROR_PRINT.get())
         {
             return ChiselToolType.MIRRORPATTERN;
         }
 
-        if (is != null && is.getItem() == ModItems.ITEM_MIRROR_PRINT_WRITTEN.get())
+        if (item == ModItems.ITEM_MIRROR_PRINT_WRITTEN.get())
         {
             return ChiselToolType.MIRRORPATTERN;
         }
@@ -573,8 +578,7 @@ public class ClientSide
             final BitLocation other = getStartPos();
             if ((chMode == ChiselMode.DRAWN_REGION || tool == ChiselToolType.TAPEMEASURE) && other != null)
             {
-                // this handles the client side, but the server side will fire
-                // separately.
+                // this handles the client side, but the server side will fire separately.
                 pie.setCanceled(true);
             }
         }
@@ -587,19 +591,21 @@ public class ClientSide
             return;
         }
 
-        if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.getInventory().getSelected().isEmpty())
+        Player player = Minecraft.getInstance().player;
+
+        if (player != null && !player.getInventory().getSelected().isEmpty())
         {
-            lastTool = getToolTypeForItem(Objects.requireNonNull(Minecraft.getInstance().player).getInventory().getSelected());
+            lastTool = getToolTypeForItem(player.getInventory().getSelected());
         }
 
-        // used to prevent hyper chisels.. its actually far worse then you might
-        // think...
-        if (event.side == LogicalSide.CLIENT && event.type == TickEvent.Type.CLIENT && event.phase == TickEvent.Phase.START
-              && !Minecraft.getInstance().options.keyAttack.isUnbound() && !Minecraft.getInstance().options.keyAttack.isDown())
+        // used to prevent hyper chisels... it's actually far worse than you might think...
+        // 用于防止一下凿太多
+        if (event.phase == TickEvent.Phase.START && !Minecraft.getInstance().options.keyAttack.isUnbound() && !Minecraft.getInstance().options.keyAttack.isDown())
         {
             ItemChisel.resetDelay();
         }
 
+        // 处理快捷键
         if (!getToolKey().isUnbound() && !getToolKey().isDown() && lastTool == ChiselToolType.CHISEL)
         {
             if (ticksSinceRelease >= 4)
@@ -610,7 +616,6 @@ public class ClientSide
                     lastHand = InteractionHand.MAIN_HAND;
                 }
 
-                lastTool = ChiselToolType.CHISEL;
                 ticksSinceRelease = 0;
             }
             else

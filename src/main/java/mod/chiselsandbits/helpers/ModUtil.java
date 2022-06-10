@@ -61,17 +61,16 @@ public class ModUtil
 
 	private static final SimpleInstanceCache<CompoundTag, VoxelBlob> STACK_VOXEL_BLOB_SIMPLE_INSTANCE_CACHE = new SimpleInstanceCache<>(new CompoundTag(), null);
 
-	static public Direction getPlaceFace(
-			final LivingEntity placer )
+	static public Direction getPlaceFace(final LivingEntity placer)
 	{
 		return Direction.orderedByNearest(placer)[0].getOpposite();
 	}
 
-	static public Pair<Vec3, Vec3> getPlayerRay(
-			final Player playerIn )
-	{
+	static public Pair<Vec3, Vec3> getPlayerRay(Player playerIn) {
+
 		double reachDistance = 5.0d;
 
+		// TODO 为什么？
 		final double x = playerIn.xo + ( playerIn.getX() - playerIn.xo );
 		final double y = playerIn.yo + ( playerIn.getY() - playerIn.yo ) + playerIn.getEyeHeight();
 		final double z = playerIn.zo + ( playerIn.getZ() - playerIn.zo );

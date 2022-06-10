@@ -130,11 +130,6 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
         final ItemStack stack = player.getItemInHand( hand );
         final BlockState blkstate = world.getBlockState( pos );
 
-        if ( ItemChiseledBit.checkRequiredSpace( player, blkstate ) )
-        {
-            return InteractionResult.FAIL;
-        }
-
         boolean offgrid = false;
 
         if ( PositivePatternMode.getMode( stack ) == PositivePatternMode.PLACEMENT )

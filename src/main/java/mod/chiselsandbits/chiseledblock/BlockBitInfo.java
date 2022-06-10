@@ -39,44 +39,41 @@ import java.util.HashMap;
 public class BlockBitInfo
 {
 	// imc api...
-	private static HashMap<Block, Boolean> ignoreLogicBlocks = new HashMap<>();
+	private static final HashMap<Block, Boolean> ignoreLogicBlocks = new HashMap<>();
 
 	static
 	{
-		ignoreLogicBlocks.put( Blocks.ACACIA_LEAVES, true );
-        ignoreLogicBlocks.put( Blocks.BIRCH_LEAVES, true );
-        ignoreLogicBlocks.put( Blocks.DARK_OAK_LEAVES, true );
-        ignoreLogicBlocks.put( Blocks.JUNGLE_LEAVES, true );
-        ignoreLogicBlocks.put( Blocks.OAK_LEAVES, true );
-		ignoreLogicBlocks.put( Blocks.SPRUCE_LEAVES, true );
-		ignoreLogicBlocks.put( Blocks.SNOW, true );
+		ignoreLogicBlocks.put(Blocks.ACACIA_LEAVES, true);
+        ignoreLogicBlocks.put(Blocks.BIRCH_LEAVES, true);
+        ignoreLogicBlocks.put(Blocks.DARK_OAK_LEAVES, true);
+        ignoreLogicBlocks.put(Blocks.JUNGLE_LEAVES, true);
+        ignoreLogicBlocks.put(Blocks.OAK_LEAVES, true);
+		ignoreLogicBlocks.put(Blocks.SPRUCE_LEAVES, true);
+		ignoreLogicBlocks.put(Blocks.SNOW, true);
 	}
 
 	// cache data..
-	private static HashMap<BlockState, BlockBitInfo> stateBitInfo    = new HashMap<>();
-	private static HashMap<Block, SupportsAnalysisResult> supportedBlocks = new HashMap<>();
-    private static HashMap<Block, Boolean> forcedBlocks    = new HashMap<>();
-	private static HashMap<Block, Fluid>   fluidBlocks  = new HashMap<>();
-	private static IntObjectMap<Fluid>               fluidStates     = new IntObjectHashMap<>();
-	private static HashMap<BlockState, Integer>      bitColor        = new HashMap<>();
+	// 缓存数据
+	private static final HashMap<BlockState, BlockBitInfo> stateBitInfo = new HashMap<>();
+	private static final HashMap<Block, SupportsAnalysisResult> supportedBlocks = new HashMap<>();
+    private static final HashMap<Block, Boolean> forcedBlocks = new HashMap<>();
+	private static final HashMap<Block, Fluid> fluidBlocks = new HashMap<>();
+	private static final IntObjectMap<Fluid> fluidStates = new IntObjectHashMap<>();
+	private static final HashMap<BlockState, Integer> bitColor = new HashMap<>();
 
-	public static int getColorFor(
-			final BlockState state,
-			final int tint )
-	{
-		Integer out = bitColor.get( state );
+	public static int getColorFor(BlockState state, int tint) {
 
-		if ( out == null )
-		{
-			final Block blk = state.getBlock();
+		Integer out = bitColor.get(state);
 
-			final Fluid fluid = BlockBitInfo.getFluidFromBlock( blk );
-			if ( fluid != null )
-			{
+		if (out == null) {
+
+			final Block block = state.getBlock();
+
+			final Fluid fluid = BlockBitInfo.getFluidFromBlock(block);
+			if (fluid != null) {
 				out = fluid.getAttributes().getColor();
 			}
-			else
-			{
+			else {
 				final ItemStack target = ModUtil.getItemStackFromBlockState( state );
 
 				if ( ModUtil.isEmpty( target ) )
@@ -111,10 +108,8 @@ public class BlockBitInfo
         }
     }
 
-    public static void addFluidBlock(
-			final Fluid fluid )
-	{
-		fluidBlocks.put( fluid.defaultFluidState().createLegacyBlock().getBlock(), fluid );
+    public static void addFluidBlock(Fluid fluid) {
+		fluidBlocks.put(fluid.defaultFluidState().createLegacyBlock().getBlock(), fluid);
 
 		for ( final BlockState state : fluid.defaultFluidState().createLegacyBlock().getBlock().getStateDefinition().getPossibleStates() )
 		{
@@ -132,10 +127,8 @@ public class BlockBitInfo
 		supportedBlocks.clear();
 	}
 
-	static public Fluid getFluidFromBlock(
-			final Block blk )
-	{
-		return fluidBlocks.get( blk );
+	static public Fluid getFluidFromBlock(final Block blk) {
+		return fluidBlocks.get(blk);
 	}
 
 	public static VoxelType getTypeFromStateID(
@@ -184,42 +177,43 @@ public class BlockBitInfo
 		return bit;
 	}
 
-	@SuppressWarnings( "deprecation" )
-	public static SupportsAnalysisResult doSupportAnalysis(
-			final BlockState state )
-	{
-	    if (state.getBlock() instanceof BlockChiseled) {
+	/**
+	 * 判断某个方块状态是否可以被雕刻，以及其原因
+	 */
+	@SuppressWarnings("deprecation")
+	public static SupportsAnalysisResult doSupportAnalysis(final BlockState state) {
+		final Block block = state.getBlock();
+		// 本身就是雕刻方块
+	    if (block instanceof BlockChiseled) {
 	        return new SupportsAnalysisResult(
-	          true,
-              LocalStrings.ChiselSupportGenericNotSupported,
-              LocalStrings.ChiselSupportIsAlreadyChiseled
+					true,
+					LocalStrings.ChiselSupportGenericNotSupported,
+					LocalStrings.ChiselSupportIsAlreadyChiseled
             );
         }
-
-		if ( forcedBlocks.containsKey( state.getBlock() ) )
-		{
-			final boolean forcing = forcedBlocks.get( state.getBlock() );
+		// 在强制禁用/启用列表内
+		if (forcedBlocks.containsKey(block)) {
+			final boolean forcing = forcedBlocks.get(block);
 			return new SupportsAnalysisResult(
-			  forcing,
-              LocalStrings.ChiselSupportForcedUnsupported,
-              LocalStrings.ChiselSupportForcedSupported
+					forcing,
+					LocalStrings.ChiselSupportForcedUnsupported,
+					LocalStrings.ChiselSupportForcedSupported
             );
 		}
 
-		final Block blk = state.getBlock();
-		if ( supportedBlocks.containsKey( blk ) )
-		{
-			return supportedBlocks.get( blk );
+		// 一个缓存，避免每次都要进行下面的分析
+		if (supportedBlocks.containsKey(block)) {
+			return supportedBlocks.get(block);
 		}
 
 		if (state.is(ModTags.Blocks.BLOCKED_CHISELABLE))
         {
             final SupportsAnalysisResult result = new SupportsAnalysisResult(
-              false,
-              LocalStrings.ChiselSupportTagBlackListed,
-              LocalStrings.ChiselSupportTagWhitelisted
+					false,
+					LocalStrings.ChiselSupportTagBlackListed,
+					LocalStrings.ChiselSupportTagWhitelisted
             );
-            supportedBlocks.put(blk, result);
+            supportedBlocks.put(block, result);
             return result;
         }
 
@@ -229,9 +223,9 @@ public class BlockBitInfo
               LocalStrings.ChiselSupportTagBlackListed,
               LocalStrings.ChiselSupportTagWhitelisted
             );
-            supportedBlocks.put(blk, result);
+            supportedBlocks.put(block, result);
 
-		    final BlockBitInfo info = BlockBitInfo.createFromState( state );
+		    final BlockBitInfo info = BlockBitInfo.createFromState(state);
 		    stateBitInfo.put(state, info);
 
 		    return result;
@@ -241,7 +235,7 @@ public class BlockBitInfo
 		{
 			// require basic hardness behavior...
 //			final ReflectionHelperBlock pb = new ReflectionHelperBlock();
-			final Class<? extends Block> blkClass = blk.getClass();
+			final Class<? extends Block> blkClass = block.getClass();
 			Method method;
 			// custom dropping behavior?
 //			pb.getDrops(state, null);
@@ -249,25 +243,25 @@ public class BlockBitInfo
 			final Class<?> wc = getDeclaringClass( blkClass, method.getName(), BlockState.class, LootContext.Builder.class );
 			final boolean quantityDroppedTest = wc == Block.class || wc == BlockBehaviour.class;
 
-			final boolean isNotSlab = Item.byBlock( blk ) != Items.AIR;
+			final boolean isNotSlab = Item.byBlock( block ) != Items.AIR;
 			boolean itemExistsOrNotSpecialDrops = quantityDroppedTest || isNotSlab;
 			// ignore blocks with custom collision.
 //			pb.getShape( null, null, null, null );
 			method = ObfuscationReflectionHelper.findMethod(BlockBehaviour.class, "m_5940_", BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
 			Class<?> collisionClass = getDeclaringClass( blkClass, method.getName(), BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class );
-			boolean noCustomCollision = collisionClass == Block.class || collisionClass == BlockBehaviour.class || blk.getClass() == SlimeBlock.class;
+			boolean noCustomCollision = collisionClass == Block.class || collisionClass == BlockBehaviour.class || block.getClass() == SlimeBlock.class;
 
 			// full cube specifically is tied to lighting... so for glass
 			// Compatibility use isFullBlock which can be true for glass.
-			boolean isFullBlock = state.canOcclude() || blk instanceof AbstractGlassBlock;
+			boolean isFullBlock = state.canOcclude() || block instanceof AbstractGlassBlock;
 			final BlockBitInfo info = BlockBitInfo.createFromState( state );
 
-			final boolean tickingBehavior = blk.isRandomlyTicking(state) && ChiselsAndBits.getConfig().getServer().blackListRandomTickingBlocks.get();
+			final boolean tickingBehavior = block.isRandomlyTicking(state) && ChiselsAndBits.getConfig().getServer().blackListRandomTickingBlocks.get();
 			boolean hasBehavior = ( state.hasBlockEntity() || tickingBehavior );
 
 			final boolean supportedMaterial = ModBlocks.convertGivenStateToChiseledBlock( state ) != null;
 
-			final Boolean IgnoredLogic = ignoreLogicBlocks.get( blk );
+			final Boolean IgnoredLogic = ignoreLogicBlocks.get( block );
 			if ( blkClass.isAnnotationPresent( IgnoreBlockLogic.class ) || IgnoredLogic != null && IgnoredLogic )
 			{
 				isFullBlock = true;
@@ -284,12 +278,12 @@ public class BlockBitInfo
                   (blkClass.isAnnotationPresent( IgnoreBlockLogic.class ) || IgnoredLogic != null && IgnoredLogic) ? LocalStrings.ChiselSupportLogicIgnored : LocalStrings.ChiselSupportGenericSupported
                 );
 
-                supportedBlocks.put( blk, result);
+                supportedBlocks.put( block, result);
                 stateBitInfo.put( state, info );
                 return result;
 			}
 
-			if ( fluidBlocks.containsKey( blk ) )
+			if ( fluidBlocks.containsKey( block ) )
 			{
 				stateBitInfo.put( state, info );
 
@@ -299,7 +293,7 @@ public class BlockBitInfo
                   LocalStrings.ChiselSupportGenericFluidSupport
                 );
 
-				supportedBlocks.put( blk, result );
+				supportedBlocks.put( block, result );
 				return result;
 			}
 
@@ -354,7 +348,7 @@ public class BlockBitInfo
                 );
             }
 
-			supportedBlocks.put( blk, result );
+			supportedBlocks.put( block, result );
 			return result;
 		}
 		catch ( final Throwable t )
@@ -366,14 +360,12 @@ public class BlockBitInfo
             );
 			// if the above test fails for any reason, then the block cannot be
 			// supported.
-			supportedBlocks.put( blk, result );
+			supportedBlocks.put( block, result );
 			return result;
 		}
 	}
 
-    public static boolean isSupported(
-      final BlockState state )
-    {
+    public static boolean isSupported(final BlockState state) {
         return doSupportAnalysis(state).isSupported();
     }
 
@@ -388,8 +380,7 @@ public class BlockBitInfo
             this.supportedReason = supportedReason;
         }
 
-        public boolean isSupported()
-        {
+        public boolean isSupported() {
             return supported;
         }
 
@@ -499,10 +490,8 @@ public class BlockBitInfo
 		}
 	}
 
-	public static boolean canChisel(
-			final BlockState state )
-	{
-		return state.getBlock() instanceof BlockChiseled || isSupported( state );
+	public static boolean canChisel(final BlockState state) {
+		return state.getBlock() instanceof BlockChiseled || isSupported(state);
 	}
 
     public static boolean canChisel(

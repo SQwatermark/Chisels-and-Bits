@@ -542,26 +542,4 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
 	private static Stopwatch timer;
 
-	public static boolean checkRequiredSpace(
-			final Player player,
-			final BlockState blkstate) {
-		if ( ChiselsAndBits.getConfig().getServer().requireBagSpace.get() && !player.isCreative() )
-		{
-			//Cycle every item in any bag, if the player can't store the clicked block then
-			//send them a message.
-			final int stateId = ModUtil.getStateId( blkstate );
-			if ( !ItemChiseledBit.hasBitSpace( player, stateId ) )
-			{
-				if( player.getCommandSenderWorld().isClientSide && ( timer == null || timer.elapsed( TimeUnit.MILLISECONDS ) > 1000 ) )
-				{
-					//Timer is client-sided so it doesn't have to be made player-specific
-					timer = Stopwatch.createStarted();
-					//Only client should handle messaging.
-					player.sendMessage( new TranslatableComponent( "mod.chiselsandbits.result.require_bag" ), Util.NIL_UUID );
-				}
-				return true;
-			}
-		}
-		return false;
-	}
 }

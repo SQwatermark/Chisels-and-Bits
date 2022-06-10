@@ -150,11 +150,6 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
         final ItemStack stack = player.getItemInHand( hand );
         final BlockState blkstate = world.getBlockState( pos );
 
-        if ( ItemChiseledBit.checkRequiredSpace( player, blkstate ) )
-        {
-            return InteractionResult.FAIL;
-        }
-
         if ( !player.mayUseItemAt( pos, side, stack ) || !world.mayInteract( player, pos ) )
         {
             return InteractionResult.FAIL;
