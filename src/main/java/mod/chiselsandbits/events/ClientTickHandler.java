@@ -17,9 +17,7 @@ public class ClientTickHandler {
         if (Minecraft.getInstance().player != null) {
             if (Minecraft.getInstance().player.getMainHandItem().getItem() instanceof ItemMagnifyingGlass
                     || Minecraft.getInstance().player.getOffhandItem().getItem() instanceof ItemMagnifyingGlass) {
-                if (Minecraft.getInstance().gui != null) {
-                    Minecraft.getInstance().gui.toolHighlightTimer = 40;
-                }
+                Minecraft.getInstance().gui.toolHighlightTimer = 40;
             }
         }
     }

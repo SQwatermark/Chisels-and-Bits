@@ -20,8 +20,7 @@ public class PacketSuppressInteraction extends ModPacket
     }
 
     @Override
-	public void server(
-			final ServerPlayer player )
+	public void server(ServerPlayer player)
 	{
 		EventPlayerInteract.setPlayerSuppressionState( player, newSetting );
 	}

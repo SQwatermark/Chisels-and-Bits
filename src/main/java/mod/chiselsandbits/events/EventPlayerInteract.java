@@ -19,37 +19,27 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * Disable breaking blocks when using a chisel / bit, some items break too fast
  * for the other code to prevent which is where this comes in.
  *
- * This manages survival chisel actions, creative some how skips this and calls
+ * This manages survival chisel actions, creative somehow skips this and calls
  * onBlockStartBreak on its own, but when in creative this is called on the
- * server... which still needs to be canceled or it will break the block.
+ * server... which still needs to be canceled, or it will break the block.
  *
  * The whole things, is very strange.
  */
 public class EventPlayerInteract
 {
+	private static final WeakHashMap<Player, Boolean> serverSuppressEvent = new WeakHashMap<>();
 
-	private static WeakHashMap<Player, Boolean> serverSuppressEvent = new WeakHashMap<Player, Boolean>();
-
-	public static void setPlayerSuppressionState(
-			final Player player,
-			final boolean state )
-	{
-		if ( state )
-		{
+	public static void setPlayerSuppressionState(Player player, boolean state) {
+		if (state) {
 			serverSuppressEvent.put( player, state );
-		}
-		else
-		{
-			serverSuppressEvent.remove( player );
+		} else {
+			serverSuppressEvent.remove(player);
 		}
 	}
 
 	@SubscribeEvent
-	public void interaction(
-			final LeftClickBlock event )
-	{
-		if ( event.getPlayer() != null && event.getUseItem() != Event.Result.DENY )
-		{
+	public void interaction(LeftClickBlock event) {
+		if (event.getPlayer() != null && event.getUseItem() != Event.Result.DENY) {
 			final ItemStack is = event.getItemStack();
 			final boolean validEvent = event.getPos() != null && event.getWorld() != null;
 			if ( is != null && ( is.getItem() instanceof ItemChisel || is.getItem() instanceof ItemChiseledBit ) && validEvent )
@@ -71,20 +61,15 @@ public class EventPlayerInteract
 			}
 		}
 
-		testInteractionSupression( event, event.getUseItem() );
+		testInteractionSupression(event, event.getUseItem());
 	}
 
 	@SubscribeEvent
-	public void interaction(
-			final RightClickBlock event )
-	{
-		testInteractionSupression( event, event.getUseItem() );
+	public void interaction(RightClickBlock event) {
+		testInteractionSupression(event, event.getUseItem());
 	}
 
-	private void testInteractionSupression(
-			final PlayerInteractEvent event,
-			final Event.Result useItem )
-	{
+	private void testInteractionSupression(PlayerInteractEvent event, Event.Result useItem) {
 		// client is dragging...
 		if ( event.getWorld().isClientSide )
 		{

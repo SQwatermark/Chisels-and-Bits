@@ -1,7 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "chiselsandbits:chisel_printer",
-    "chiselsandbits:bit_storage"
-  ]
-}

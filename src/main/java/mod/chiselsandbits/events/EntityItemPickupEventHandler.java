@@ -57,12 +57,7 @@ public class EntityItemPickupEventHandler
         }
     }
 
-    private static boolean updateEntity(
-      final Player player,
-      final ItemEntity ei,
-      ItemStack is,
-      final int originalSize )
-    {
+    private static boolean updateEntity(Player player, ItemEntity ei, ItemStack is, int originalSize ) {
         if ( is == null )
         {
             ei.remove(Entity.RemovalReason.DISCARDED);

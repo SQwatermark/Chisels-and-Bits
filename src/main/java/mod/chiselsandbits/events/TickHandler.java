@@ -11,9 +11,10 @@ public class TickHandler {
     private static long clientTicks = 0;
 
     @SubscribeEvent
-    public static void onTickClientTick(final TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START)
+    public static void onTickClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
             clientTicks++;
+        }
     }
 
     public static long getClientTicks()

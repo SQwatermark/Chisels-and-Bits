@@ -18,15 +18,13 @@ import net.minecraftforge.fml.common.Mod;
 public class TooltipEvent {
 
     @SubscribeEvent
-    public static void onItemTooltip(final ItemTooltipEvent event)
-    {
+    public static void onItemTooltip(ItemTooltipEvent event) {
         if (Minecraft.getInstance().player != null && ChiselsAndBits.getConfig().getCommon().enableHelp.get())
             if (Minecraft.getInstance().player.getMainHandItem().getItem() instanceof ItemMagnifyingGlass || Minecraft.getInstance().player.getOffhandItem().getItem() instanceof ItemMagnifyingGlass)
-                if (event.getItemStack().getItem() instanceof BlockItem) {
-                    final BlockItem blockItem = (BlockItem) event.getItemStack().getItem();
-                    final Block block = blockItem.getBlock();
-                    final BlockState blockState = block.defaultBlockState();
-                    final BlockBitInfo.SupportsAnalysisResult result = BlockBitInfo.doSupportAnalysis(blockState);
+                if (event.getItemStack().getItem() instanceof BlockItem blockItem) {
+                    Block block = blockItem.getBlock();
+                    BlockState blockState = block.defaultBlockState();
+                    BlockBitInfo.SupportsAnalysisResult result = BlockBitInfo.doSupportAnalysis(blockState);
 
                     event.getToolTip().add(
                         new TextComponent(
