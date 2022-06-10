@@ -100,7 +100,6 @@ public abstract class DebugAction
 			final IBitAccess access = api.createBitItem( ModUtil.getEmptyStack() );
 			assert access != null;
 
-			apiAssert( "BIT_BAG", player, api.getItemType( new ItemStack(ModItems.ITEM_BIT_BAG_DEFAULT.get() ) ) == ItemType.BIT_BAG );
 			apiAssert( "CHISEL", player, api.getItemType( new ItemStack( ModItems.ITEM_CHISEL_DIAMOND.get() ) ) == ItemType.CHISEL );
 			apiAssert( "MIRROR_DESIGN 1", player, api.getItemType( new ItemStack( ModItems.ITEM_MIRROR_PRINT.get() ) ) == ItemType.MIRROR_DESIGN );
 			apiAssert( "NEGATIVE_DESIGN 1", player, api.getItemType( new ItemStack( ModItems.ITEM_NEGATIVE_PRINT.get()) ) == ItemType.NEGATIVE_DESIGN );

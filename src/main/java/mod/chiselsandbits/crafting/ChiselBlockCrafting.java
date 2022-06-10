@@ -4,14 +4,12 @@ import java.util.Random;
 
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
 import mod.chiselsandbits.api.IBitAccess;
-import mod.chiselsandbits.api.IBitBag;
 import mod.chiselsandbits.api.IBitBrush;
 import mod.chiselsandbits.api.IBitVisitor;
 import mod.chiselsandbits.api.ItemType;
 import mod.chiselsandbits.chiseledblock.ItemBlockChiseled;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,19 +50,16 @@ public class ChiselBlockCrafting extends CustomRecipe
 		private static class Chiseler implements IBitVisitor
 		{
 			private final ItemStack chisel;
-			private final IBitBag bbag;
 			private final Random r = new Random();
 			final IBitBrush airBrush;
 			public boolean isAir = true;
 			public boolean modified = false;
 
 			public Chiseler(
-					final ItemStack chisel,
-					final IBitBag bag ) throws InvalidBitItem
+					final ItemStack chisel) throws InvalidBitItem
 			{
 				airBrush = ChiselsAndBits.getApi().createBrushFromState( null );
 				this.chisel = chisel;
-				bbag = bag;
 				r.setSeed( 0 ); // ensure that the results are always the same,
 								// crafting needs to be 'regular'
 			}
@@ -91,17 +86,6 @@ public class ChiselBlockCrafting extends CustomRecipe
 					}
 					
 					final ItemStack is = currentValue.getItemStack( 1 );
-					if ( is != null )
-					{
-						for ( int idx = 0; idx < bbag.getSlots(); ++idx )
-						{
-							if ( ModUtil.isEmpty( bbag.insertItem( idx, is, false ) ) )
-							{
-								modified = true;
-								return airBrush;
-							}
-						}
-					}
 				}
 
 				isAir = false;
@@ -118,7 +102,7 @@ public class ChiselBlockCrafting extends CustomRecipe
 			try
 			{
 				final IBitAccess ba = ChiselsAndBits.getApi().createBitItem( block );
-				final Chiseler c = new Chiseler( chisel, ChiselsAndBits.getApi().getBitbag( bag ) );
+				final Chiseler c = new Chiseler( chisel);
 
 				if ( ba == null )
 				{
@@ -158,18 +142,6 @@ public class ChiselBlockCrafting extends CustomRecipe
 
 			if ( ModUtil.isEmpty( is ) )
 			{
-				continue;
-			}
-
-			if ( is.getItem() instanceof ItemBitBag )
-			{
-				if ( i.bag_slot != -1 )
-				{
-					noDuplicates = false;
-				}
-
-				i.bag = is;
-				i.bag_slot = x;
 				continue;
 			}
 

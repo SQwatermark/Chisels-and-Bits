@@ -17,13 +17,11 @@ import mod.chiselsandbits.helpers.*;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.interfaces.IChiselModeItem;
 import mod.chiselsandbits.interfaces.IItemScrollWheel;
-import mod.chiselsandbits.items.ItemBitBag.BagPos;
 import mod.chiselsandbits.modes.ChiselMode;
 import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.network.packets.PacketChisel;
 import mod.chiselsandbits.registry.ModItems;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -54,7 +52,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselModeItem, ICacheClearable
 {
@@ -517,18 +514,6 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 			final Player player,
 			final int blk )
 	{
-		final List<BagPos> bags = ItemBitBag.getBags( player.getInventory() );
-		for ( final BagPos bp : bags )
-		{
-			for ( int x = 0; x < bp.inv.getContainerSize(); x++ )
-			{
-				final ItemStack is = bp.inv.getItem( x );
-				if( ( ItemChiseledBit.sameBit( is, blk ) && ModUtil.getStackSize( is ) < bp.inv.getMaxStackSize() ) || ModUtil.isEmpty( is ) )
-				{
-					return true;
-				}
-			}
-		}
 		for ( int x = 0; x < 36; x++ )
 		{
 			final ItemStack is = player.getInventory().getItem( x );

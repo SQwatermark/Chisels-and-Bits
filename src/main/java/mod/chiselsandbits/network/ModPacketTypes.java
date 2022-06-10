@@ -4,15 +4,10 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 import mod.chiselsandbits.network.packets.PacketAccurateSneakPlace;
-import mod.chiselsandbits.network.packets.PacketBagGui;
-import mod.chiselsandbits.network.packets.PacketBagGuiStack;
 import mod.chiselsandbits.network.packets.PacketChisel;
-import mod.chiselsandbits.network.packets.PacketClearBagGui;
-import mod.chiselsandbits.network.packets.PacketOpenBagGui;
 import mod.chiselsandbits.network.packets.PacketRotateVoxelBlob;
 import mod.chiselsandbits.network.packets.PacketSetChiselMode;
 import mod.chiselsandbits.network.packets.PacketSetColor;
-import mod.chiselsandbits.network.packets.PacketSortBagGui;
 import mod.chiselsandbits.network.packets.PacketSuppressInteraction;
 import mod.chiselsandbits.network.packets.PacketUndo;
 import org.apache.logging.log4j.LogManager;
@@ -23,26 +18,14 @@ public enum ModPacketTypes
 	CHISEL((channel, integer) -> {
         channel.registerMessage(integer, PacketChisel.class, PacketChisel::new);
     }),
-	OPEN_BAG_GUI( (channel, integer) -> {
-        channel.registerMessage(integer, PacketOpenBagGui.class, PacketOpenBagGui::new);
-    } ),
 	SET_CHISEL_MODE( (channel, integer) -> {
         channel.registerMessage(integer, PacketSetChiselMode.class, PacketSetChiselMode::new);
     } ),
 	ROTATE_VOXEL_BLOB( ((channel, integer) -> {
 	    channel.registerMessage(integer, PacketRotateVoxelBlob.class, PacketRotateVoxelBlob::new);
     })),
-	BAG_GUI( ((channel, integer) -> {
-        channel.registerMessage(integer, PacketBagGui.class, PacketBagGui::new);
-    }) ),
-	BAG_GUI_STACK( ((channel, integer) -> {
-        channel.registerMessage(integer, PacketBagGuiStack.class, PacketBagGuiStack::new);
-    }) ),
 	UNDO( ((channel, integer) -> {
         channel.registerMessage(integer, PacketUndo.class, PacketUndo::new);
-    }) ),
-	CLEAR_BAG( ((channel, integer) -> {
-        channel.registerMessage(integer, PacketClearBagGui.class, PacketClearBagGui::new);
     }) ),
 	SUPRESS_INTERACTION( ((channel, integer) -> {
         channel.registerMessage(integer, PacketSuppressInteraction.class, PacketSuppressInteraction::new);
@@ -52,9 +35,6 @@ public enum ModPacketTypes
     }) ),
 	ACCURATE_PLACEMENT( ((channel, integer) -> {
         channel.registerMessage(integer, PacketAccurateSneakPlace.class, PacketAccurateSneakPlace::new);
-    }) ),
-	SORT_BAG_GUI( ((channel, integer) -> {
-        channel.registerMessage(integer, PacketSortBagGui.class, PacketSortBagGui::new);
     }) );
 
 	private static final Logger LOGGER = LogManager.getLogger(ModPacketTypes.class);

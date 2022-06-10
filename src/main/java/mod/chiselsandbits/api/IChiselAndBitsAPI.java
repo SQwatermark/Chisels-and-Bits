@@ -159,16 +159,6 @@ public interface IChiselAndBitsAPI
 			Vec3 spawnPos );
 
 	/**
-	 * Access the contents of a bitbag as if it was a normal
-	 * {@link IItemHandler} with a few extra features.
-	 *
-	 * @return internal object to manipulate bag.
-	 */
-	@Nullable
-	IBitBag getBitbag(
-			ItemStack stack );
-
-	/**
 	 * Example: int stackSize =
 	 * api.getParameter(IntegerParam.BIT_BAG_MAX_STACK_SIZE );
 	 * 

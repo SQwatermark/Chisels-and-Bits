@@ -16,11 +16,6 @@ public final class ModItems
 
     private final static DeferredRegister<Item> ITEM_REGISTRAR = DeferredRegister.create(ForgeRegistries.ITEMS, ChiselsAndBits.MODID);
 
-    private ModItems()
-    {
-        throw new IllegalStateException("Tried to initialize: ModItems but this is a Utility class.");
-    }
-
     public static final RegistryObject<ItemChisel> ITEM_CHISEL_STONE   =
       ITEM_REGISTRAR.register("chisel_stone", () -> new ItemChisel(Tiers.STONE, new Item.Properties().tab(
       CHISELS_AND_BITS)));
@@ -57,13 +52,6 @@ public final class ModItems
         CHISELS_AND_BITS)));
     public static final RegistryObject<ItemNegativePrint> ITEM_NEGATIVE_PRINT_WRITTEN =
       ITEM_REGISTRAR.register("negativeprint_written", () -> new ItemNegativePrint(new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-
-    public static final RegistryObject<ItemBitBag>      ITEM_BIT_BAG_DEFAULT =
-      ITEM_REGISTRAR.register("bit_bag", () -> new ItemBitBag(new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitBag>      ITEM_BIT_BAG_DYED =
-      ITEM_REGISTRAR.register("bit_bag_dyed", () -> new ItemBitBag(new Item.Properties().tab(
         CHISELS_AND_BITS)));
     public static final RegistryObject<ItemWrench>      ITEM_WRENCH =
       ITEM_REGISTRAR.register("wrench_wood", () -> new ItemWrench(new Item.Properties().tab(

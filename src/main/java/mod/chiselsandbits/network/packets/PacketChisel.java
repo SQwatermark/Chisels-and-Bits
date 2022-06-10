@@ -9,7 +9,6 @@ import mod.chiselsandbits.chiseledblock.iterators.ChiselIterator;
 import mod.chiselsandbits.chiseledblock.iterators.ChiselTypeIterator;
 import mod.chiselsandbits.client.UndoTracker;
 import mod.chiselsandbits.helpers.*;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.modes.ChiselMode;
@@ -218,12 +217,6 @@ public class PacketChisel extends ModPacket
 			for ( final ItemEntity ei : spawnlist )
 			{
 				feeder.addItem( ei );
-				ItemBitBag.cleanupInventory( who, ei.getItem() );
-			}
-
-			if ( place.usesBits() )
-			{
-				ItemBitBag.cleanupInventory( who, bitPlaced != null ? bitPlaced : new ItemStack(ModItems.ITEM_BLOCK_BIT.get(), 1) );
 			}
 
 		}

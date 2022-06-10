@@ -1,16 +1,14 @@
 package mod.chiselsandbits.crafting;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import mod.chiselsandbits.api.StateCount;
-import mod.chiselsandbits.bitbag.BagInventory;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.helpers.ModUtil;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class ChiselCraftingRequirements
 {
@@ -21,7 +19,6 @@ class ChiselCraftingRequirements
 
 	final ItemStack[] pile;
 	private final ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
-	private final ArrayList<BagInventory> bags = new ArrayList<BagInventory>();
 
 	public ChiselCraftingRequirements(
 			final Container inv,
@@ -45,11 +42,6 @@ class ChiselCraftingRequirements
 			if ( is == null )
 			{
 				continue;
-			}
-
-			if ( is.getItem() instanceof ItemBitBag )
-			{
-				bags.add( new BagInventory( copy ? is.copy() : is ) );
 			}
 
 			if ( is.getItem() instanceof ItemChiseledBit )
@@ -84,11 +76,6 @@ class ChiselCraftingRequirements
 						ModUtil.setStackSize( is, Math.max( 0, ModUtil.getStackSize( is ) - ref.quantity ) );
 						ref.quantity -= original - ModUtil.getStackSize( is );
 					}
-				}
-
-				for ( final BagInventory bag : bags )
-				{
-					ref.quantity -= bag.extractBit( ref.stateId, ref.quantity );
 				}
 
 				if ( ref.quantity > 0 )

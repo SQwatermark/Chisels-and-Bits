@@ -24,7 +24,8 @@ public class ModItemGroup extends CreativeModeTab
 	@Override
 	public ItemStack makeIcon()
 	{
-		return new ItemStack(ModItems.ITEM_BIT_BAG_DEFAULT.get());
+		return new ItemStack(ModItems
+				.ITEM_BIT_SAW_DIAMOND.get());
 	}
 
 }

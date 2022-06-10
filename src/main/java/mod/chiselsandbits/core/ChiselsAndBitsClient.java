@@ -1,22 +1,21 @@
 package mod.chiselsandbits.core;
 
-import mod.chiselsandbits.bitbag.BagInventoryScreen;
 import mod.chiselsandbits.client.gui.SpriteIconPositioning;
 import mod.chiselsandbits.client.model.loader.ChiseledBlockModelLoader;
 import mod.chiselsandbits.modes.ChiselMode;
 import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
-import mod.chiselsandbits.registry.ModContainerTypes;
 import mod.chiselsandbits.printer.ChiselPrinterScreen;
+import mod.chiselsandbits.registry.ModContainerTypes;
 import mod.chiselsandbits.utils.Constants;
 import mod.chiselsandbits.utils.TextureUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -43,10 +42,6 @@ public class ChiselsAndBitsClient
         ClientSide.instance.postinit( ChiselsAndBits.getInstance() );
 
         // TODO
-        MenuScreens.register(
-                ModContainerTypes.BAG_CONTAINER.get(),
-                BagInventoryScreen::new
-        );
         MenuScreens.register(
                 ModContainerTypes.CHISEL_STATION_CONTAINER.get(),
                 ChiselPrinterScreen::new

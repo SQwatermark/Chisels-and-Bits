@@ -1,6 +1,5 @@
 package mod.chiselsandbits.items;
 
-import mod.chiselsandbits.bitbag.BagInventory;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
 import mod.chiselsandbits.chiseledblock.ItemBlockChiseled;
@@ -202,7 +201,6 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 			final BlockPos pos,
 			final ActingPlayer player )
 	{
-		final List<BagInventory> bags = ModUtil.getBags( player );
 
 		for ( final Entry<Integer, Integer> type : stats.entrySet() )
 		{
@@ -214,7 +212,7 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 			}
 
 			IItemInInventory bit = ModUtil.findBit( player, pos, inPattern );
-			int stillNeeded = type.getValue() - ModUtil.consumeBagBit( bags, inPattern, type.getValue() );
+			int stillNeeded = type.getValue();
 			if ( stillNeeded != 0 )
 			{
 				for ( int x = stillNeeded; x > 0 && bit.isValid(); --x )
@@ -253,8 +251,6 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 		ItemStack spawnedItem = null;
 
 		final VoxelBlob filled = new VoxelBlob();
-
-		final List<BagInventory> bags = ModUtil.getBags( player );
 		final List<ItemEntity> spawnlist = new ArrayList<>();
 
 		final PositivePatternMode chiselMode = PositivePatternMode.getMode( stack );
@@ -287,11 +283,7 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 						if ( inPlace == 0 && inPattern != 0 && filled.get( x, y, z ) == 0 )
 						{
 							final IItemInInventory bit = ModUtil.findBit( player, pos, inPattern );
-							if ( ModUtil.consumeBagBit( bags, inPattern, 1 ) == 1 )
-							{
-								vb.set( x, y, z, inPattern );
-							}
-							else if ( bit.isValid() )
+							if ( bit.isValid() )
 							{
 								if ( !player.isCreative() )
 								{
@@ -311,7 +303,6 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 		for ( final ItemEntity ei : spawnlist )
 		{
 			feeder.addItem( ei );
-			ItemBitBag.cleanupInventory( who, ei.getItem() );
 		}
 
 	}

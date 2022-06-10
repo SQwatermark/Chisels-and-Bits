@@ -1,14 +1,12 @@
 package mod.chiselsandbits.helpers;
 
-import mod.chiselsandbits.bitbag.BagInventory;
+import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.ItemBlockChiseled;
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
-import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.IntegerBox;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.StateLookup.CachedStateLookup;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.items.ItemNegativePrint;
 import mod.chiselsandbits.items.ItemPositivePrint;
@@ -42,8 +40,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -355,47 +351,6 @@ public class ModUtil
 			}
 		}
 		return seen;
-	}
-
-	public static List<BagInventory> getBags(
-			final ActingPlayer player )
-	{
-		if ( player.isCreative() )
-		{
-			return java.util.Collections.emptyList();
-		}
-
-		final List<BagInventory> bags = new ArrayList<BagInventory>();
-		final Container inv = player.getInventory();
-
-		for ( int zz = 0; zz < inv.getContainerSize(); zz++ )
-		{
-			final ItemStack which = inv.getItem( zz );
-			if ( which != null && which.getItem() instanceof ItemBitBag )
-			{
-				bags.add( new BagInventory( which ) );
-			}
-		}
-
-		return bags;
-	}
-
-	public static int consumeBagBit(
-			final List<BagInventory> bags,
-			final int inPattern,
-			final int howMany )
-	{
-		int remaining = howMany;
-		for ( final BagInventory inv : bags )
-		{
-			remaining -= inv.extractBit( inPattern, remaining );
-			if ( remaining == 0 )
-			{
-				return howMany;
-			}
-		}
-
-		return howMany - remaining;
 	}
 
 	public static VoxelBlob getBlobFromStack(

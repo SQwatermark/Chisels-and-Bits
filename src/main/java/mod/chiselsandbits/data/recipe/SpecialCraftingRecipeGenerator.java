@@ -31,7 +31,6 @@ public class SpecialCraftingRecipeGenerator implements DataProvider
     @Override
     public void run(final HashCache cache) throws IOException
     {
-        saveRecipe(cache, ModRecipeSerializers.BAG_DYEING.getId());
         saveRecipe(cache, ModRecipeSerializers.CHISEL_BLOCK_CRAFTING.getId());
         saveRecipe(cache, ModRecipeSerializers.BIT_SAW_CRAFTING.getId());
         saveRecipe(cache, ModRecipeSerializers.CHISEL_CRAFTING.getId());

@@ -7,7 +7,6 @@ public enum ItemType
 	NEGATIVE_DESIGN( true ),
 	MIRROR_DESIGN( true ),
 	CHISEL( false ),
-	BIT_BAG( false ),
 	CHISLED_BIT( false ),
 	WRENCH( false );
 

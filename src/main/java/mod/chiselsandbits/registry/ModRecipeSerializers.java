@@ -14,7 +14,6 @@ public final class ModRecipeSerializers
 
     private static final DeferredRegister<RecipeSerializer<?>> REGISTRAR = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, ChiselsAndBits.MODID);
 
-    public static final RegistryObject<SimpleRecipeSerializer<BagDyeing>> BAG_DYEING = REGISTRAR.register("bag_dyeing", () -> new SimpleRecipeSerializer<>(BagDyeing::new));
     public static final RegistryObject<SimpleRecipeSerializer<ChiselCrafting>> CHISEL_CRAFTING = REGISTRAR.register("chisel_crafting", () -> new SimpleRecipeSerializer<>(ChiselCrafting::new));
     public static final RegistryObject<SimpleRecipeSerializer<ChiselBlockCrafting>> CHISEL_BLOCK_CRAFTING = REGISTRAR.register("chisel_block_crafting", () -> new SimpleRecipeSerializer<>(ChiselBlockCrafting::new));
     public static final RegistryObject<SimpleRecipeSerializer<StackableCrafting>> STACKABLE_CRAFTING = REGISTRAR.register("stackable_crafting", () -> new SimpleRecipeSerializer<>(StackableCrafting::new));

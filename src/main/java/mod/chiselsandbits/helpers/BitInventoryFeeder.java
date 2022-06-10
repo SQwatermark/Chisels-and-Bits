@@ -3,9 +3,7 @@ package mod.chiselsandbits.helpers;
 import java.util.*;
 
 import mod.chiselsandbits.core.ChiselsAndBits;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
-import mod.chiselsandbits.items.ItemBitBag.BagPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,8 +37,6 @@ public class BitInventoryFeeder
 	{
 		ItemStack is = ModUtil.nonNull( ei.getItem() );
 
-		final List<BagPos> bags = ItemBitBag.getBags( player.getInventory() );
-
 		if ( !ModUtil.containsAtLeastOneOf( player.getInventory(), is ) )
 		{
 			final ItemStack minSize = is.copy();
@@ -53,11 +49,6 @@ public class BitInventoryFeeder
 			ModUtil.adjustStackSize( is, -ModUtil.getStackSize( minSize ) );
 			player.getInventory().add( minSize );
 			ModUtil.adjustStackSize( is, ModUtil.getStackSize( minSize ) );
-		}
-
-		for ( final BagPos bp : bags )
-		{
-			is = bp.inv.insertItem( is );
 		}
 
 		if ( ModUtil.isEmpty( is ) )

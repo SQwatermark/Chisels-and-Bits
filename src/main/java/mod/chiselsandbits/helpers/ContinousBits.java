@@ -1,27 +1,23 @@
 package mod.chiselsandbits.helpers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import mod.chiselsandbits.bitbag.BagInventory;
-import mod.chiselsandbits.core.ChiselsAndBits;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.registry.ModItems;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContinousBits implements IContinuousInventory
 {
 	final int stateID;
     private final List<IItemInInventory> options = new ArrayList<IItemInInventory>();
-	private final List<BagInventory> bags = new ArrayList<BagInventory>();
 
     public ContinousBits(
 			final ActingPlayer src,
@@ -56,10 +52,6 @@ public class ContinousBits implements IContinuousInventory
 							options.add( new ItemStackSlot( inv, zz, which, src, canEdit) );
 						}
 					}
-				}
-				else if ( i instanceof ItemBitBag )
-				{
-					bags.add( new BagInventory( which ) );
 				}
 				else if ((handler = which.getCapability( CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )).isPresent() )
 				{
@@ -99,30 +91,8 @@ public class ContinousBits implements IContinuousInventory
 	{
 		final IItemInInventory slot = options.get( 0 );
 
-		if ( slot instanceof ItemStackSlot && ModUtil.getStackSize( slot.getStack() ) <= 1 )
-		{
-			for ( final BagInventory bag : bags )
-			{
-				( (ItemStackSlot) slot ).replaceStack( bag.restockItem( slot.getStack(), slot.getStackType() ) );
-			}
-		}
-
 		boolean worked = slot.consume();
-
-		if ( slot.isValid() )
-		{
-			if ( slot instanceof ItemStackSlot )
-			{
-				for ( final BagInventory bag : bags )
-				{
-					( (ItemStackSlot) slot ).replaceStack( bag.restockItem( slot.getStack(), slot.getStackType() ) );
-				}
-			}
-		}
-		else
-		{
-			options.remove( 0 );
-		}
+		options.remove( 0 );
 
 		return worked;
 	}

@@ -2,7 +2,6 @@ package mod.chiselsandbits.bitstorage;
 
 import javax.annotation.Nonnull;
 
-import mod.chiselsandbits.api.IBitBag;
 import mod.chiselsandbits.api.ItemType;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.core.ChiselsAndBits;
@@ -474,22 +473,6 @@ public class BlockEntityBitStorage extends BlockEntity implements IItemHandler, 
 				{
 					playerIn.getInventory().setItem( x, insertItem( 0, stackInSlot, false ) );
 					change = true;
-				}
-
-				if ( ChiselsAndBits.getApi().getItemType( stackInSlot ) == ItemType.BIT_BAG )
-				{
-					final IBitBag bag = ChiselsAndBits.getApi().getBitbag( stackInSlot );
-
-					if ( bag == null )
-					{
-						continue;
-					}
-
-					for ( int y = 0; y < bag.getSlots(); ++y )
-					{
-						bag.insertItem( y, insertItem( 0, bag.extractItem( y, bag.getSlotLimit( y ), false ), false ), false );
-						change = true;
-					}
 				}
 			}
 

@@ -162,11 +162,6 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 			return ItemType.CHISLED_BIT;
 		}
 
-		if ( stack.getItem() instanceof ItemBitBag )
-		{
-			return ItemType.BIT_BAG;
-		}
-
 		if ( stack.getItem() instanceof ItemChisel )
 		{
 			return ItemType.CHISEL;
@@ -294,22 +289,6 @@ public class ChiselAndBitsAPI implements IChiselAndBitsAPI
 			ei.setItem( stack );
 			player.getCommandSenderWorld().addFreshEntity( ei );
 		}
-	}
-
-	@Override
-	public IBitBag getBitbag(
-			final ItemStack stack )
-	{
-		if ( !ModUtil.isEmpty( stack ) )
-		{
-			final Object o = stack.getCapability( CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP );
-			if ( o instanceof IBitBag )
-			{
-				return (IBitBag) o;
-			}
-		}
-
-		return null;
 	}
 
 	@Override

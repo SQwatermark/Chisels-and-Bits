@@ -197,13 +197,8 @@ public class ClientSide
         return kb;
     }
 
-    public void postinit(
-      final ChiselsAndBits mod)
-    {
+    public void postinit(ChiselsAndBits mod) {
         readyState = readyState.updateState(ReadyState.TRIGGER_POST);
-
-        Minecraft.getInstance().getItemColors().register(new ItemColorBitBag(), ModItems.ITEM_BIT_BAG_DEFAULT.get());
-        Minecraft.getInstance().getItemColors().register(new ItemColorBitBag(), ModItems.ITEM_BIT_BAG_DYED.get());
         Minecraft.getInstance().getItemColors().register(new ItemColorBits(), ModItems.ITEM_BLOCK_BIT.get());
         Minecraft.getInstance().getItemColors().register(new ItemColorPatterns(), ModItems.ITEM_POSITIVE_PRINT.get());
         Minecraft.getInstance().getItemColors().register(new ItemColorPatterns(), ModItems.ITEM_POSITIVE_PRINT_WRITTEN.get());

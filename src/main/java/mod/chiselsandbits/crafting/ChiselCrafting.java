@@ -1,7 +1,6 @@
 package mod.chiselsandbits.crafting;
 
 import mod.chiselsandbits.helpers.ModUtil;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
@@ -46,10 +45,6 @@ public class ChiselCrafting extends CustomRecipe
 			if ( is.getItem() == ModItems.ITEM_POSITIVE_PRINT_WRITTEN.get() && pattern == null )
 			{
 				pattern = is;
-			}
-			else if ( is.getItem() instanceof ItemBitBag )
-			{
-				continue;
 			}
 			else if ( is.getItem() instanceof ItemChiseledBit )
 			{

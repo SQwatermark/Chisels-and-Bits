@@ -1,7 +1,6 @@
 package mod.chiselsandbits.network.packets;
 
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
-import mod.chiselsandbits.bitbag.BagInventory;
 import mod.chiselsandbits.chiseledblock.data.BitIterator;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
@@ -9,19 +8,17 @@ import mod.chiselsandbits.client.UndoTracker;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.api.BitAccess;
 import mod.chiselsandbits.helpers.*;
-import mod.chiselsandbits.items.ItemBitBag;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.network.ModPacket;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,7 +124,6 @@ public class PacketUndo extends ModPacket
 				final IContinuousInventory selected = new ContinousChisels( player, pos, side );
 				ItemStack spawnedItem = null;
 
-				final List<BagInventory> bags = ModUtil.getBags( player );
 				final List<ItemEntity> spawnlist = new ArrayList<ItemEntity>();
 
 				final BitIterator bi = new BitIterator();
@@ -166,11 +162,7 @@ public class PacketUndo extends ModPacket
 							}
 
 							final IItemInInventory bit = ModUtil.findBit( player, pos, inAfter );
-							if ( ModUtil.consumeBagBit( bags, inAfter, 1 ) == 1 )
-							{
-								bi.setNext( target, inAfter );
-							}
-							else if ( bit.isValid() )
+							if ( bit.isValid() )
 							{
 								if ( !player.isCreative() )
 								{
@@ -201,7 +193,6 @@ public class PacketUndo extends ModPacket
 						for ( final ItemEntity ei : spawnlist )
 						{
 							feeder.addItem(ei);
-							ItemBitBag.cleanupInventory( player.getPlayer(), ei.getItem() );
 						}
 					}
 
