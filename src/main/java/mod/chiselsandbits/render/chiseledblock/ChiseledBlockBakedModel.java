@@ -29,11 +29,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * 雕刻方块的模型
+ */
 public class ChiseledBlockBakedModel extends BaseBakedBlockModel
 {
     private static final Random RANDOM = new Random();
 
-    public static final  float       PIXELS_PER_BLOCK = 16.0f;
+    public static final float PIXELS_PER_BLOCK = 16.0f;
     private final static int[][]     faceVertMap      = new int[6][4];
     private final static float[][][] quadMapping      = new float[6][4][6];
 
@@ -65,19 +68,17 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
             int a = 0;
             int b = 2;
 
-            switch (myFace)
-            {
-                case NORTH:
-                case SOUTH:
+            switch (myFace) {
+                case NORTH, SOUTH -> {
                     a = 0;
                     b = 1;
-                    break;
-                case EAST:
-                case WEST:
+                }
+                case EAST, WEST -> {
                     a = 1;
                     b = 2;
-                    break;
-                default:
+                }
+                default -> {
+                }
             }
 
             final int p = vertData.length / 4;
@@ -114,7 +115,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    private ChiselRenderType   myLayer;
+    private ChiselRenderType myLayer;
     private TextureAtlasSprite sprite;
 
     // keep memory requirements low by using arrays.
@@ -126,13 +127,9 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
     private BakedQuad[] west;
     private BakedQuad[] generic;
 
-    public List<BakedQuad> getList(
-      final Direction side)
-    {
-        if (side != null)
-        {
-            switch (side)
-            {
+    public List<BakedQuad> getList(final Direction side) {
+        if (side != null) {
+            switch (side) {
                 case DOWN:
                     return asList(down);
                 case EAST:
@@ -152,27 +149,17 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         return asList(generic);
     }
 
-    private List<BakedQuad> asList(
-      final BakedQuad[] array)
-    {
-        if (array == null)
-        {
+    private static List<BakedQuad> asList(final BakedQuad[] array) {
+        if (array == null) {
             return Collections.emptyList();
         }
-
         return Arrays.asList(array);
     }
 
-    private ChiseledBlockBakedModel()
-    {
+    private ChiseledBlockBakedModel() {
     }
 
-    public ChiseledBlockBakedModel(
-      final int blockReference,
-      final ChiselRenderType layer,
-      final VoxelBlob data,
-      final VertexFormat format)
-    {
+    public ChiseledBlockBakedModel(final int blockReference, final ChiselRenderType layer, final VoxelBlob data, final VertexFormat format) {
         myLayer = layer;
         final BlockState state = ModUtil.getStateById(blockReference);
 
@@ -202,11 +189,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    public static ChiseledBlockBakedModel breakingParticleModel(
-      final ChiselRenderType layer,
-      final Integer blockStateID,
-      final Random random)
-    {
+    public static ChiseledBlockBakedModel breakingParticleModel(final ChiselRenderType layer, final Integer blockStateID, final Random random) {
         return ModelUtil.getBreakingModel(layer, blockStateID, random);
     }
 
@@ -222,22 +205,16 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         return trulyEmpty;
     }
 
-    IFaceBuilder getBuilder(
-      VertexFormat format)
-    {
-        if (ChiseledBlockSmartModel.ForgePipelineDisabled())
-        {
+    private IFaceBuilder getBuilder(VertexFormat format) {
+        if (ChiseledBlockSmartModel.ForgePipelineDisabled()) {
             format = DefaultVertexFormat.BLOCK;
         }
 
         return new ChiselsAndBitsBakedQuad.Builder(format);
     }
 
-    private void generateFaces(
-      final ChiseledModelBuilder builder,
-      final VoxelBlob blob,
-      final Random weight)
-    {
+    private void generateFaces(final ChiseledModelBuilder builder, final VoxelBlob blob, final Random weight) {
+
         final ArrayList<ArrayList<FaceRegion>> rset = new ArrayList<>();
         final VisibleFace visFace = new VisibleFace();
 
@@ -343,46 +320,34 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    private float NotZero(
-      float byteToFloat)
-    {
-        if (byteToFloat < 0.00001f)
-        {
+    private float NotZero(float byteToFloat) {
+        if (byteToFloat < 0.00001f) {
             return 1;
         }
-
         return byteToFloat;
     }
 
-    private float byteToFloat(
-      final int i)
-    {
+    private float byteToFloat(final int i) {
         return (i & 0xff) / 255.0f;
     }
 
-    private void mergeFaces(
-      final ArrayList<FaceRegion> src)
-    {
+    private void mergeFaces(final ArrayList<FaceRegion> src) {
         boolean restart;
 
-        do
-        {
+        do {
             restart = false;
 
             final int size = src.size();
             final int sizeMinusOne = size - 1;
 
             restart:
-            for (int x = 0; x < sizeMinusOne; ++x)
-            {
+            for (int x = 0; x < sizeMinusOne; ++x) {
                 final FaceRegion faceA = src.get(x);
 
-                for (int y = x + 1; y < size; ++y)
-                {
+                for (int y = x + 1; y < size; ++y) {
                     final FaceRegion faceB = src.get(y);
 
-                    if (faceA.extend(faceB))
-                    {
+                    if (faceA.extend(faceB)) {
                         src.set(y, src.get(sizeMinusOne));
                         src.remove(sizeMinusOne);
 
@@ -395,41 +360,29 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         while (restart);
     }
 
-    private void processXFaces(
-      final VoxelBlob blob,
-      final VisibleFace visFace,
-      final ArrayList<ArrayList<FaceRegion>> rset)
-    {
+    private void processXFaces(final VoxelBlob blob, final VisibleFace visFace, final ArrayList<ArrayList<FaceRegion>> rset) {
         ArrayList<FaceRegion> regions = null;
         final ICullTest test = myLayer.getTest();
 
-        for (final Direction myFace : X_Faces)
-        {
-            for (int x = 0; x < blob.detail; x++)
-            {
-                if (regions == null)
-                {
+        for (final Direction myFace : X_Faces) {
+            for (int x = 0; x < blob.detail; x++) {
+                if (regions == null) {
                     regions = new ArrayList<FaceRegion>(16);
                 }
 
-                for (int z = 0; z < blob.detail; z++)
-                {
+                for (int z = 0; z < blob.detail; z++) {
                     FaceRegion currentFace = null;
 
-                    for (int y = 0; y < blob.detail; y++)
-                    {
+                    for (int y = 0; y < blob.detail; y++) {
                         final FaceRegion region = getRegion(blob, myFace, x, y, z, visFace, test);
 
-                        if (region == null)
-                        {
+                        if (region == null) {
                             currentFace = null;
                             continue;
                         }
 
-                        if (currentFace != null)
-                        {
-                            if (currentFace.extend(region))
-                            {
+                        if (currentFace != null) {
+                            if (currentFace.extend(region)) {
                                 continue;
                             }
                         }
@@ -439,8 +392,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                     }
                 }
 
-                if (!regions.isEmpty())
-                {
+                if (!regions.isEmpty()) {
                     rset.add(regions);
                     regions = null;
                 }
@@ -448,41 +400,29 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    private void processYFaces(
-      final VoxelBlob blob,
-      final VisibleFace visFace,
-      final ArrayList<ArrayList<FaceRegion>> rset)
-    {
+    private void processYFaces(final VoxelBlob blob, final VisibleFace visFace, final ArrayList<ArrayList<FaceRegion>> rset) {
         ArrayList<FaceRegion> regions = null;
         final ICullTest test = myLayer.getTest();
 
-        for (final Direction myFace : Y_Faces)
-        {
-            for (int y = 0; y < blob.detail; y++)
-            {
-                if (regions == null)
-                {
-                    regions = new ArrayList<FaceRegion>(16);
+        for (final Direction myFace : Y_Faces) {
+            for (int y = 0; y < blob.detail; y++) {
+                if (regions == null) {
+                    regions = new ArrayList<>(16);
                 }
 
-                for (int z = 0; z < blob.detail; z++)
-                {
+                for (int z = 0; z < blob.detail; z++) {
                     FaceRegion currentFace = null;
 
-                    for (int x = 0; x < blob.detail; x++)
-                    {
+                    for (int x = 0; x < blob.detail; x++) {
                         final FaceRegion region = getRegion(blob, myFace, x, y, z, visFace, test);
 
-                        if (region == null)
-                        {
+                        if (region == null) {
                             currentFace = null;
                             continue;
                         }
 
-                        if (currentFace != null)
-                        {
-                            if (currentFace.extend(region))
-                            {
+                        if (currentFace != null) {
+                            if (currentFace.extend(region)) {
                                 continue;
                             }
                         }
@@ -492,8 +432,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                     }
                 }
 
-                if (!regions.isEmpty())
-                {
+                if (!regions.isEmpty()) {
                     rset.add(regions);
                     regions = null;
                 }
@@ -501,41 +440,29 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    private void processZFaces(
-      final VoxelBlob blob,
-      final VisibleFace visFace,
-      final ArrayList<ArrayList<FaceRegion>> rset)
-    {
+    private void processZFaces(final VoxelBlob blob, final VisibleFace visFace, final ArrayList<ArrayList<FaceRegion>> rset) {
         ArrayList<FaceRegion> regions = null;
         final ICullTest test = myLayer.getTest();
 
-        for (final Direction myFace : Z_Faces)
-        {
-            for (int z = 0; z < blob.detail; z++)
-            {
-                if (regions == null)
-                {
-                    regions = new ArrayList<FaceRegion>(16);
+        for (final Direction myFace : Z_Faces) {
+            for (int z = 0; z < blob.detail; z++) {
+                if (regions == null) {
+                    regions = new ArrayList<>(16);
                 }
 
-                for (int y = 0; y < blob.detail; y++)
-                {
+                for (int y = 0; y < blob.detail; y++) {
                     FaceRegion currentFace = null;
 
-                    for (int x = 0; x < blob.detail; x++)
-                    {
+                    for (int x = 0; x < blob.detail; x++) {
                         final FaceRegion region = getRegion(blob, myFace, x, y, z, visFace, test);
 
-                        if (region == null)
-                        {
+                        if (region == null) {
                             currentFace = null;
                             continue;
                         }
 
-                        if (currentFace != null)
-                        {
-                            if (currentFace.extend(region))
-                            {
+                        if (currentFace != null) {
+                            if (currentFace.extend(region)) {
                                 continue;
                             }
                         }
@@ -545,8 +472,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                     }
                 }
 
-                if (!regions.isEmpty())
-                {
+                if (!regions.isEmpty()) {
                     rset.add(regions);
                     regions = null;
                 }
@@ -554,19 +480,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    private FaceRegion getRegion(
-      final VoxelBlob blob,
-      final Direction myFace,
-      final int x,
-      final int y,
-      final int z,
-      final VisibleFace visFace,
-      final ICullTest test)
-    {
+    private FaceRegion getRegion(final VoxelBlob blob, final Direction myFace, final int x, final int y, final int z, final VisibleFace visFace, final ICullTest test) {
         blob.visibleFace(myFace, x, y, z, visFace, test);
 
-        if (visFace.visibleFace)
-        {
+        if (visFace.visibleFace) {
             final Vec3i off = myFace.getNormal();
 
             return new FaceRegion(myFace,
@@ -581,13 +498,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
     }
 
     // generate final pos from static data.
-    private void getVertexPos(
-      final float[] pos,
-      final Direction side,
-      final int vertNum,
-      final int[] to,
-      final int[] from)
-    {
+    private void getVertexPos(final float[] pos, final Direction side, final int vertNum, final int[] to, final int[] from) {
         final float[] interpos = quadMapping[side.ordinal()][vertNum];
 
         pos[0] = to[0] * interpos[0] + from[0] * interpos[1];
@@ -595,13 +506,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         pos[2] = to[2] * interpos[4] + from[2] * interpos[5];
     }
 
-    private void getFaceUvs(
-      final float[] uvs,
-      final Direction face,
-      final int[] from,
-      final int[] to,
-      final float[] quadsUV)
-    {
+    private void getFaceUvs(final float[] uvs, final Direction face, final int[] from, final int[] to, final float[] quadsUV) {
         float to_u = 0;
         float to_v = 0;
         float from_u = 0;
@@ -661,36 +566,21 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         uvs[7] = 16.0f * v(quadsUV, to_u, from_v); // 1
     }
 
-    float u(
-      final float[] src,
-      final float inU,
-      final float inV)
-    {
+    float u(final float[] src, final float inU, final float inV) {
         final float inv = 1.0f - inU;
         final float u1 = src[0] * inU + inv * src[2];
         final float u2 = src[4] * inU + inv * src[6];
         return u1 * inV + (1.0f - inV) * u2;
     }
 
-    float v(
-      final float[] src,
-      final float inU,
-      final float inV)
-    {
+    float v(final float[] src, final float inU, final float inV) {
         final float inv = 1.0f - inU;
         final float v1 = src[1] * inU + inv * src[3];
         final float v2 = src[5] * inU + inv * src[7];
         return v1 * inV + (1.0f - inV) * v2;
     }
 
-    static private void offsetVec(
-      final int[] result,
-      final int toX,
-      final int toY,
-      final int toZ,
-      final Direction f,
-      final int d)
-    {
+    private static void offsetVec(final int[] result, final int toX, final int toY, final int toZ, final Direction f, final int d) {
 
         int leftX = 0;
         final int leftY = 0;
@@ -700,34 +590,33 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         int upY = 0;
         int upZ = 0;
 
-        switch (f)
-        {
-            case DOWN:
+        switch (f) {
+            case DOWN -> {
                 leftX = 1;
                 upZ = 1;
-                break;
-            case EAST:
+            }
+            case EAST -> {
                 leftZ = 1;
                 upY = 1;
-                break;
-            case NORTH:
+            }
+            case NORTH -> {
                 leftX = 1;
                 upY = 1;
-                break;
-            case SOUTH:
+            }
+            case SOUTH -> {
                 leftX = 1;
                 upY = 1;
-                break;
-            case UP:
+            }
+            case UP -> {
                 leftX = 1;
                 upZ = 1;
-                break;
-            case WEST:
+            }
+            case WEST -> {
                 leftZ = 1;
                 upY = 1;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         result[0] = (toX + leftX * d + upX * d) / 2;
@@ -737,15 +626,13 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
 
     @NotNull
     @Override
-    public List<BakedQuad> getQuads(
-      @Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand, @NotNull final IModelData extraData)
-    {
+    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand, @NotNull final IModelData extraData) {
         return getList(side);
     }
 
+    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
-    {
+    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand) {
         return getList(side);
     }
 
@@ -755,28 +642,23 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         return true;
     }
 
+    @NotNull
     @Override
-    public TextureAtlasSprite getParticleIcon()
-    {
+    public TextureAtlasSprite getParticleIcon() {
         return sprite != null ? sprite : ClientSide.instance.getMissingIcon();
     }
 
-    public int faceCount()
-    {
+    public int faceCount() {
         int count = getList(null).size();
 
-        for (final Direction f : Direction.values())
-        {
+        for (final Direction f : Direction.values()) {
             count += getList(f).size();
         }
 
         return count;
     }
 
-    public static ChiseledBlockBakedModel createFromTexture(
-      TextureAtlasSprite findTexture,
-      ChiselRenderType layer)
-    {
+    public static ChiseledBlockBakedModel createFromTexture(TextureAtlasSprite findTexture, ChiselRenderType layer) {
         ChiseledBlockBakedModel out = new ChiseledBlockBakedModel();
         out.sprite = findTexture;
         out.myLayer = layer;

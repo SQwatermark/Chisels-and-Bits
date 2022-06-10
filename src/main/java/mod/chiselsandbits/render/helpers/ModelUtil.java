@@ -528,25 +528,18 @@ public class ModelUtil implements ICacheClearable
 		return Minecraft.getInstance().getItemColors().getColor( target, tint );
 	}
 
-	public static ChiseledBlockBakedModel getBreakingModel(
-			ChiselRenderType layer,
-			Integer blockStateID,
-            Random random)
-	{
+	public static ChiseledBlockBakedModel getBreakingModel(ChiselRenderType layer, Integer blockStateID, Random random) {
 		Pair<RenderType, Integer> key = Pair.of(layer.layer, blockStateID);
-		ChiseledBlockBakedModel out = breakCache.get( key );
+		ChiseledBlockBakedModel out = breakCache.get(key);
 
-		if ( out == null )
+		if (out == null)
 		{
 			final BlockState state = ModUtil.getStateById( blockStateID );
 			final BakedModel model = ModelUtil.solveModel( state, random, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel( ModUtil.getStateById( blockStateID ) ), layer.layer );
 
-			if ( model != null )
-			{
+			if (model != null) {
 				out = ChiseledBlockBakedModel.createFromTexture( ModelUtil.findTexture( blockStateID, model, Direction.UP, layer.layer, random ), layer );
-			}
-			else
-			{
+			} else {
 				out = ChiseledBlockBakedModel.createFromTexture( null, null );
 			}
 

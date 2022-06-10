@@ -42,19 +42,24 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.zip.*;
 
+/**
+ * 二进制体素数据
+ */
 public final class VoxelBlob implements IVoxelSrc
 {
 
     private static final BitSet fluidFilterState;
 
     private static final Map<Object, BitSet> layerFilters = new HashMap<>();
+
     static
     {
         fluidFilterState = new BitSet(4096);
         clearCache();
     }
-    public static synchronized void clearCache()
-    {
+
+    public static synchronized void clearCache() {
+
         fluidFilterState.clear();
 
         final ForgeRegistry<Block> blockReg = (ForgeRegistry<Block>) ForgeRegistries.BLOCKS;

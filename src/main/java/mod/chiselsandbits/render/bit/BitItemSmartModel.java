@@ -27,9 +27,7 @@ public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable
 
     static private final NonNullList<ItemStack> alternativeStacks = NonNullList.create();
 
-	private BakedModel getCachedModel(
-			int stateID,
-			final boolean large )
+	private BakedModel getCachedModel(int stateID, boolean large )
 	{
 	    if (stateID == 0) {
 	        //We are running an empty bit, for display purposes.

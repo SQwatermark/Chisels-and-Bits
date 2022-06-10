@@ -10,11 +10,7 @@ public class EventBlockBitPostModification extends Event
 	private final Level w;
 	private final BlockPos pos;
 
-	public EventBlockBitPostModification(
-			final Level w,
-			final BlockPos pos )
-	{
-
+	public EventBlockBitPostModification(Level w, BlockPos pos) {
 		this.w = w;
 		this.pos = pos;
 	}

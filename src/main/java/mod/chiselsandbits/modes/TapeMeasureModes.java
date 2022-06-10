@@ -8,41 +8,30 @@ import net.minecraft.nbt.StringTag;
 
 public enum TapeMeasureModes implements IToolMode
 {
-	BIT( LocalStrings.TapeMeasureBit ),
-	BLOCK( LocalStrings.TapeMeasureBlock ),
-	DISTANCE( LocalStrings.TapeMeasureDistance );
+	BIT(LocalStrings.TapeMeasureBit),
+	BLOCK(LocalStrings.TapeMeasureBlock),
+	DISTANCE(LocalStrings.TapeMeasureDistance);
 
 	public final LocalStrings string;
 	public boolean isDisabled = false;
 
 	public Object binding;
 
-	private TapeMeasureModes(
-			final LocalStrings str )
-	{
+	TapeMeasureModes(LocalStrings str) {
 		string = str;
 	}
 
-	public static TapeMeasureModes getMode(
-			final ItemStack stack )
-	{
-		if ( stack != null )
-		{
-			try
-			{
+	public static TapeMeasureModes getMode(ItemStack stack) {
+		if (stack != null) {
+			try {
 				final CompoundTag nbt = stack.getTag();
-				if ( nbt != null && nbt.contains( "mode" ) )
-				{
-					return valueOf( nbt.getString( "mode" ) );
+				if (nbt != null && nbt.contains( "mode" )) {
+					return valueOf( nbt.getString( "mode" ));
 				}
-			}
-			catch ( final IllegalArgumentException iae )
-			{
+			} catch (IllegalArgumentException iae) {
 				// nope!
-			}
-			catch ( final Exception e )
-			{
-				Log.logError( "Unable to determine mode.", e );
+			} catch (Exception e) {
+				Log.logError("Unable to determine mode.", e);
 			}
 		}
 
@@ -50,12 +39,9 @@ public enum TapeMeasureModes implements IToolMode
 	}
 
 	@Override
-	public void setMode(
-			final ItemStack stack )
-	{
-		if ( stack != null )
-		{
-			stack.addTagElement( "mode", StringTag.valueOf( name() ) );
+	public void setMode(ItemStack stack) {
+		if (stack != null) {
+			stack.addTagElement( "mode", StringTag.valueOf(name()));
 		}
 	}
 

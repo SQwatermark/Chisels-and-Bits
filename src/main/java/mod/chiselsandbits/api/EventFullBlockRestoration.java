@@ -7,19 +7,13 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 @Cancelable
-public class EventFullBlockRestoration extends Event
-{
+public class EventFullBlockRestoration extends Event {
 
-	private final Level      w;
-	private final BlockPos   pos;
+	private final Level w;
+	private final BlockPos pos;
 	private final BlockState restoredState;
 
-	public EventFullBlockRestoration(
-			final Level w,
-			final BlockPos pos,
-			final BlockState restoredState )
-	{
-
+	public EventFullBlockRestoration(Level w, BlockPos pos, BlockState restoredState) {
 		this.w = w;
 		this.pos = pos;
 		this.restoredState = restoredState;

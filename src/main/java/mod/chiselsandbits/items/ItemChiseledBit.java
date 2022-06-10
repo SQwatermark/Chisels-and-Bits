@@ -107,22 +107,15 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
           () -> () -> displayName);
     }
 
-	@Override
 	/**
-	 * alter digging behavior to chisel, uses packets to enable server to stay
-	 * in-sync.
+	 * alter digging behavior to chisel, uses packets to enable server to stay in-sync.
 	 */
-	public boolean onBlockStartBreak(
-			final ItemStack itemstack,
-			final BlockPos pos,
-			final Player player )
-	{
+	@Override
+	public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, Player player) {
 		return ItemChisel.fromBreakToChisel( ChiselMode.castMode( ChiselModeManager.getChiselMode( player, ChiselToolType.BIT, InteractionHand.MAIN_HAND ) ), itemstack, pos, player, InteractionHand.MAIN_HAND );
 	}
 
-	public static Component getBitStateName(
-			final BlockState state )
-	{
+	public static Component getBitStateName(BlockState state) {
 		ItemStack target = null;
 		Block blk = null;
 

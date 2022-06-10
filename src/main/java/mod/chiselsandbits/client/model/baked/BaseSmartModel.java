@@ -27,30 +27,24 @@ public abstract class BaseSmartModel implements BakedModel
 
 	private final ItemOverrides overrides;
 
-	private static class OverrideHelper extends ItemOverrides
-	{
+	private static class OverrideHelper extends ItemOverrides {
 		final BaseSmartModel parent;
 
-		public OverrideHelper(
-				final BaseSmartModel p )
-		{
+		public OverrideHelper(final BaseSmartModel p) {
 			super();
 			parent = p;
 		}
 
         @Nullable
         @Override
-        public BakedModel resolve(
-          final BakedModel p_239290_1_, final ItemStack p_239290_2_, @Nullable final ClientLevel p_239290_3_, @Nullable final LivingEntity p_239290_4_, int p_173469_)
-        {
+        public BakedModel resolve(final BakedModel p_239290_1_, final ItemStack p_239290_2_, @Nullable final ClientLevel p_239290_3_, @Nullable final LivingEntity p_239290_4_, int p_173469_) {
             return parent.resolve( p_239290_1_, p_239290_2_, p_239290_3_, p_239290_4_ );
         }
-
-	};
+	}
 
 	public BaseSmartModel()
 	{
-		overrides = new OverrideHelper( this );
+		overrides = new OverrideHelper(this);
 	}
 
 	@Override
@@ -71,19 +65,19 @@ public abstract class BaseSmartModel implements BakedModel
 		return false;
 	}
 
+	@NotNull
 	@Override
-	public TextureAtlasSprite getParticleIcon()
-	{
-		final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon( Blocks.STONE.defaultBlockState() );
+	public TextureAtlasSprite getParticleIcon() {
+		final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.STONE.defaultBlockState());
 
-		if ( sprite == null )
-		{
+		if (sprite == null) {
 			return ClientSide.instance.getMissingIcon();
 		}
 
 		return sprite;
 	}
 
+	@NotNull
 	@Override
 	public ItemTransforms getTransforms()
 	{
@@ -99,7 +93,8 @@ public abstract class BaseSmartModel implements BakedModel
         return model.getQuads( state, side, rand, extraData );
     }
 
-    @Override
+    @NotNull
+	@Override
     public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
     {
         final BakedModel model = handleBlockState( state, rand );

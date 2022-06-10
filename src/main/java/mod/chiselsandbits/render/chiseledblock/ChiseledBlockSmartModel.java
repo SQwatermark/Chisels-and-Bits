@@ -35,30 +35,25 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheClearable
-{
+public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheClearable {
+
     private static final SimpleMaxSizedCache<ModelCacheKey, ChiseledBlockBakedModel> MODEL_CACHE = new SimpleMaxSizedCache<>(ChiselsAndBits.getConfig().getClient().modelCacheSize.get());
-    private static final CacheMap<ItemStack, BakedModel>          ITEM_TO_MODEL_CACHE = new CacheMap<>();
-    private static final CacheMap<VoxelBlobStateInstance, Integer> SIDE_CACHE          = new CacheMap<>();
+    private static final CacheMap<ItemStack, BakedModel> ITEM_TO_MODEL_CACHE = new CacheMap<>();
+    private static final CacheMap<VoxelBlobStateInstance, Integer> SIDE_CACHE = new CacheMap<>();
 
     public static final BitSet FLUID_RENDER_TYPES = new BitSet(RenderType.chunkBufferLayers().size());
 
-    public static int getSides(
-      final BlockEntityChiseledBlock te)
-    {
+    public static int getSides(final BlockEntityChiseledBlock te) {
         final VoxelBlobStateReference ref = te.getBlobStateReference();
         Integer out;
 
-        if (ref == null)
-        {
+        if (ref == null) {
             return 0;
         }
 
-        synchronized (SIDE_CACHE)
-        {
+        synchronized (SIDE_CACHE) {
             out = SIDE_CACHE.get(ref.getInstance());
-            if (out == null)
-            {
+            if (out == null) {
                 final VoxelBlob blob = ref.getVoxelBlob();
 
                 // ignore non-solid, and fluids.
@@ -73,20 +68,14 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         return out;
     }
 
-    public static ChiseledBlockBakedModel getCachedModel(
-      final BlockEntityChiseledBlock te,
-      final ChiselRenderType layer)
-    {
+    public static ChiseledBlockBakedModel getCachedModel(final BlockEntityChiseledBlock te, final ChiselRenderType layer) {
         final VoxelBlobStateReference data = te.getBlobStateReference();
         Integer blockP = te.getPrimaryBlockStateId();
         VoxelBlob vBlob = (data != null) ? data.getVoxelBlob() : null;
         return getCachedModel(blockP, vBlob, layer, getModelFormat(), Objects.requireNonNull(te.getLevel()).random);
     }
 
-    public static ChiseledBlockBakedModel getCachedModel(
-      final ItemStack stack,
-      final ChiselRenderType layer)
-    {
+    public static ChiseledBlockBakedModel getCachedModel(final ItemStack stack, final ChiselRenderType layer) {
         Integer blockP = 0;
         return getCachedModel(blockP, ModUtil.getBlobFromStack(stack, null), layer, getModelFormat(), new Random());
     }
@@ -96,41 +85,27 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         return DefaultVertexFormat.BLOCK;
     }
 
-    public static boolean ForgePipelineDisabled()
-    {
+    public static boolean ForgePipelineDisabled() {
         return !ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get() || ChiselsAndBits.getConfig().getClient().disableCustomVertexFormats.get();
     }
 
-    public static ChiseledBlockBakedModel getCachedModel(
-      final Integer blockP,
-      final VoxelBlob data,
-      final ChiselRenderType layer,
-      final VertexFormat format,
-      final Random random)
-    {
-        if (data == null)
-        {
+    public static ChiseledBlockBakedModel getCachedModel(final Integer blockP, final VoxelBlob data, final ChiselRenderType layer, final VertexFormat format, final Random random) {
+        if (data == null) {
             return new ChiseledBlockBakedModel(blockP, layer, null, format);
         }
 
         ChiseledBlockBakedModel out = null;
 
-        if (format == getModelFormat())
-        {
+        if (format == getModelFormat()) {
             out = MODEL_CACHE.get(new ModelCacheKey(data, layer));
         }
 
-        if (out == null)
-        {
+        if (out == null) {
             out = new ChiseledBlockBakedModel(blockP, layer, data, format);
-
-            if (out.isEmpty())
-            {
+            if (out.isEmpty()) {
                 out = ChiseledBlockBakedModel.breakingParticleModel(layer, blockP, random);
             }
-
-            if (format == getModelFormat())
-            {
+            if (format == getModelFormat()) {
                 MODEL_CACHE.put(new ModelCacheKey(data, layer), out);
             }
         }
@@ -250,8 +225,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
     }
 
     @Override
-    public void clearCache()
-    {
+    public void clearCache() {
         SIDE_CACHE.clear();
         MODEL_CACHE.clear();
         ITEM_TO_MODEL_CACHE.clear();
@@ -282,34 +256,21 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         return true;
     }
 
-    private static final class ModelCacheKey {
-        private final VoxelBlob blob;
-        private final ChiselRenderType type;
-
-        private ModelCacheKey(final VoxelBlob blob, final ChiselRenderType type) {
-            this.blob = blob;
-            this.type = type;
-        }
+    private record ModelCacheKey(VoxelBlob blob, ChiselRenderType type) {
 
         @Override
-        public boolean equals(final Object o)
-        {
-            if (this == o)
-            {
+        public boolean equals(final Object o) {
+            if (this == o) {
                 return true;
             }
-            if (!(o instanceof ModelCacheKey))
-            {
+            if (!(o instanceof final ModelCacheKey that)) {
                 return false;
             }
-            final ModelCacheKey that = (ModelCacheKey) o;
-            return Objects.equals(blob, that.blob) &&
-                     Objects.equals(type, that.type);
+            return Objects.equals(blob, that.blob) && Objects.equals(type, that.type);
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return Objects.hash(blob, type);
         }
     }

@@ -122,15 +122,9 @@ public class ItemChisel extends DiggerItem implements IItemScrollWheel, IChiselM
 
 					final ClipContext context = new ClipContext(ray_from, ray_to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player);
 
-					final HitResult mop = player.level.clip(context);
-					if (mop != null && mop instanceof BlockHitResult)
-					{
-					    final BlockHitResult rayTraceResult = (BlockHitResult) mop;
-						final BitLocation loc = new BitLocation( rayTraceResult, BitOperation.CHISEL );
-						ClientSide.instance.pointAt( ChiselToolType.CHISEL, loc, hand );
-						return true;
-					}
-
+					final BlockHitResult rayTraceResult = player.level.clip(context);
+					final BitLocation loc = new BitLocation( rayTraceResult, BitOperation.CHISEL );
+					ClientSide.instance.pointAt(ChiselToolType.CHISEL, loc, hand);
 					return true;
 				}
 
@@ -144,19 +138,16 @@ public class ItemChisel extends DiggerItem implements IItemScrollWheel, IChiselM
                 final ClipContext context = new ClipContext(ray_from, ray_to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player);
 
                 BlockHitResult mop = player.level.clip(context);
-				if (mop.getType() != HitResult.Type.MISS)
-				{
+				if (mop.getType() != HitResult.Type.MISS) {
 				    if ((Minecraft.getInstance().hitResult != null ? Minecraft.getInstance().hitResult.getType() : HitResult.Type.MISS) == HitResult.Type.BLOCK) {
                         BlockHitResult minecraftResult = (BlockHitResult) Minecraft.getInstance().hitResult;
                         if (!minecraftResult.getBlockPos().immutable().equals(mop.getBlockPos().immutable())) {
                             mop = minecraftResult;
                         }
                     }
-
 					useChisel( mode, player, player.level, mop, hand );
 				}
 			}
-
 			return true;
 		}
 

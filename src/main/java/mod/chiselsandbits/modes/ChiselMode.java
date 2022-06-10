@@ -28,31 +28,20 @@ public enum ChiselMode implements IToolMode
 
 	public Object binding;
 
-	private ChiselMode(
-			final LocalStrings str )
-	{
+	ChiselMode(LocalStrings str) {
 		string = str;
 	}
 
-	public static ChiselMode getMode(
-			final ItemStack stack )
-	{
-		if ( stack != null )
-		{
-			try
-			{
+	public static ChiselMode getMode(ItemStack stack) {
+		if (stack != null) {
+			try {
 				final CompoundTag nbt = stack.getTag();
-				if ( nbt != null && nbt.contains( "mode" ) )
-				{
+				if ( nbt != null && nbt.contains( "mode" ) ) {
 					return valueOf( nbt.getString( "mode" ) );
 				}
-			}
-			catch ( final IllegalArgumentException iae )
-			{
+			} catch ( final IllegalArgumentException iae ) {
 				// nope!
-			}
-			catch ( final Exception e )
-			{
+			} catch ( final Exception e ) {
 				Log.logError( "Unable to determine mode.", e );
 			}
 		}
@@ -61,12 +50,9 @@ public enum ChiselMode implements IToolMode
 	}
 
 	@Override
-	public void setMode(
-			final ItemStack stack )
-	{
-		if ( stack != null )
-		{
-			stack.addTagElement( "mode", StringTag.valueOf( name() ) );
+	public void setMode(ItemStack stack) {
+		if (stack != null) {
+			stack.addTagElement( "mode", StringTag.valueOf(name()));
 		}
 	}
 
@@ -82,14 +68,10 @@ public enum ChiselMode implements IToolMode
 		return isDisabled;
 	}
 
-	public static ChiselMode castMode(
-			final IToolMode chiselMode )
-	{
-		if ( chiselMode instanceof ChiselMode )
-		{
+	public static ChiselMode castMode(IToolMode chiselMode) {
+		if (chiselMode instanceof ChiselMode) {
 			return (ChiselMode) chiselMode;
 		}
-
 		return ChiselMode.SINGLE;
 	}
 

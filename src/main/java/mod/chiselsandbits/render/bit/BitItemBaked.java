@@ -20,24 +20,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class BitItemBaked extends BaseBakedBlockModel
-{
+public class BitItemBaked extends BaseBakedBlockModel {
+
 	public static final float PIXELS_PER_BLOCK = 16.0f;
 
 	private static final float BIT_BEGIN = 6.0f;
 	private static final float BIT_END = 10.0f;
 
-	final ArrayList<BakedQuad> generic = new ArrayList<BakedQuad>( 6 );
+	final ArrayList<BakedQuad> generic = new ArrayList<>(6);
 
 	private static final Random RANDOM = new Random();
 
-	public BitItemBaked(
-			final int BlockRef )
-	{
+	public BitItemBaked(int BlockRef) {
 		final FaceBakery faceBakery = new FaceBakery();
 
-		final Vector3f to = new Vector3f( BIT_BEGIN, BIT_BEGIN, BIT_BEGIN );
-		final Vector3f from = new Vector3f( BIT_END, BIT_END, BIT_END );
+		final Vector3f to = new Vector3f(BIT_BEGIN, BIT_BEGIN, BIT_BEGIN);
+		final Vector3f from = new Vector3f(BIT_END, BIT_END, BIT_END);
 
 		final BlockElementRotation bpr = null;
 		final BlockModelRotation mr = BlockModelRotation.X0_Y0;

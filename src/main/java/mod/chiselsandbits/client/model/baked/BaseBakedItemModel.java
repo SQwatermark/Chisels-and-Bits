@@ -11,11 +11,12 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel implements BakedModel
+public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel
 {
-	protected ArrayList<BakedQuad> list = new ArrayList<BakedQuad>();
+	protected ArrayList<BakedQuad> list = new ArrayList<>();
 
 	@Override
 	final public boolean useAmbientOcclusion()
@@ -35,8 +36,9 @@ public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel imple
 		return false;
 	}
 
-    @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
+    @NotNull
+	@Override
+    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand)
     {
         if ( side != null )
         {

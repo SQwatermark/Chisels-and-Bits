@@ -18,9 +18,7 @@ public enum PositivePatternMode implements IToolMode
 
 	public Object binding;
 
-	private PositivePatternMode(
-			final LocalStrings str )
-	{
+	PositivePatternMode(final LocalStrings str) {
 		string = str;
 	}
 
@@ -51,8 +49,7 @@ public enum PositivePatternMode implements IToolMode
 	}
 
 	@Override
-	public void setMode(
-			final ItemStack stack )
+	public void setMode(final ItemStack stack)
 	{
 		if ( stack != null )
 		{

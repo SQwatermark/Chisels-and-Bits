@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 public class PrintSmartModel extends BaseSmartModel
 {
 
-	WeakHashMap<ItemStack, PrintBaked> cache = new WeakHashMap<ItemStack, PrintBaked>();
+	WeakHashMap<ItemStack, PrintBaked> cache = new WeakHashMap<>();
 
 	final IPatternItem item;
 	final String name;

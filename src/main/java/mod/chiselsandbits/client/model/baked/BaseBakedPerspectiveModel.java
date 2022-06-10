@@ -9,8 +9,10 @@ import net.minecraft.client.resources.model.BakedModel;
 
 import java.util.Random;
 
-public abstract class BaseBakedPerspectiveModel implements BakedModel
-{
+/**
+ * 仅仅规定了模型在各种观察模式下的显示
+ */
+public abstract class BaseBakedPerspectiveModel implements BakedModel {
 
     protected static final Random RANDOM = new Random();
 
@@ -31,27 +33,16 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel
 		firstPerson_righthand = firstPerson_lefthand = getMatrix( 0, 0, 0, 0, 45, 0, 0.40f );
 	}
 
-	private static Transformation getMatrix(
-			final float transX,
-			final float transY,
-			final float transZ,
-			final float rotX,
-			final float rotY,
-			final float rotZ,
-			final float scaleXYZ )
-	{
+	private static Transformation getMatrix(float transX, float transY, float transZ, float rotX, float rotY, float rotZ, float scaleXYZ) {
 		final Vector3f translation = new Vector3f( transX, transY, transZ );
 		final Vector3f scale = new Vector3f( scaleXYZ, scaleXYZ, scaleXYZ );
 		final Quaternion rotation = new Quaternion(rotX, rotY, rotZ, true);
-
 		return new Transformation(translation, rotation, scale, null);
 	}
 
     @Override
-    public BakedModel handlePerspective(final ItemTransforms.TransformType cameraTransformType, final PoseStack mat)
-    {
-        switch ( cameraTransformType )
-        {
+    public BakedModel handlePerspective(final ItemTransforms.TransformType cameraTransformType, final PoseStack mat) {
+        switch ( cameraTransformType ) {
             case FIRST_PERSON_LEFT_HAND:
                 firstPerson_lefthand.push(mat);
                 return this;
@@ -74,7 +65,6 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel
                 return this;
             default:
         }
-
         fixed.push(mat);
         return this;
     }
