@@ -232,7 +232,6 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
 
 
-	@SuppressWarnings( "deprecation" )
 	@Override
 	public int getItemStackLimit(ItemStack stack)
 	{

@@ -29,11 +29,6 @@ public class ServerConfiguration extends AbstractConfiguration
     public ForgeConfigSpec.IntValue netheriteChiselUses;
     public ForgeConfigSpec.IntValue goldChiselUses;
     public ForgeConfigSpec.IntValue wrenchUses;
-    public ForgeConfigSpec.IntValue stoneSawUses;
-    public ForgeConfigSpec.IntValue ironSawUses;
-    public ForgeConfigSpec.IntValue goldSawUses;
-    public ForgeConfigSpec.IntValue diamondSawUses;
-    public ForgeConfigSpec.IntValue netheriteSawUses;
     public ForgeConfigSpec.BooleanValue fullBlockCrafting;
     public ForgeConfigSpec.BooleanValue requireBagSpace;
     public ForgeConfigSpec.BooleanValue voidExcessBits;
@@ -67,11 +62,6 @@ public class ServerConfiguration extends AbstractConfiguration
         netheriteChiselUses = defineInteger(builder, "server.balancing.chisel-uses.netherite", 8957952);
         goldChiselUses = defineInteger(builder, "server.balancing.chisel-uses.gold", 1024);
         wrenchUses = defineInteger(builder, "server.balancing.wrench-uses", 1888);
-        stoneSawUses = defineInteger(builder, "server.balancing.saw-uses.stone", 512);
-        goldSawUses = defineInteger(builder, "server.balancing.saw-uses.gold", 500);
-        ironSawUses = defineInteger(builder, "server.balancing.saw-uses.iron", 2048);
-        diamondSawUses = defineInteger(builder, "server.balancing.saw-uses.diamond", 8192);
-        netheriteSawUses = defineInteger(builder, "server.balancing.saw-uses.netherite", 32768);
         fullBlockCrafting = defineBoolean(builder, "server.balancing.full-block-crafting.enabled", true);
         requireBagSpace = defineBoolean(builder, "server.balancing.bag-space.required", true);
         voidExcessBits = defineBoolean(builder, "server.balancing.bag-space.void-excess", true);

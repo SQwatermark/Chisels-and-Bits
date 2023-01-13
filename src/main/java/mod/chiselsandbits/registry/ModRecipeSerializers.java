@@ -19,7 +19,6 @@ public final class ModRecipeSerializers
     public static final RegistryObject<SimpleRecipeSerializer<StackableCrafting>> STACKABLE_CRAFTING = REGISTRAR.register("stackable_crafting", () -> new SimpleRecipeSerializer<>(StackableCrafting::new));
     public static final RegistryObject<SimpleRecipeSerializer<NegativeInversionCrafting>> NEGATIVE_INVERSION_CRAFTING = REGISTRAR.register("negative_inversion_crafting", () -> new SimpleRecipeSerializer<>(NegativeInversionCrafting::new));
     public static final RegistryObject<SimpleRecipeSerializer<MirrorTransferCrafting>> MIRROR_TRANSFER_CRAFTING = REGISTRAR.register("mirror_transfer_crafting", () -> new SimpleRecipeSerializer<>(MirrorTransferCrafting::new));
-    public static final RegistryObject<SimpleRecipeSerializer<BitSawCrafting>> BIT_SAW_CRAFTING = REGISTRAR.register("bit_saw_crafting", () -> new SimpleRecipeSerializer<>(BitSawCrafting::new));
 
     public static void onModConstruction() {
         REGISTRAR.register(FMLJavaModLoadingContext.get().getModEventBus());

@@ -68,7 +68,6 @@ public class ChiselsAndBits
         MinecraftForge.EVENT_BUS.register(new EventPlayerInteract());
 
         ModBlocks.onModConstruction();
-        ModContainerTypes.onModConstruction();
         ModItems.onModConstruction();
         ModRecipeSerializers.onModConstruction();
         ModBlockEntityTypes.onModConstruction();

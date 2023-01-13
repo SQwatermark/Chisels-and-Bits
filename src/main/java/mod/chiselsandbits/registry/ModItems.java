@@ -56,21 +56,6 @@ public final class ModItems
     public static final RegistryObject<ItemWrench>      ITEM_WRENCH =
       ITEM_REGISTRAR.register("wrench_wood", () -> new ItemWrench(new Item.Properties().tab(
         CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitSaw>      ITEM_BIT_SAW_STONE =
-      ITEM_REGISTRAR.register("bitsaw_stone", () -> new ItemBitSaw(Tiers.STONE, new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitSaw>      ITEM_BIT_SAW_GOLD =
-      ITEM_REGISTRAR.register("bitsaw_gold", () -> new ItemBitSaw(Tiers.GOLD, new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitSaw>      ITEM_BIT_SAW_IRON =
-      ITEM_REGISTRAR.register("bitsaw_iron", () -> new ItemBitSaw(Tiers.IRON, new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitSaw>      ITEM_BIT_SAW_DIAMOND =
-      ITEM_REGISTRAR.register("bitsaw_diamond", () -> new ItemBitSaw(Tiers.DIAMOND, new Item.Properties().tab(
-        CHISELS_AND_BITS)));
-    public static final RegistryObject<ItemBitSaw>      ITEM_BIT_SAW_NETHERITE =
-      ITEM_REGISTRAR.register("bitsaw_netherite", () -> new ItemBitSaw(Tiers.NETHERITE, new Item.Properties().tab(
-        CHISELS_AND_BITS).fireResistant()));
     public static final RegistryObject<ItemTapeMeasure> ITEM_TAPE_MEASURE =
       ITEM_REGISTRAR.register("tape_measure", () -> new ItemTapeMeasure(new Item.Properties().tab(
         CHISELS_AND_BITS)));

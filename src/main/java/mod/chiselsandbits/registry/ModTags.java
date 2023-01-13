@@ -2,16 +2,16 @@ package mod.chiselsandbits.registry;
 
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.Item;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class ModTags
 {
 
+    // TODO ?
     public static void init() {
         Items.init();
         Blocks.init();
@@ -21,7 +21,6 @@ public class ModTags
         private static void init () {}
 
         public static TagKey<Item> CHISEL = tag("chisel");
-        public static TagKey<Item> BIT_BAG = tag("bit_bag");
 
         private static TagKey<Item> tag(String name)
         {
