@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.model.data.EmptyModelData;
 
 import java.util.List;
 import java.util.Random;
@@ -162,10 +163,10 @@ public class RenderHelper
 
         for (final Direction direction : Direction.values())
         {
-            renderQuads(matrixStack, alpha, consumer, model.getQuads(null, direction, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
+            renderQuads(matrixStack, alpha, consumer, model.getQuads(null, direction, RENDER_RANDOM, EmptyModelData.INSTANCE), worldObj, blockPos, combinedLightmap, combinedOverlay);
         }
 
-        renderQuads(matrixStack, alpha, consumer, model.getQuads(null, null, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
+        renderQuads(matrixStack, alpha, consumer, model.getQuads(null, null, RENDER_RANDOM, EmptyModelData.INSTANCE), worldObj, blockPos, combinedLightmap, combinedOverlay);
     }
 
     public static void renderGhostModel(

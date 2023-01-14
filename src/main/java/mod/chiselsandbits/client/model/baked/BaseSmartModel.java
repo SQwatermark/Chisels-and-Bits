@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +99,7 @@ public abstract class BaseSmartModel implements BakedModel
     public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
     {
         final BakedModel model = handleBlockState( state, rand );
-        return model.getQuads( state, side, rand );
+        return model.getQuads( state, side, rand, EmptyModelData.INSTANCE );
     }
 
 	public BakedModel handleBlockState(

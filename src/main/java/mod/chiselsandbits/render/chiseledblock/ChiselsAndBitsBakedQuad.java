@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChiselsAndBitsBakedQuad extends BakedQuad
 {
 
-	public static final ConcurrentHashMap<VertexFormat, FormatInfo> formatData = new ConcurrentHashMap<VertexFormat, FormatInfo>();
+	public static final ConcurrentHashMap<VertexFormat, FormatInfo> formatData = new ConcurrentHashMap<>();
 
 	private final int[] processedVertexData;
 
@@ -70,7 +70,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 	@Override
 	public int[] getVertices()
 	{
-        return this.processedVertexData;
+        return this.processedVertexData == null ? this.vertices : this.processedVertexData;
 	}
 
 	private int[] buildProcessedVertexData() {

@@ -26,6 +26,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -111,17 +112,17 @@ public class ModelUtil implements ICacheClearable
 
 				if ( xf.getAxis() == Axis.Y )
 				{
-					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getStillTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getStillTexture());
 					mp[0].uvs = new float[] { Uf, Vf, 0, Vf, Uf, 0, 0, 0 };
 				}
 				else if ( xf.getAxis() == Axis.X )
 				{
-					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getFlowingTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getFlowingTexture());
 					mp[0].uvs = new float[] { U, 0, U, V, 0, 0, 0, V };
 				}
 				else
 				{
-					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getFlowingTexture());
+					mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getFlowingTexture());
 					mp[0].uvs = new float[] { U, 0, 0, 0, U, V, 0, V };
 				}
 
@@ -134,7 +135,7 @@ public class ModelUtil implements ICacheClearable
 			return cache.get( cacheVal );
 		}
 
-		final HashMap<Direction, ArrayList<ModelQuadLayerBuilder>> tmp = new HashMap<Direction, ArrayList<ModelQuadLayerBuilder>>();
+		final HashMap<Direction, ArrayList<ModelQuadLayerBuilder>> tmp = new HashMap<>();
 		final int color = BlockBitInfo.getColorFor( state, 0 );
 
 		for ( final Direction f : Direction.values() )
@@ -179,7 +180,7 @@ public class ModelUtil implements ICacheClearable
 		try
 		{
 			// try to get block model...
-			return model.getQuads( state, f, rand );
+			return model.getQuads(state, f, rand, EmptyModelData.INSTANCE);
 		}
 		catch ( final Throwable t )
 		{
@@ -189,7 +190,7 @@ public class ModelUtil implements ICacheClearable
 		try
 		{
 			// try to get item model?
-			return model.getQuads( null, f, rand );
+			return model.getQuads(null, f, rand, EmptyModelData.INSTANCE);
 		}
 		catch ( final Throwable t )
 		{
@@ -205,7 +206,7 @@ public class ModelUtil implements ICacheClearable
 			{
 				try
 				{
-					return secondModel.getQuads( null, f, rand );
+					return secondModel.getQuads( null, f, rand, EmptyModelData.INSTANCE );
 				}
 				catch ( final Throwable t )
 				{

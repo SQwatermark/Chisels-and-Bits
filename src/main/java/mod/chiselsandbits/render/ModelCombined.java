@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,10 +45,10 @@ public class ModelCombined extends BaseBakedBlockModel
 
 		for ( final BakedModel m : merged )
 		{
-			generic.addAll( m.getQuads( null, null, COMBINED_RANDOM_MODEL ) );
+			generic.addAll( m.getQuads( null, null, COMBINED_RANDOM_MODEL, EmptyModelData.INSTANCE ) );
 			for ( final Direction f : Direction.values() )
 			{
-				face[f.ordinal()].addAll( m.getQuads( null, f, COMBINED_RANDOM_MODEL ) );
+				face[f.ordinal()].addAll( m.getQuads( null, f, COMBINED_RANDOM_MODEL, EmptyModelData.INSTANCE ) );
 			}
 		}
 
