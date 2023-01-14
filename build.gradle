@@ -112,9 +112,9 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
 
-//    implementation fg.deobf('me.jellysquid.mods:wisteria-mc1.18.2:0.4.2-pre3')
-//    implementation fg.deobf("net.coderbot.iris:lycoris-mc1.18.2:1.5.0-pre1")
-//    implementation fg.deobf("rubidium:rubidium:0.5.4")
+    implementation fg.deobf('me.jellysquid.mods:wisteria-mc1.18.2:0.4.2-pre3')
+    implementation fg.deobf("net.coderbot.iris:lycoris-mc1.18.2:1.5.0-pre3")
+
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
