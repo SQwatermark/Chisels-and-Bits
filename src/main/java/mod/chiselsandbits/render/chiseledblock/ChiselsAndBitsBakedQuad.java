@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,7 +17,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 
 	public static final ConcurrentHashMap<VertexFormat, FormatInfo> formatData = new ConcurrentHashMap<>();
 
-	private final int[] processedVertexData;
+	private final int[] raw;
 
     private static int[] packData(
 			VertexFormat format,
@@ -60,52 +61,31 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 		}
 	}
 
-	private float[] getRawPart(
-			int v,
-			int i )
-	{
-		return formatData.get( DefaultVertexFormat.BLOCK ).unpack( vertices, v, i );
+	private float[] getRawPart(int v, int i) {
+		return formatData.get( DefaultVertexFormat.BLOCK ).unpack( raw, v, i );
 	}
-
-	@Override
-	public int[] getVertices()
-	{
-        return this.processedVertexData == null ? this.vertices : this.processedVertexData;
-	}
-
-	private int[] buildProcessedVertexData() {
-        int[] packed = new int[DefaultVertexFormat.BLOCK.getIntegerSize() * 4];
-
-        for ( int v = 0; v < 4; v++ )
-        {
-            for ( int e = 0; e < DefaultVertexFormat.BLOCK.getElements().size(); e++ )
-            {
-                LightUtil.pack( getRawPart( v, e ), packed, DefaultVertexFormat.BLOCK, v, e );
-            }
-        }
-
-        return packed;
-    }
 
 	public ChiselsAndBitsBakedQuad(
-			final float[][][] unpackedData,
+			final int[] raw,
+			final int[] packedData,
 			final int tint,
 			final Direction orientation,
 			final TextureAtlasSprite sprite)
 	{
-		super( packData( DefaultVertexFormat.BLOCK, unpackedData ), tint, orientation, sprite, true );
-        processedVertexData = buildProcessedVertexData();
+		super(packedData, tint, orientation, sprite, true );
+		this.raw = raw;
     }
 
 	public static class Colored extends ChiselsAndBitsBakedQuad
 	{
 		public Colored(
-				final float[][][] unpackedData,
+				final int[] raw,
+				final int[] packedData,
 				final int tint,
 				final Direction orientation,
 				final TextureAtlasSprite sprite)
 		{
-			super( unpackedData, tint, orientation, sprite );
+			super(raw, packedData, tint, orientation, sprite);
 		}
 	}
 
@@ -189,16 +169,28 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 		}
 
 		@Override
-		public BakedQuad create(
-				final TextureAtlasSprite sprite )
+		public BakedQuad create(final TextureAtlasSprite sprite)
 		{
-            final boolean isColored = false;
-            if (isColored)
+
+			int[] unLighted = packData(DefaultVertexFormat.BLOCK, unpackedData);
+
+			int[] packed = new int[DefaultVertexFormat.BLOCK.getIntegerSize() * 4];
+
+			for ( int v = 0; v < 4; v++ )
 			{
-				return new Colored( unpackedData, tint, orientation, sprite);
+				for ( int e = 0; e < DefaultVertexFormat.BLOCK.getElements().size(); e++ )
+				{
+					float[] rawPart = formatData.get(DefaultVertexFormat.BLOCK).unpack(unLighted, v, e);
+					LightUtil.pack(rawPart, packed, DefaultVertexFormat.BLOCK, v, e);
+				}
 			}
 
-			return new ChiselsAndBitsBakedQuad( unpackedData, tint, orientation, sprite);
+            final boolean isColored = false;
+            if (isColored) {
+				return new Colored(unLighted, packed, tint, orientation, sprite);
+			}
+
+			return new ChiselsAndBitsBakedQuad(unLighted, packed, tint, orientation, sprite);
 		}
 
 		@Override
