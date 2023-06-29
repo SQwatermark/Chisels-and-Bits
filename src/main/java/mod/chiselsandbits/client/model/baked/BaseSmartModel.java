@@ -88,13 +88,13 @@ public abstract class BaseSmartModel implements BakedModel
 
 	@Override
 	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-		return BakedModel.super.getQuads(state, side, rand, data, renderType);
+		final BakedModel model = handleBlockState( state, rand, data );
+		return model.getQuads( state, side, rand, data, renderType );
 	}
 
 	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-		final BakedModel model = handleBlockState( state, rand );
-		return model.getQuads( state, side, rand );
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+		return getQuads(state, side, rand, ModelData.EMPTY, null);
 	}
 
 	public BakedModel handleBlockState(

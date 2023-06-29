@@ -33,12 +33,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.util.*;
 
 public class ModelUtil implements ICacheClearable {
-    private final static HashMap<Pair<RenderType, Direction>, HashMap<Integer, String>> blockToTexture = new HashMap<>();
-    private static HashMap<Triple<Integer, RenderType, Direction>, ModelQuadLayer[]> cache = new HashMap<>();
-    private static HashMap<Pair<RenderType, Integer>, ChiseledBlockBakedModel> breakCache = new HashMap<>();
+    private static final HashMap<Pair<RenderType, Direction>, HashMap<Integer, String>> blockToTexture = new HashMap<>();
+    private static final HashMap<Triple<Integer, RenderType, Direction>, ModelQuadLayer[]> cache = new HashMap<>();
+    private static final HashMap<Pair<RenderType, Integer>, ChiseledBlockBakedModel> breakCache = new HashMap<>();
 
     @SuppressWarnings("unused")
-    private static ModelUtil instance = new ModelUtil();
+    private static final ModelUtil instance = new ModelUtil();
 
     public static RandomSource MODEL_RANDOM = RandomSource.create();
 
@@ -49,43 +49,39 @@ public class ModelUtil implements ICacheClearable {
         breakCache.clear();
     }
 
-    public static ModelQuadLayer[] getCachedFace(
-            final int stateID,
-            final Random weight,
-            final Direction face,
-            final RenderType layer) {
+    public static ModelQuadLayer[] getCachedFace(int stateID, RandomSource weight, Direction face, RenderType layer) {
         if (layer == null) {
             return null;
         }
 
         final Triple<Integer, RenderType, Direction> cacheVal = Triple.of(stateID, layer, face);
 
+        // 先从缓存中获取
         final ModelQuadLayer[] mpc = cache.get(cacheVal);
         if (mpc != null) {
             return mpc;
         }
 
-        final RenderType original = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
-        try {
-            ForgeHooksClient.setRenderType(layer);
-            return getInnerCachedFace(cacheVal, stateID, weight, face, layer);
-        } finally {
-            // restore previous layer.
-            ForgeHooksClient.setRenderType(original);
-        }
+        // TODO ?
+//        final RenderType original = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
+//        try {
+//            ForgeHooksClient.setRenderType(layer);
+//            return getInnerCachedFace(cacheVal, stateID, weight, face, layer);
+//        } finally {
+//            // restore previous layer.
+//            ForgeHooksClient.setRenderType(original);
+//        }
+        return getInnerCachedFace(cacheVal, stateID, weight, face, layer);
     }
 
-    private static ModelQuadLayer[] getInnerCachedFace(
-            final Triple<Integer, RenderType, Direction> cacheVal,
-            final int stateID,
-            final Random weight,
-            final Direction face,
-            final RenderType layer) {
-        final BlockState state = ModUtil.getStateById(stateID);
-        final BakedModel model = ModelUtil.solveModel(state, weight, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state), layer);
-        final int lv = ChiselsAndBits.getConfig().getClient().useGetLightValue.get() ? DeprecationHelper.getLightValue(state) : 0;
+    private static ModelQuadLayer[] getInnerCachedFace(Triple<Integer, RenderType, Direction> cacheVal,
+            int stateID, RandomSource weight, Direction face, RenderType layer) {
 
-        final Fluid fluid = BlockBitInfo.getFluidFromBlock(state.getBlock());
+        BlockState state = ModUtil.getStateById(stateID);
+        BakedModel model = ModelUtil.solveModel(state, weight, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state), layer);
+        int lv = ChiselsAndBits.getConfig().getClient().useGetLightValue.get() ? DeprecationHelper.getLightValue(state) : 0;
+
+        Fluid fluid = BlockBitInfo.getFluidFromBlock(state.getBlock());
         if (fluid != null) {
             var clientFluid = IClientFluidTypeExtensions.of(fluid);
             for (final Direction xf : Direction.values()) {
@@ -201,7 +197,7 @@ public class ModelUtil implements ICacheClearable {
                 ArrayList<ModelQuadLayerBuilder> l = tmp.get(face);
 
                 ModelQuadLayerBuilder b = null;
-                for (final ModelQuadLayerBuilder lx : l) {
+                for (ModelQuadLayerBuilder lx : l) {
                     if (lx.cache.sprite == sprite) {
                         b = lx;
                         break;
@@ -231,13 +227,13 @@ public class ModelUtil implements ICacheClearable {
                     l.add(b);
                 }
 
-                q.pipe(b.uvr);
+                q.pipe(b.uvReader);
 
-                if (ChiselsAndBits.getConfig().getClient().enableFaceLightmapExtraction.get()) {
-                    //TODO: Check if this works.
-                    b.lv.setVertexFormat(DefaultVertexFormat.BLOCK);
-                    q.pipe(b.lv);
-                }
+//                if (ChiselsAndBits.getConfig().getClient().enableFaceLightmapExtraction.get()) {
+//                    //TODO: Check if this works.
+//                    b.lightMapReader.setVertexFormat(DefaultVertexFormat.BLOCK);
+//                    q.pipe(b.lightMapReader);
+//                }
             } catch (final Exception ignored) {
 
             }

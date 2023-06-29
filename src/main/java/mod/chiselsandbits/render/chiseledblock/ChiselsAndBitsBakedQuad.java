@@ -169,7 +169,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad
 		}
 
 		@Override
-		public BakedQuad create(final TextureAtlasSprite sprite)
+		public BakedQuad create(TextureAtlasSprite sprite)
 		{
 
 			int[] unLighted = packData(DefaultVertexFormat.BLOCK, unpackedData);

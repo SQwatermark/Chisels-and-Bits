@@ -32,7 +32,7 @@ public class BitItemBaked extends BaseBakedBlockModel {
 
 	final ArrayList<BakedQuad> generic = new ArrayList<>(6);
 
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.create();
 
 	public BitItemBaked(int BlockRef) {
 		final FaceBakery faceBakery = new FaceBakery();
@@ -135,15 +135,15 @@ public class BitItemBaked extends BaseBakedBlockModel {
 
 	@Override
 	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-		return super.getQuads(state, side, rand, data, renderType);
-	}
-
-	@Override
-	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource pRandom) {
 		if (side != null) {
 			return Collections.emptyList();
 		}
 		return generic;
+	}
+
+	@Override
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+		return getQuads(state, side, rand, ModelData.EMPTY, null);
 	}
 
 	@Override

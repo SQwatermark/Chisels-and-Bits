@@ -23,12 +23,12 @@ public class NullBakedModel implements BakedModel {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-        return BakedModel.super.getQuads(state, side, rand, data, renderType);
+        return Collections.emptyList();
     }
 
     @Override
-    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState pState, @Nullable Direction pDirection, @NotNull RandomSource pRandom) {
-        return Collections.emptyList();
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+        return getQuads(state, side, rand, ModelData.EMPTY, null);
     }
 
     @Override

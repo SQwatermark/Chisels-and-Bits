@@ -34,31 +34,29 @@ import java.util.*;
 /**
  * 雕刻方块的模型
  */
-public class ChiseledBlockBakedModel extends BaseBakedBlockModel
-{
-    private static final Random RANDOM = new Random();
+public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
+    private static final RandomSource RANDOM = RandomSource.create();
 
     public static final float PIXELS_PER_BLOCK = 16.0f;
-    private final static int[][]     faceVertMap      = new int[6][4];
-    private final static float[][][] quadMapping      = new float[6][4][6];
+    private final static int[][] faceVertMap = new int[6][4];
+    private final static float[][][] quadMapping = new float[6][4][6];
 
-    private static final Direction[] X_Faces = new Direction[] {Direction.EAST, Direction.WEST};
-    private static final Direction[] Y_Faces = new Direction[] {Direction.UP, Direction.DOWN};
-    private static final Direction[] Z_Faces = new Direction[] {Direction.SOUTH, Direction.NORTH};
+    private static final Direction[] X_Faces = new Direction[]{Direction.EAST, Direction.WEST};
+    private static final Direction[] Y_Faces = new Direction[]{Direction.UP, Direction.DOWN};
+    private static final Direction[] Z_Faces = new Direction[]{Direction.SOUTH, Direction.NORTH};
+
     // Analyze FaceBakery / makeBakedQuad and prepare static data for face gen.
-    static
-    {
+    static {
         final Vector3f to = new Vector3f(0, 0, 0);
         final Vector3f from = new Vector3f(16, 16, 16);
 
-        for (final Direction myFace : Direction.values())
-        {
+        for (final Direction myFace : Direction.values()) {
             final FaceBakery faceBakery = new FaceBakery();
 
             final BlockElementRotation bpr = null;
             final BlockModelRotation mr = BlockModelRotation.X0_Y0;
 
-            final float[] defUVs = new float[] {0, 0, 1, 1};
+            final float[] defUVs = new float[]{0, 0, 1, 1};
             final BlockFaceUV uv = new BlockFaceUV(defUVs, 0);
             final BlockElementFace bpf = new BlockElementFace(myFace, 0, "", uv);
 
@@ -84,33 +82,24 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
             }
 
             final int p = vertData.length / 4;
-            for (int vertNum = 0; vertNum < 4; vertNum++)
-            {
+            for (int vertNum = 0; vertNum < 4; vertNum++) {
                 final float A = Float.intBitsToFloat(vertData[vertNum * p + a]);
                 final float B = Float.intBitsToFloat(vertData[vertNum * p + b]);
 
-                for (int o = 0; o < 3; o++)
-                {
+                for (int o = 0; o < 3; o++) {
                     final float v = Float.intBitsToFloat(vertData[vertNum * p + o]);
                     final float scaler = 1.0f / 16.0f; // pos start in the 0-16
                     quadMapping[myFace.ordinal()][vertNum][o * 2] = v * scaler;
                     quadMapping[myFace.ordinal()][vertNum][o * 2 + 1] = (1.0f - v) * scaler;
                 }
 
-                if (ModelUtil.isZero(A) && ModelUtil.isZero(B))
-                {
+                if (ModelUtil.isZero(A) && ModelUtil.isZero(B)) {
                     faceVertMap[myFace.get3DDataValue()][vertNum] = 0;
-                }
-                else if (ModelUtil.isZero(A) && ModelUtil.isOne(B))
-                {
+                } else if (ModelUtil.isZero(A) && ModelUtil.isOne(B)) {
                     faceVertMap[myFace.get3DDataValue()][vertNum] = 3;
-                }
-                else if (ModelUtil.isOne(A) && ModelUtil.isZero(B))
-                {
+                } else if (ModelUtil.isOne(A) && ModelUtil.isZero(B)) {
                     faceVertMap[myFace.get3DDataValue()][vertNum] = 1;
-                }
-                else
-                {
+                } else {
                     faceVertMap[myFace.get3DDataValue()][vertNum] = 2;
                 }
             }
@@ -161,22 +150,19 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
     private ChiseledBlockBakedModel() {
     }
 
-    public ChiseledBlockBakedModel(final int blockReference, final ChiselRenderType layer, final VoxelBlob data, final VertexFormat format) {
+    public ChiseledBlockBakedModel(int stateId, ChiselRenderType layer, VoxelBlob data, VertexFormat format) {
         myLayer = layer;
-        final BlockState state = ModUtil.getStateById(blockReference);
+        BlockState state = ModUtil.getStateById(stateId);
 
         BakedModel originalModel = null;
 
-        if (state != null)
-        {
+        if (state != null) {
             originalModel = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state);
         }
 
-        if (originalModel != null && data != null)
-        {
-            if (layer.filter(data))
-            {
-                final ChiseledModelBuilder builder = new ChiseledModelBuilder();
+        if (originalModel != null && data != null) {
+            if (layer.filter(data)) {
+                ChiseledModelBuilder builder = new ChiseledModelBuilder();
                 generateFaces(builder, data, RANDOM);
 
                 // convert from builder to final storage.
@@ -195,12 +181,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         return ModelUtil.getBreakingModel(layer, blockStateID, random);
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         boolean trulyEmpty = getList(null).isEmpty();
 
-        for (final Direction e : Direction.values())
-        {
+        for (final Direction e : Direction.values()) {
             trulyEmpty = trulyEmpty && getList(e).isEmpty();
         }
 
@@ -215,7 +199,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         return new ChiselsAndBitsBakedQuad.Builder(format);
     }
 
-    private void generateFaces(final ChiseledModelBuilder builder, final VoxelBlob blob, final Random weight) {
+    private void generateFaces(final ChiseledModelBuilder builder, final VoxelBlob blob, final RandomSource weight) {
 
         final ArrayList<ArrayList<FaceRegion>> rset = new ArrayList<>();
         final VisibleFace visFace = new VisibleFace();
@@ -234,12 +218,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         final IFaceBuilder darkBuilder = getBuilder(DefaultVertexFormat.BLOCK);
         final IFaceBuilder litBuilder = darkBuilder;
 
-        for (final ArrayList<FaceRegion> src : rset)
-        {
+        for (final ArrayList<FaceRegion> src : rset) {
             mergeFaces(src);
 
-            for (final FaceRegion region : src)
-            {
+            for (final FaceRegion region : src) {
                 final Direction myFace = region.face;
 
                 // keep integers up until the last moment... ( note I tested
@@ -249,10 +231,8 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                 offsetVec(from, region.getMinX(), region.getMinY(), region.getMinZ(), myFace, -1);
                 final ModelQuadLayer[] mpc = ModelUtil.getCachedFace(region.blockStateID, weight, myFace, myLayer.layer);
 
-                if (mpc != null)
-                {
-                    for (final ModelQuadLayer pc : mpc)
-                    {
+                if (mpc != null) {
+                    for (final ModelQuadLayer pc : mpc) {
                         final IFaceBuilder faceBuilder = pc.light > 0 ? litBuilder : darkBuilder;
                         VertexFormat builderFormat = faceBuilder.getFormat();
 
@@ -263,13 +243,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                         getFaceUvs(uvs, myFace, from, to, pc.uvs);
 
                         // build it.
-                        for (int vertNum = 0; vertNum < 4; vertNum++)
-                        {
-                            for (int elementIndex = 0; elementIndex < builderFormat.getElements().size(); elementIndex++)
-                            {
+                        for (int vertNum = 0; vertNum < 4; vertNum++) {
+                            for (int elementIndex = 0; elementIndex < builderFormat.getElements().size(); elementIndex++) {
                                 final VertexFormatElement element = builderFormat.getElements().get(elementIndex);
-                                switch (element.getUsage())
-                                {
+                                switch (element.getUsage()) {
                                     case POSITION:
                                         getVertexPos(pos, myFace, vertNum, to, from);
                                         faceBuilder.put(elementIndex, pos[0], pos[1], pos[2]);
@@ -288,13 +265,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                                         break;
 
                                     case UV:
-                                        if (element.getIndex() == 2)
-                                        {
+                                        if (element.getIndex() == 2) {
                                             final float v = maxLightmap * Math.max(0, Math.min(15, pc.light));
                                             faceBuilder.put(elementIndex, v, v);
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             final float u = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 0];
                                             final float v = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 1];
                                             faceBuilder.put(elementIndex, pc.sprite.getU(u), pc.sprite.getV(v));
@@ -308,12 +282,9 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
                             }
                         }
 
-                        if (region.isEdge)
-                        {
+                        if (region.isEdge) {
                             builder.getList(myFace).add(faceBuilder.create(pc.sprite));
-                        }
-                        else
-                        {
+                        } else {
                             builder.getList(null).add(faceBuilder.create(pc.sprite));
                         }
                     }
@@ -489,11 +460,11 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
             final Vec3i off = myFace.getNormal();
 
             return new FaceRegion(myFace,
-              x * 2 + 1 + off.getX(),
-              y * 2 + 1 + off.getY(),
-              z * 2 + 1 + off.getZ(),
-              visFace.state,
-              visFace.isEdge);
+                    x * 2 + 1 + off.getX(),
+                    y * 2 + 1 + off.getY(),
+                    z * 2 + 1 + off.getZ(),
+                    visFace.state,
+                    visFace.isEdge);
         }
 
         return null;
@@ -514,8 +485,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         float from_u = 0;
         float from_v = 0;
 
-        switch (face)
-        {
+        switch (face) {
             case UP:
                 to_u = to[0] / 16.0f;
                 to_v = to[2] / 16.0f;
@@ -628,17 +598,16 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-        return super.getQuads(state, side, rand, data, renderType);
+        return getList(side);
     }
 
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState pState, @Nullable Direction pDirection, RandomSource pRandom) {
-        return getList(pDirection);
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+        return getQuads(state, side, rand, ModelData.EMPTY, null);
     }
 
     @Override
-    public boolean usesBlockLight()
-    {
+    public boolean usesBlockLight() {
         return true;
     }
 

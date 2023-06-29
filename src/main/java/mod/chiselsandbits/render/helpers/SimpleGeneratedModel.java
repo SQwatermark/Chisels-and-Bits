@@ -5,14 +5,17 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Vector3f;
 import mod.chiselsandbits.core.ChiselsAndBits;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.jetbrains.annotations.NotNull;
@@ -146,10 +149,7 @@ public class SimpleGeneratedModel implements BakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(
-            final BlockState state,
-            final Direction side,
-            final Random rand) {
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
         if (side == null) {
             return Collections.emptyList();
         }
@@ -157,15 +157,9 @@ public class SimpleGeneratedModel implements BakedModel {
         return face[side.ordinal()];
     }
 
-    @NotNull
     @Override
-    public List<BakedQuad> getQuads(
-            @Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand, @NotNull final IModelData extraData) {
-        if (side == null) {
-            return Collections.emptyList();
-        }
-
-        return face[side.ordinal()];
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+        return getQuads(state, side, rand, ModelData.EMPTY, null);
     }
 
     @Override

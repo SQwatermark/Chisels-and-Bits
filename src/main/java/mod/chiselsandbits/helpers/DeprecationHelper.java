@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.DistExecutor;
 
-@SuppressWarnings( "deprecation" )
 public class DeprecationHelper
 {
 

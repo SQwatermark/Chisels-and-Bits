@@ -42,17 +42,17 @@ public abstract class BaseBakedItemModel extends BaseBakedPerspectiveModel
 
 	@Override
 	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-		return super.getQuads(state, side, rand, data, renderType);
-	}
-
-	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState pState, @Nullable Direction side, RandomSource pRandom) {
 		if ( side != null )
 		{
 			return Collections.emptyList();
 		}
 
 		return list;
+	}
+
+	@Override
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+		return getQuads(state, side, rand, ModelData.EMPTY, null);
 	}
 
 	@Override
