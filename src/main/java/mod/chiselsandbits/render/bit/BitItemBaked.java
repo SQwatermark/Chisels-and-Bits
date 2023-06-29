@@ -1,6 +1,5 @@
 package mod.chiselsandbits.render.bit;
 
-import com.mojang.math.Vector3f;
 import mod.chiselsandbits.client.model.baked.BaseBakedBlockModel;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
@@ -12,8 +11,12 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,18 +133,20 @@ public class BitItemBaked extends BaseBakedBlockModel {
 		return afloat;
 	}
 
-    @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
-    {
-        if ( side != null )
-        {
-            return Collections.emptyList();
-        }
+	@Override
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
+		return super.getQuads(state, side, rand, data, renderType);
+	}
 
-        return generic;
-    }
+	@Override
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource pRandom) {
+		if (side != null) {
+			return Collections.emptyList();
+		}
+		return generic;
+	}
 
-    @Override
+	@Override
     public boolean usesBlockLight()
     {
         return true;

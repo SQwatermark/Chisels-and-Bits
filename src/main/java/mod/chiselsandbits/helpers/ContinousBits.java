@@ -7,8 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class ContinousBits implements IContinuousInventory
 						}
 					}
 				}
-				else if ((handler = which.getCapability( CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )).isPresent() )
+				else if ((handler = which.getCapability( ForgeCapabilities.ITEM_HANDLER )).isPresent() )
 				{
 					IItemHandler internal = handler.orElseThrow(() -> new IllegalStateException("Handler is supposed to be present!"));
 					for ( int x = 0; x < internal.getSlots(); x++ )

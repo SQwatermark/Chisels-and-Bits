@@ -8,7 +8,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockColorChisled implements BlockColor
+public class BlockColorChiseled implements BlockColor
 {
 
 	public static final int TINT_MASK = 0xff;

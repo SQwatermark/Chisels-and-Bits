@@ -6,18 +6,13 @@ import mod.chiselsandbits.items.ItemChiseledBit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
-
 @Mod.EventBusSubscriber(modid = ChiselsAndBits.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class EntityItemPickupEventHandler
-{
-
+public class EntityItemPickupEventHandler {
     @SubscribeEvent
     public static void pickupItems(EntityItemPickupEvent event) {
 
@@ -27,7 +22,7 @@ public class EntityItemPickupEventHandler
         if (entityItem != null)
         {
             final ItemStack is = entityItem.getItem();
-            final Player player = event.getPlayer();
+            final Player player = event.getEntity();
             if (is.getItem() instanceof ItemChiseledBit)
             {
                 final int originalSize = ModUtil.getStackSize( is );

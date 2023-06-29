@@ -2,7 +2,6 @@ package mod.chiselsandbits.config;
 
 import mod.chiselsandbits.helpers.LocalStrings;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.List;
@@ -52,7 +51,7 @@ public class CommonConfiguration extends AbstractConfiguration
                     }
                 }
 
-                tooltip.add( new TextComponent(a));
+                tooltip.add( Component.literal(a));
             }
         }
     }

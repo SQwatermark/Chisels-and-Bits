@@ -1,7 +1,5 @@
 package mod.chiselsandbits.crafting;
 
-import java.util.Random;
-
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
 import mod.chiselsandbits.api.IBitAccess;
 import mod.chiselsandbits.api.IBitBrush;
@@ -12,286 +10,248 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemChisel;
 import mod.chiselsandbits.registry.ModRecipeSerializers;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class ChiselBlockCrafting extends CustomRecipe
-{
+public class ChiselBlockCrafting extends CustomRecipe {
 
-	public ChiselBlockCrafting(
-			ResourceLocation name )
-	{
-		super( name );
-	}
+    public ChiselBlockCrafting(ResourceLocation name) {
+        super(name, CraftingBookCategory.MISC);
+    }
 
-	static private class ChiselBlockInfo
-	{
-		public ItemStack chisel = ModUtil.getEmptyStack();
-		public int chisel_slot = -1;
+    static private class ChiselBlockInfo {
+        public ItemStack chisel = ModUtil.getEmptyStack();
+        public int chisel_slot = -1;
 
-		public ItemStack bag = ModUtil.getEmptyStack();
-		public int bag_slot = -1;
+        public ItemStack bag = ModUtil.getEmptyStack();
+        public int bag_slot = -1;
 
-		public ItemStack block = ModUtil.getEmptyStack();
-		public int block_slot = -1;
+        public ItemStack block = ModUtil.getEmptyStack();
+        public int block_slot = -1;
 
-		public boolean isValid;
-		public boolean modified = false;
+        public boolean isValid;
+        public boolean modified = false;
 
-		private static class Chiseler implements IBitVisitor
-		{
-			private final ItemStack chisel;
-			private final Random r = new Random();
-			final IBitBrush airBrush;
-			public boolean isAir = true;
-			public boolean modified = false;
+        private static class Chiseler implements IBitVisitor {
+            private final ItemStack chisel;
+            private final RandomSource r = RandomSource.create();
+            final IBitBrush airBrush;
+            public boolean isAir = true;
+            public boolean modified = false;
 
-			public Chiseler(
-					final ItemStack chisel) throws InvalidBitItem
-			{
-				airBrush = ChiselsAndBits.getApi().createBrushFromState( null );
-				this.chisel = chisel;
-				r.setSeed( 0 ); // ensure that the results are always the same,
-								// crafting needs to be 'regular'
-			}
+            public Chiseler(
+                    final ItemStack chisel) throws InvalidBitItem {
+                airBrush = ChiselsAndBits.getApi().createBrushFromState(null);
+                this.chisel = chisel;
+                r.setSeed(0); // ensure that the results are always the same,
+                // crafting needs to be 'regular'
+            }
 
-			@Override
-			public IBitBrush visitBit(
-					final int x,
-					final int y,
-					final int z,
-					final IBitBrush currentValue )
-			{
-				if ( currentValue.isAir() )
-				{
-					return currentValue;
-				}
-				
-				boolean damageTools = ChiselsAndBits.getConfig().getServer().damageTools.get();
-				
-				if ( chisel.getDamageValue() < chisel.getMaxDamage() || ! damageTools )
-				{
-					if ( damageTools )
-					{
-						ModUtil.damageItem( chisel, r );
-					}
-					
-					final ItemStack is = currentValue.getItemStack( 1 );
-				}
+            @Override
+            public IBitBrush visitBit(
+                    final int x,
+                    final int y,
+                    final int z,
+                    final IBitBrush currentValue) {
+                if (currentValue.isAir()) {
+                    return currentValue;
+                }
 
-				isAir = false;
-				return currentValue;
-			};
-		};
+                boolean damageTools = ChiselsAndBits.getConfig().getServer().damageTools.get();
 
-		public void doLogic()
-		{
-			bag = ModUtil.copy( bag );
-			block = ModUtil.copy( block );
-			chisel = ModUtil.copy( chisel );
+                if (chisel.getDamageValue() < chisel.getMaxDamage() || !damageTools) {
+                    if (damageTools) {
+                        ModUtil.damageItem(chisel, r);
+                    }
 
-			try
-			{
-				final IBitAccess ba = ChiselsAndBits.getApi().createBitItem( block );
-				final Chiseler c = new Chiseler( chisel);
+                    final ItemStack is = currentValue.getItemStack(1);
+                }
 
-				if ( ba == null )
-				{
-					return;
-				}
+                isAir = false;
+                return currentValue;
+            }
 
-				ba.visitBits( c );
+            ;
+        }
 
-				modified = c.modified;
+        ;
 
-				if ( ! c.isAir )
-				{
-					block = ba.getBitsAsItem( Direction.NORTH, ItemType.CHISLED_BLOCK, false );
-				}
-				else
-				{
-					block = ModUtil.getEmptyStack();
-				}
-			}
-			catch ( final InvalidBitItem e )
-			{
+        public void doLogic() {
+            bag = ModUtil.copy(bag);
+            block = ModUtil.copy(block);
+            chisel = ModUtil.copy(chisel);
 
-			}
-		}
-	};
+            try {
+                final IBitAccess ba = ChiselsAndBits.getApi().createBitItem(block);
+                final Chiseler c = new Chiseler(chisel);
 
-	private ChiselBlockInfo getInfo(
-			final CraftingContainer inv )
-	{
-		final ChiselBlockInfo i = new ChiselBlockInfo();
-		boolean noDuplicates = true;
-		boolean noStrangeitems = true;
+                if (ba == null) {
+                    return;
+                }
 
-		for ( int x = 0; x < inv.getContainerSize(); ++x )
-		{
-			final ItemStack is = inv.getItem( x );
+                ba.visitBits(c);
 
-			if ( ModUtil.isEmpty( is ) )
-			{
-				continue;
-			}
+                modified = c.modified;
 
-			if ( is.getItem() instanceof ItemChisel )
-			{
-				if ( i.chisel_slot != -1 )
-				{
-					noDuplicates = false;
-				}
+                if (!c.isAir) {
+                    block = ba.getBitsAsItem(Direction.NORTH, ItemType.CHISLED_BLOCK, false);
+                } else {
+                    block = ModUtil.getEmptyStack();
+                }
+            } catch (final InvalidBitItem e) {
 
-				i.chisel = is;
-				i.chisel_slot = x;
-				continue;
-			}
+            }
+        }
+    }
 
-			if ( is.getItem() instanceof BlockItem)
-			{
-				if ( i.block_slot != -1 )
-				{
-					noDuplicates = false;
-				}
+    ;
 
-				final BlockState actingState = ModUtil.getStateFromItem( is );
-				if ( actingState.getBlock() != Blocks.AIR )
-				{
-					try
-					{
-						final IBitBrush state = ChiselsAndBits.getApi().createBrushFromState( actingState );
-						final IBitAccess item = ChiselsAndBits.getApi().createBitItem( ModUtil.getEmptyStack() );
-						assert item != null;
+    private ChiselBlockInfo getInfo(
+            final CraftingContainer inv) {
+        final ChiselBlockInfo i = new ChiselBlockInfo();
+        boolean noDuplicates = true;
+        boolean noStrangeitems = true;
 
-						item.visitBits( new IBitVisitor() {
+        for (int x = 0; x < inv.getContainerSize(); ++x) {
+            final ItemStack is = inv.getItem(x);
 
-							@Override
-							public IBitBrush visitBit(
-									final int x,
-									final int y,
-									final int z,
-									final IBitBrush currentValue )
-							{
-								return state;
-							}
-						} );
+            if (ModUtil.isEmpty(is)) {
+                continue;
+            }
 
-						i.block = item.getBitsAsItem( Direction.EAST, ItemType.CHISLED_BLOCK, false );
-						if ( i.block != null )
-						{
-							ModUtil.setStackSize( i.block, ModUtil.getStackSize( is ) );
-							i.block_slot = x;
-							continue;
-						}
-					}
-					catch ( final InvalidBitItem err )
-					{
-						// not supported.
-					}
-				}
-			}
+            if (is.getItem() instanceof ItemChisel) {
+                if (i.chisel_slot != -1) {
+                    noDuplicates = false;
+                }
 
-			if ( is.getItem() instanceof ItemBlockChiseled )
-			{
-				if ( i.block_slot != -1 )
-				{
-					noDuplicates = false;
-				}
+                i.chisel = is;
+                i.chisel_slot = x;
+                continue;
+            }
 
-				i.block = is;
-				i.block_slot = x;
-				continue;
-			}
+            if (is.getItem() instanceof BlockItem) {
+                if (i.block_slot != -1) {
+                    noDuplicates = false;
+                }
 
-			noStrangeitems = false;
-		}
+                final BlockState actingState = ModUtil.getStateFromItem(is);
+                if (actingState.getBlock() != Blocks.AIR) {
+                    try {
+                        final IBitBrush state = ChiselsAndBits.getApi().createBrushFromState(actingState);
+                        final IBitAccess item = ChiselsAndBits.getApi().createBitItem(ModUtil.getEmptyStack());
+                        assert item != null;
 
-		i.isValid = i.chisel_slot != -1 && i.bag_slot != -1 && i.block_slot != -1 && noDuplicates && noStrangeitems;
+                        item.visitBits(new IBitVisitor() {
 
-		return i;
-	}
+                            @Override
+                            public IBitBrush visitBit(
+                                    final int x,
+                                    final int y,
+                                    final int z,
+                                    final IBitBrush currentValue) {
+                                return state;
+                            }
+                        });
 
-	@Override
-	public boolean matches(
-			final CraftingContainer inv,
-			final Level worldIn )
-	{
-		return getInfo( inv ).isValid;
-	}
+                        i.block = item.getBitsAsItem(Direction.EAST, ItemType.CHISLED_BLOCK, false);
+                        if (i.block != null) {
+                            ModUtil.setStackSize(i.block, ModUtil.getStackSize(is));
+                            i.block_slot = x;
+                            continue;
+                        }
+                    } catch (final InvalidBitItem err) {
+                        // not supported.
+                    }
+                }
+            }
 
-	@Override
-	public ItemStack assemble(
-			final CraftingContainer inv )
-	{
-		final ChiselBlockInfo cbc = getInfo( inv );
-		cbc.doLogic();
+            if (is.getItem() instanceof ItemBlockChiseled) {
+                if (i.block_slot != -1) {
+                    noDuplicates = false;
+                }
 
-		if ( cbc.isValid && cbc.modified )
-		{
-			return cbc.bag;
-		}
+                i.block = is;
+                i.block_slot = x;
+                continue;
+            }
 
-		return ModUtil.getEmptyStack();
-	}
+            noStrangeitems = false;
+        }
 
-	@Override
-	public boolean canCraftInDimensions(
-			final int width,
-			final int height )
-	{
-		return width * height > 3;
-	}
+        i.isValid = i.chisel_slot != -1 && i.bag_slot != -1 && i.block_slot != -1 && noDuplicates && noStrangeitems;
 
-	@Override
-	public ItemStack getResultItem()
-	{
-		return ModUtil.getEmptyStack();
-	}
-
-	@Override
-	public NonNullList<ItemStack> getRemainingItems(
-			final CraftingContainer inv )
-	{
-		final NonNullList<ItemStack> list = NonNullList.create();
-
-		final ChiselBlockInfo cbc = getInfo( inv );
-		cbc.doLogic();
-
-		boolean damageTools = ChiselsAndBits.getConfig().getServer().damageTools.get();
-		for ( int x = 0; x < inv.getContainerSize(); ++x )
-		{
-			if ( cbc.isValid && x == cbc.chisel_slot && !ModUtil.isEmpty( cbc.chisel ) && ( !damageTools || cbc.chisel.getDamageValue() < cbc.chisel.getMaxDamage()) )
-			{
-				list.add( cbc.chisel );
-			}
-			else if ( cbc.isValid && x == cbc.block_slot && ! ModUtil.isEmpty( cbc.block ) )
-			{
-				ItemStack block = ModUtil.copy(cbc.block);
-				ModUtil.setStackSize(block, 1);
-				list.add(block);
-			}
-			else
-			{
-				list.add( ModUtil.getEmptyStack() );
-			}
-		}
-
-		return list;
-	}
+        return i;
+    }
 
     @Override
-    public RecipeSerializer<?> getSerializer()
-    {
+    public boolean matches(
+            final CraftingContainer inv,
+            final Level worldIn) {
+        return getInfo(inv).isValid;
+    }
+
+    @Override
+    public ItemStack assemble(CraftingContainer inv, RegistryAccess p_267165_) {
+        final ChiselBlockInfo cbc = getInfo(inv);
+        cbc.doLogic();
+
+        if (cbc.isValid && cbc.modified) {
+            return cbc.bag;
+        }
+
+        return ModUtil.getEmptyStack();
+    }
+
+    @Override
+    public boolean canCraftInDimensions(
+            final int width,
+            final int height) {
+        return width * height > 3;
+    }
+
+    @Override
+    public ItemStack getResultItem(RegistryAccess p_267025_) {
+        return ModUtil.getEmptyStack();
+    }
+
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(
+            final CraftingContainer inv) {
+        final NonNullList<ItemStack> list = NonNullList.create();
+
+        final ChiselBlockInfo cbc = getInfo(inv);
+        cbc.doLogic();
+
+        boolean damageTools = ChiselsAndBits.getConfig().getServer().damageTools.get();
+        for (int x = 0; x < inv.getContainerSize(); ++x) {
+            if (cbc.isValid && x == cbc.chisel_slot && !ModUtil.isEmpty(cbc.chisel) && (!damageTools || cbc.chisel.getDamageValue() < cbc.chisel.getMaxDamage())) {
+                list.add(cbc.chisel);
+            } else if (cbc.isValid && x == cbc.block_slot && !ModUtil.isEmpty(cbc.block)) {
+                ItemStack block = ModUtil.copy(cbc.block);
+                ModUtil.setStackSize(block, 1);
+                list.add(block);
+            } else {
+                list.add(ModUtil.getEmptyStack());
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public RecipeSerializer<?> getSerializer() {
         return ModRecipeSerializers.CHISEL_BLOCK_CRAFTING.get();
     }
 }

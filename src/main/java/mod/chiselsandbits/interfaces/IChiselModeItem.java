@@ -1,6 +1,5 @@
 package mod.chiselsandbits.interfaces;
 
-public interface IChiselModeItem
-{
+public interface IChiselModeItem {
 
 }

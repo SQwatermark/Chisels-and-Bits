@@ -20,72 +20,63 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.Level;
 
-public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable
-{
-	static private final HashMap<Integer, BakedModel> modelCache      = new HashMap<Integer, BakedModel>();
-	static private final HashMap<Integer, BakedModel> largeModelCache = new HashMap<Integer, BakedModel>();
+public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable {
+    static private final HashMap<Integer, BakedModel> modelCache = new HashMap<>();
+    static private final HashMap<Integer, BakedModel> largeModelCache = new HashMap<>();
 
     static private final NonNullList<ItemStack> alternativeStacks = NonNullList.create();
 
-	private BakedModel getCachedModel(int stateID, boolean large )
-	{
-	    if (stateID == 0) {
-	        //We are running an empty bit, for display purposes.
+    private BakedModel getCachedModel(int stateID, boolean large) {
+        if (stateID == 0) {
+            //We are running an empty bit, for display purposes.
             //Lets loop:
             if (alternativeStacks.isEmpty())
                 ModItems.ITEM_BLOCK_BIT.get().fillItemCategory(Objects.requireNonNull(ModItems.ITEM_BLOCK_BIT.get().getItemCategory()), alternativeStacks);
 
-            final int alternativeIndex = (int)((Math.floor(TickHandler.getClientTicks() / 20d)) % alternativeStacks.size());
+            final int alternativeIndex = (int) ((Math.floor(TickHandler.getClientTicks() / 20d)) % alternativeStacks.size());
 
-            stateID = ItemChiseledBit.getStackState( alternativeStacks.get(alternativeIndex));
+            stateID = ItemChiseledBit.getStackState(alternativeStacks.get(alternativeIndex));
         }
 
-		final HashMap<Integer, BakedModel> target = large ? largeModelCache : modelCache;
-		BakedModel out = target.get( stateID );
+        final HashMap<Integer, BakedModel> target = large ? largeModelCache : modelCache;
+        BakedModel out = target.get(stateID);
 
-		if ( out == null )
-		{
-			if ( large )
-			{
-				final VoxelBlob blob = new VoxelBlob();
-				blob.fill( stateID );
-				final BakedModel a = new ChiseledBlockBakedModel( stateID, ChiselRenderType.SOLID, blob,  DefaultVertexFormat.BLOCK );
-				final BakedModel b = new ChiseledBlockBakedModel( stateID, ChiselRenderType.SOLID_FLUID, blob,  DefaultVertexFormat.BLOCK );
-				final BakedModel c = new ChiseledBlockBakedModel( stateID, ChiselRenderType.CUTOUT_MIPPED, blob, DefaultVertexFormat.BLOCK );
-				final BakedModel d = new ChiseledBlockBakedModel( stateID, ChiselRenderType.CUTOUT, blob,  DefaultVertexFormat.BLOCK );
-				final BakedModel e = new ChiseledBlockBakedModel( stateID, ChiselRenderType.TRANSLUCENT, blob, DefaultVertexFormat.BLOCK );
-				out = new ModelCombined( a, b, c, d, e );
-			}
-			else
-			{
-				out = new BitItemBaked( stateID );
-			}
+        if (out == null) {
+            if (large) {
+                final VoxelBlob blob = new VoxelBlob();
+                blob.fill(stateID);
+                final BakedModel a = new ChiseledBlockBakedModel(stateID, ChiselRenderType.SOLID, blob, DefaultVertexFormat.BLOCK);
+                final BakedModel b = new ChiseledBlockBakedModel(stateID, ChiselRenderType.SOLID_FLUID, blob, DefaultVertexFormat.BLOCK);
+                final BakedModel c = new ChiseledBlockBakedModel(stateID, ChiselRenderType.CUTOUT_MIPPED, blob, DefaultVertexFormat.BLOCK);
+                final BakedModel d = new ChiseledBlockBakedModel(stateID, ChiselRenderType.CUTOUT, blob, DefaultVertexFormat.BLOCK);
+                final BakedModel e = new ChiseledBlockBakedModel(stateID, ChiselRenderType.TRANSLUCENT, blob, DefaultVertexFormat.BLOCK);
+                out = new ModelCombined(a, b, c, d, e);
+            } else {
+                out = new BitItemBaked(stateID);
+            }
 
-			target.put( stateID, out );
-		}
+            target.put(stateID, out);
+        }
 
-		return out;
-	}
-
-    public BakedModel resolve(
-      final BakedModel originalModel,
-      final ItemStack stack,
-      final Level world,
-      final LivingEntity entity )
-    {
-        return getCachedModel( ItemChiseledBit.getStackState( stack ), ClientSide.instance.holdingShift() );
+        return out;
     }
 
-	@Override
-	public void clearCache()
-	{
-		modelCache.clear();
-		largeModelCache.clear();
-	}
+    public BakedModel resolve(
+            final BakedModel originalModel,
+            final ItemStack stack,
+            final Level world,
+            final LivingEntity entity) {
+        return getCachedModel(ItemChiseledBit.getStackState(stack), ClientSide.instance.holdingShift());
+    }
 
     @Override
-    public boolean usesBlockLight()
-    {
+    public void clearCache() {
+        modelCache.clear();
+        largeModelCache.clear();
+    }
+
+    @Override
+    public boolean usesBlockLight() {
         return true;
     }
 }

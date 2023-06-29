@@ -6,36 +6,35 @@ import net.minecraft.core.Direction;
 /**
  * Do not implement, acquire from {@link IChiselAndBitsAPI}
  */
-public interface IBitLocation
-{
+public interface IBitLocation {
 
-	/**
-	 * Get block position that the bit is inside.
-	 *
-	 * @return Block Pos
-	 */
-	BlockPos getBlockPos();
+    /**
+     * Get block position that the bit is inside.
+     *
+     * @return Block Pos
+     */
+    BlockPos getBlockPos();
 
-	/**
-	 * get Bit X coordinate.
-	 *
-	 * @return X coordinate
-	 */
-	int getBitX();
+    /**
+     * get Bit X coordinate.
+     *
+     * @return X coordinate
+     */
+    int getBitX();
 
-	/**
-	 * get Bit Y coordinate.
-	 *
-	 * @return Y coordinate
-	 */
-	int getBitY();
+    /**
+     * get Bit Y coordinate.
+     *
+     * @return Y coordinate
+     */
+    int getBitY();
 
-	/**
-	 * get Bit Z coordinate.
-	 *
-	 * @return Z coordinate
-	 */
-	int getBitZ();
+    /**
+     * get Bit Z coordinate.
+     *
+     * @return Z coordinate
+     */
+    int getBitZ();
 
     /**
      * Offsets the bit location into the given direction by one.
@@ -43,5 +42,5 @@ public interface IBitLocation
      *
      * @param direction The direction.
      */
-	IBitLocation offSet(final Direction direction);
+    IBitLocation offSet(final Direction direction);
 }

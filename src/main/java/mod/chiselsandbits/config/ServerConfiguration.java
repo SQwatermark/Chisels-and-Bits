@@ -1,7 +1,9 @@
 package mod.chiselsandbits.config;
+
 import com.google.common.collect.Lists;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Objects;
@@ -76,11 +78,15 @@ public class ServerConfiguration extends AbstractConfiguration
         finishCategory(builder);
     }
 
-    public boolean canRevertToBlock(
-      BlockState newState )
-    {
+    /**
+     * <p> 通过配置文件判断完整的雕刻方块是否可以变回普通方块
+     * <p> 如果配置为*，则所有方块都可变回普通方块
+     * @param newState
+     * @return
+     */
+    public boolean canRevertToBlock(BlockState newState) {
         final List<? extends String> blockNames = revertibleBlocks.get();
-        return blockNames.contains("*") || blockNames.contains(Objects.requireNonNull(newState.getBlock().getRegistryName()).toString());
+        return blockNames.contains("*") || blockNames.contains(Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(newState.getBlock())).toString());
     }
 
 

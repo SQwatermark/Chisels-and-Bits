@@ -7,11 +7,10 @@ import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
 import mod.chiselsandbits.network.ModPacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.Util;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class PacketSetChiselMode extends ModPacket
 {
@@ -44,7 +43,7 @@ public class PacketSetChiselMode extends ModPacket
 
 			if ( originalMode != mode && chatNotification )
 			{
-				player.sendMessage( new TranslatableComponent( mode.getName().toString() ), Util.NIL_UUID);
+				player.sendSystemMessage( Component.translatable( mode.getName().toString() ) );
 			}
         }
 	}

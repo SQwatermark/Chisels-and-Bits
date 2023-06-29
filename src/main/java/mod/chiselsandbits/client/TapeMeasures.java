@@ -3,8 +3,6 @@ package mod.chiselsandbits.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import mod.chiselsandbits.chiseledblock.data.BitLocation;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
@@ -12,14 +10,14 @@ import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.TapeMeasureModes;
 import mod.chiselsandbits.registry.ModItems;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,10 +26,9 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.TransformationHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class TapeMeasures
 {
@@ -194,12 +191,12 @@ public class TapeMeasures
 
 			final String out = chMode == TapeMeasureModes.DISTANCE ? getSize( Len ) : DeprecationHelper.translateToLocal( "mod.chiselsandbits.tapemeasure.chatmsg", getSize( LenX ), getSize( LenY ), getSize( LenZ ) );
 
-			final TextComponent chatMsg = new TextComponent( out );
+			final MutableComponent chatMsg = Component.literal( out );
 
 			// NOT 100% Accurate, if anyone wants to try and resolve this, yay
 			chatMsg.setStyle( Style.EMPTY.withColor(TextColor.fromRgb(newMeasure.color.getTextColor())) );
 
-			player.sendMessage( chatMsg, Util.NIL_UUID );
+			player.sendSystemMessage( chatMsg );
 		}
 
 		measures.add( newMeasure );
@@ -214,7 +211,7 @@ public class TapeMeasures
 	private ResourceLocation getDimension(
 			final Player player )
 	{
-		return player.getCommandSenderWorld().dimension().getRegistryName();
+		return player.getCommandSenderWorld().dimension().registry();
 	}
 
 	public void render(final PoseStack matrixStack, final float partialTicks) {
@@ -395,7 +392,7 @@ public class TapeMeasures
 		matrixStack.translate( -fontRenderer.width( size ) * 0.5, 0, 0 );
         RenderSystem.disableDepthTest();
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		fontRenderer.drawInBatch(size, 0, 0, red << 16 | green << 8 | blue,true, matrixStack.last().pose(), buffer, true, 0, 15728880);
+		fontRenderer.drawInBatch(size, 0, 0, red << 16 | green << 8 | blue,true, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, 15728880);
 		buffer.endBatch();
         RenderSystem.enableDepthTest();
         matrixStack.popPose();
@@ -427,10 +424,10 @@ public class TapeMeasures
 		if ( view != null )
 		{
 			final float yaw = view.yRotO + ( view.getYRot() - view.yRotO ) * partialTicks;
-			matrixStack.mulPose(new Quaternion(Vector3f.YP, 180 + -yaw, true ));
+			matrixStack.mulPose(TransformationHelper.quatFromXYZ(0, 180 + -yaw, 0, true ));
 
 			final float pitch = view.xRotO + ( view.getXRot() - view.xRotO ) * partialTicks;
-			matrixStack.mulPose(new Quaternion(Vector3f.XP, -pitch, true));
+			matrixStack.mulPose(TransformationHelper.quatFromXYZ(-pitch, 0, 0, true));
 		}
 	}
 

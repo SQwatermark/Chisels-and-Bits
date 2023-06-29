@@ -4,19 +4,20 @@ import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.render.NullBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,26 +86,20 @@ public abstract class BaseSmartModel implements BakedModel
 		return ItemTransforms.NO_TRANSFORMS;
 	}
 
-    @NotNull
-    @Override
-    public List<BakedQuad> getQuads(
-      @Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand, @NotNull final IModelData extraData)
-    {
-        final BakedModel model = handleBlockState( state, rand, extraData );
-        return model.getQuads( state, side, rand, extraData );
-    }
-
-    @NotNull
 	@Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand)
-    {
-        final BakedModel model = handleBlockState( state, rand );
-        return model.getQuads( state, side, rand, EmptyModelData.INSTANCE );
-    }
+	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
+		return BakedModel.super.getQuads(state, side, rand, data, renderType);
+	}
+
+	@Override
+	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
+		final BakedModel model = handleBlockState( state, rand );
+		return model.getQuads( state, side, rand );
+	}
 
 	public BakedModel handleBlockState(
 			final BlockState state,
-			final Random rand )
+			final RandomSource rand )
 	{
 		return NullBakedModel.instance;
 	}
@@ -112,7 +107,7 @@ public abstract class BaseSmartModel implements BakedModel
 	public BakedModel handleBlockState(
 	  final BlockState state,
       final Random random,
-      final IModelData modelData
+      final ModelData modelData
     )
     {
         return NullBakedModel.instance;

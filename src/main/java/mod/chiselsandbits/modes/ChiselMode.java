@@ -6,8 +6,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 
-public enum ChiselMode implements IToolMode
-{
+/**
+ * 雕刻工具的模式
+ */
+public enum ChiselMode implements IToolMode {
 	SINGLE( LocalStrings.ChiselModeSingle ),
 	SNAP2( LocalStrings.ChiselModeSnap2 ),
 	SNAP4( LocalStrings.ChiselModeSnap4 ),

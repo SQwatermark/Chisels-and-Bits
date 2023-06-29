@@ -10,22 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @OnlyIn(Dist.CLIENT)
-public final class TextureUtils
-{
+public final class TextureUtils {
 
-    public static BufferedImage readBufferedImage(InputStream imageStream) throws IOException
-    {
+    public static BufferedImage readBufferedImage(InputStream imageStream) throws IOException {
         BufferedImage bufferedimage;
-
-        try
-        {
+        try {
             bufferedimage = ImageIO.read(imageStream);
-        }
-        finally
-        {
+        } finally {
             IOUtils.closeQuietly(imageStream);
         }
-
         return bufferedimage;
     }
 

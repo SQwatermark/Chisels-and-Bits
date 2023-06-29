@@ -7,28 +7,24 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.*;
 
-public final class VoxelShapeCache
-{
+public final class VoxelShapeCache {
 
     private static final VoxelShapeCache INSTANCE = new VoxelShapeCache();
 
-    public static VoxelShapeCache getInstance()
-    {
+    public static VoxelShapeCache getInstance() {
         return INSTANCE;
     }
 
     private final SimpleMaxSizedCache<VoxelShapeCache.CacheKey, VoxelShape> cache = new SimpleMaxSizedCache<>(ChiselsAndBits.getConfig().getCommon().collisionBoxCacheSize.get());
 
-    private VoxelShapeCache()
-    {
+    private VoxelShapeCache() {
     }
 
     public VoxelShape get(VoxelBlob blob, BoxType type) {
         final CacheKey key = new CacheKey(type, (BitSet) blob.getNoneAir().clone());
 
         VoxelShape shape = cache.get(key);
-        if (shape == null)
-        {
+        if (shape == null) {
             shape = calculateNewVoxelShape(blob, type);
             cache.put(key, shape);
         }
@@ -40,35 +36,19 @@ public final class VoxelShapeCache
         return VoxelShapeCalculator.calculate(data, type).optimize();
     }
 
-    private static final class CacheKey {
-        private final BoxType type;
-        private final BitSet  noneAirMap;
-
-        private CacheKey(final BoxType type, final BitSet noneAirMap) {
-            this.type = type;
-            this.noneAirMap = noneAirMap;
-        }
+    private record CacheKey(BoxType type, BitSet noneAirMap) {
 
         @Override
-        public boolean equals(final Object o)
-        {
-            if (this == o)
-            {
-                return true;
-            }
-            if (!(o instanceof CacheKey))
-            {
-                return false;
-            }
-            final CacheKey cacheKey = (CacheKey) o;
+            public boolean equals(final Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (!(o instanceof final CacheKey cacheKey)) {
+                    return false;
+                }
             return type == cacheKey.type &&
-                     noneAirMap.equals(cacheKey.noneAirMap);
-        }
+                        noneAirMap.equals(cacheKey.noneAirMap);
+            }
 
-        @Override
-        public int hashCode()
-        {
-            return Objects.hash(type, noneAirMap);
-        }
     }
 }

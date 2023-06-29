@@ -1,8 +1,7 @@
 package mod.chiselsandbits.interfaces;
 
-public interface ICacheClearable
-{
+public interface ICacheClearable {
 
-	void clearCache();
+    void clearCache();
 
 }

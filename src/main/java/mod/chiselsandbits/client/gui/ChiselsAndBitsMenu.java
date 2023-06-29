@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
@@ -38,7 +38,7 @@ public class ChiselsAndBitsMenu extends Screen
 
     protected ChiselsAndBitsMenu()
     {
-        super(new TextComponent("Menu"));
+        super(Component.literal("Menu"));
     }
 
     private float clampVis(
@@ -157,7 +157,6 @@ public class ChiselsAndBitsMenu extends Screen
 
         fillGradient(matrixStack, 0, 0, width, height, start, end );
 
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
 //        RenderSystem.disableAlphaTest();
         RenderSystem.blendFuncSeparate( GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0 );
@@ -325,7 +324,6 @@ public class ChiselsAndBitsMenu extends Screen
 //        RenderSystem.shadeModel( GL11.GL_FLAT );
 
         //matrixStack.translate( 0.0F, 0.0F, 5.0F );
-        RenderSystem.enableTexture();
         RenderSystem.setShaderColor( 1, 1, 1, 1.0f );
         RenderSystem.disableBlend();
 //        RenderSystem.enableAlphaTest();

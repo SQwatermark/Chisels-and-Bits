@@ -27,7 +27,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -52,6 +51,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nonnull;
 import java.util.*;
 
+/**
+ * 碎屑
+ */
 public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselModeItem, ICacheClearable
 {
 
@@ -81,7 +83,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
 		final int stateId = ItemChiseledBit.getStackState(stack);
 		if (stateId == 0) {
-		    tooltip.add(new TextComponent(ChatFormatting.RED.toString() + ChatFormatting.ITALIC.toString() + LocalStrings.AnyHelpBit.getLocal() + ChatFormatting.RESET.toString()));
+		    tooltip.add(Component.literal(ChatFormatting.RED.toString() + ChatFormatting.ITALIC.toString() + LocalStrings.AnyHelpBit.getLocal() + ChatFormatting.RESET.toString()));
         }
 	}
 
@@ -99,7 +101,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
                 final MutableComponent comp = (MutableComponent) displayName;
 
-                return comp.append(" - ").append(new TextComponent(ChiselModeManager.getChiselMode( ClientSide.instance.getPlayer(), ChiselToolType.BIT, InteractionHand.MAIN_HAND ).getName().getLocal())).append(new TextComponent(extra));
+                return comp.append(" - ").append(Component.literal(ChiselModeManager.getChiselMode( ClientSide.instance.getPlayer(), ChiselToolType.BIT, InteractionHand.MAIN_HAND ).getName().getLocal())).append(Component.literal(extra));
             }
 
             return displayName;
@@ -121,7 +123,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 
 		if ( state == null )
 		{
-			return new TextComponent("Null");
+			return Component.literal("Null");
 		}
 
 		try
@@ -136,7 +138,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 				final Fluid f = BlockBitInfo.getFluidFromBlock( blk );
 				if ( f != null )
 				{
-					return new TranslatableComponent(f.getAttributes().getTranslationKey());
+					return Component.translatable(f.getAttributes().getTranslationKey());
 				}
 			}
 			else
@@ -188,7 +190,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 		}
 		catch ( final Exception e )
 		{
-			return new TextComponent("Error");
+			return Component.literal("Error");
 		}
 	}
 
@@ -224,13 +226,11 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 			return super.getName( stack );
 		}
 
-		final MutableComponent strComponent = new TextComponent("");
+		final MutableComponent strComponent = Component.literal("");
 		return strComponent.append(super.getName( stack ))
           .append(" - ")
           .append(typeName);
 	}
-
-
 
 	@Override
 	public int getItemStackLimit(ItemStack stack)

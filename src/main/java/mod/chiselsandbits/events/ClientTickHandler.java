@@ -13,7 +13,8 @@ import net.minecraftforge.fml.common.Mod;
 public class ClientTickHandler {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onTickPlayerTick(final TickEvent.ClientTickEvent event) {
+    public static void onTickPlayerTick(TickEvent.ClientTickEvent event) {
+        // 放大镜相关
         if (Minecraft.getInstance().player != null) {
             if (Minecraft.getInstance().player.getMainHandItem().getItem() instanceof ItemMagnifyingGlass
                     || Minecraft.getInstance().player.getOffhandItem().getItem() instanceof ItemMagnifyingGlass) {

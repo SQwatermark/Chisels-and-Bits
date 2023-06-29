@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ import java.util.List;
 public class CreativeClipboardTab extends CreativeModeTab implements ICacheClearable
 {
 	static boolean                   renewMappings = true;
-	static private List<ItemStack>   myWorldItems  = new ArrayList<ItemStack>();
-	static private List<CompoundTag> myCrossItems  = new ArrayList<CompoundTag>();
+	static private List<ItemStack>   myWorldItems  = new ArrayList<>();
+	static private List<CompoundTag> myCrossItems  = new ArrayList<>();
 	static private ClipboardStorage  clipStorage   = null;
 
 	public static void load(
@@ -83,11 +84,10 @@ public class CreativeClipboardTab extends CreativeModeTab implements ICacheClear
 		ChiselsAndBits.getInstance().addClearable( this );
 	}
 
-    @Override
-    public ItemStack makeIcon()
-    {
-        return new ItemStack(ModItems.ITEM_MIRROR_PRINT_WRITTEN.get() );
-    }
+	@Override
+	public @NotNull ItemStack getIconItem() {
+		return new ItemStack(ModItems.ITEM_MIRROR_PRINT_WRITTEN.get() );
+	}
 
     @Override
     public void fillItemList(final NonNullList<ItemStack> items)

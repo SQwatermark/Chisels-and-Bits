@@ -1,28 +1,23 @@
 package mod.chiselsandbits.api;
 
-public final class ReplacementStateHandler
-{
+public final class ReplacementStateHandler {
 
     private static final ReplacementStateHandler INSTANCE = new ReplacementStateHandler();
 
-    public static ReplacementStateHandler getInstance()
-    {
+    public static ReplacementStateHandler getInstance() {
         return INSTANCE;
     }
 
     private boolean isReplacing;
 
-    private ReplacementStateHandler()
-    {
+    private ReplacementStateHandler() {
     }
 
-    public boolean isReplacing()
-    {
+    public boolean isReplacing() {
         return isReplacing;
     }
 
-    public void setReplacing(final boolean replacing)
-    {
+    public void setReplacing(final boolean replacing) {
         isReplacing = replacing;
     }
 }

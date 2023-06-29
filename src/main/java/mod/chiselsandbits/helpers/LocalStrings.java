@@ -1,7 +1,6 @@
 package mod.chiselsandbits.helpers;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 public enum LocalStrings
 {
@@ -138,12 +137,12 @@ public enum LocalStrings
 	}
 
 	public Component getLocalText() {
-	    return new TextComponent(getLocal());
+	    return Component.literal(getLocal());
     }
 
     public Component getLocalText(
       final Object... args
     ) {
-	    return new TextComponent(getLocal(args));
+	    return Component.literal(getLocal(args));
 	}
 }

@@ -1,8 +1,7 @@
 package mod.chiselsandbits.api;
 
-public enum BoxType
-{
+public enum BoxType {
 
-	OCCLUSION, COLLISION, SWIMMING
+    OCCLUSION, COLLISION, SWIMMING
 
 }

@@ -3,8 +3,6 @@ package mod.chiselsandbits.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import mod.chiselsandbits.registry.ModBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,19 +11,20 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 import java.util.List;
-import java.util.Random;
 
 public class RenderHelper
 {
 
-    public static Random RENDER_RANDOM = new Random();
+    public static RandomSource RENDER_RANDOM = RandomSource.create();
 
     public static void drawSelectionBoundingBoxIfExists(final PoseStack matrixStack, final AABB bb, final BlockPos blockPos,
                                                         final Player player, final float partialTicks, final boolean NormalBoundingBox) {
@@ -163,10 +162,10 @@ public class RenderHelper
 
         for (final Direction direction : Direction.values())
         {
-            renderQuads(matrixStack, alpha, consumer, model.getQuads(null, direction, RENDER_RANDOM, EmptyModelData.INSTANCE), worldObj, blockPos, combinedLightmap, combinedOverlay);
+            renderQuads(matrixStack, alpha, consumer, model.getQuads(null, direction, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
         }
 
-        renderQuads(matrixStack, alpha, consumer, model.getQuads(null, null, RENDER_RANDOM, EmptyModelData.INSTANCE), worldObj, blockPos, combinedLightmap, combinedOverlay);
+        renderQuads(matrixStack, alpha, consumer, model.getQuads(null, null, RENDER_RANDOM), worldObj, blockPos, combinedLightmap, combinedOverlay);
     }
 
     public static void renderGhostModel(

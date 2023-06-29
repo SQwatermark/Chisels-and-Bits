@@ -2,10 +2,15 @@ package mod.chiselsandbits.registry;
 
 import mod.chiselsandbits.core.ChiselsAndBits;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = ChiselsAndBits.MODID)
 public final class ModItemGroups {
+
     public static final CreativeModeTab CHISELS_AND_BITS = (new CreativeModeTab(ChiselsAndBits.MODID) {
         @Override
         public boolean hasSearchBar() {

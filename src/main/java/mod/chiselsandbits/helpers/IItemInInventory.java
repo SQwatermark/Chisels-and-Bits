@@ -2,20 +2,18 @@ package mod.chiselsandbits.helpers;
 
 import net.minecraft.world.item.ItemStack;
 
-public interface IItemInInventory
-{
+public interface IItemInInventory {
 
-	boolean isValid();
+    boolean isValid();
 
-	void damage(
-			ActingPlayer who );
+    void damage(ActingPlayer who);
 
-	boolean consume();
+    boolean consume();
 
-	ItemStack getStack();
+    ItemStack getStack();
 
-	void swapWithWeapon();
+    void swapWithWeapon();
 
-	ItemStack getStackType();
+    ItemStack getStackType();
 
 }

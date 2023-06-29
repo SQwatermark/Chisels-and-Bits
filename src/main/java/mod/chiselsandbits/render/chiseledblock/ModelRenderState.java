@@ -36,27 +36,15 @@ public class ModelRenderState
 			final Direction side,
 			final IStateRef value )
 	{
-		switch ( side )
-		{
-			case DOWN:
-				down = value;
-				break;
-			case EAST:
-				east = value;
-				break;
-			case NORTH:
-				north = value;
-				break;
-			case SOUTH:
-				south = value;
-				break;
-			case UP:
-				up = value;
-				break;
-			case WEST:
-				west = value;
-				break;
-			default:
+		switch (side) {
+			case DOWN -> down = value;
+			case EAST -> east = value;
+			case NORTH -> north = value;
+			case SOUTH -> south = value;
+			case UP -> up = value;
+			case WEST -> west = value;
+			default -> {
+			}
 		}
 	}
 

@@ -39,19 +39,19 @@ public class EventPlayerInteract
 
 	@SubscribeEvent
 	public void interaction(LeftClickBlock event) {
-		if (event.getPlayer() != null && event.getUseItem() != Event.Result.DENY) {
+		if (event.getEntity() != null && event.getUseItem() != Event.Result.DENY) {
 			final ItemStack is = event.getItemStack();
-			final boolean validEvent = event.getPos() != null && event.getWorld() != null;
+			final boolean validEvent = event.getPos() != null && event.getLevel() != null;
 			if ( is != null && ( is.getItem() instanceof ItemChisel || is.getItem() instanceof ItemChiseledBit ) && validEvent )
 			{
-				final BlockState state = event.getWorld().getBlockState( event.getPos() );
+				final BlockState state = event.getLevel().getBlockState( event.getPos() );
 				if ( BlockBitInfo.canChisel( state ) )
 				{
-					if ( event.getWorld().isClientSide )
+					if ( event.getLevel().isClientSide )
 					{
 						// this is called when the player is survival -
 						// client side.
-						is.getItem().onBlockStartBreak( is, event.getPos(), event.getPlayer() );
+						is.getItem().onBlockStartBreak( is, event.getPos(), event.getEntity() );
 					}
 
 					// cancel interactions vs chiseable blocks, creative is
@@ -71,7 +71,7 @@ public class EventPlayerInteract
 
 	private void testInteractionSupression(PlayerInteractEvent event, Event.Result useItem) {
 		// client is dragging...
-		if ( event.getWorld().isClientSide )
+		if ( event.getLevel().isClientSide )
 		{
 			if ( ClientSide.instance.getStartPos() != null )
 			{
@@ -80,9 +80,9 @@ public class EventPlayerInteract
 		}
 
 		// server is supressed.
-		if ( !event.getWorld().isClientSide && event.getEntity() != null && useItem != Event.Result.DENY )
+		if ( !event.getLevel().isClientSide && event.getEntity() != null && useItem != Event.Result.DENY )
 		{
-			if ( serverSuppressEvent.containsKey( event.getPlayer() ) )
+			if ( serverSuppressEvent.containsKey( event.getEntity() ) )
 			{
 				event.setCanceled( true );
 			}

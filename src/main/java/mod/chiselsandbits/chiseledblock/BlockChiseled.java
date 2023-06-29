@@ -21,19 +21,17 @@ import mod.chiselsandbits.utils.SingleBlockBlockReader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -56,14 +54,13 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 
-public class BlockChiseled extends Block implements EntityBlock, IMultiStateBlock
-{
+public class BlockChiseled extends Block implements EntityBlock, IMultiStateBlock {
 
     public static final BlockPos ZERO = BlockPos.ZERO;
 
     private static ThreadLocal<BlockState> actingAs = new ThreadLocal<>();
 
-	public static final BooleanProperty FULL_BLOCK = BooleanProperty.create( "full_block" );
+    public static final BooleanProperty FULL_BLOCK = BooleanProperty.create("full_block");
 
     public final String name;
 
@@ -74,56 +71,45 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
     }
 
     @Override
-    public boolean onDestroyedByPlayer(final BlockState state, final Level world, final BlockPos pos, final Player player, final boolean willHarvest, final FluidState fluid)
-    {
-        if ( !willHarvest && ChiselsAndBits.getConfig().getClient().addBrokenBlocksToCreativeClipboard.get() )
-        {
+    public boolean onDestroyedByPlayer(final BlockState state, final Level world, final BlockPos pos, final Player player, final boolean willHarvest, final FluidState fluid) {
+        if (!willHarvest && ChiselsAndBits.getConfig().getClient().addBrokenBlocksToCreativeClipboard.get()) {
 
-            try
-            {
-                final BlockEntityChiseledBlock tebc = getTileEntity( world, pos );
-                CreativeClipboardTab.addItem( tebc.getItemStack( player ) );
+            try {
+                final BlockEntityChiseledBlock tebc = getTileEntity(world, pos);
+                CreativeClipboardTab.addItem(tebc.getItemStack(player));
 
-                UndoTracker.getInstance().add( world, pos, tebc.getBlobStateReference(), new VoxelBlobStateReference( 0, 0 ) );
-            }
-            catch ( final ExceptionNoTileEntity e )
-            {
-                Log.noTileError( e );
+                UndoTracker.getInstance().add(world, pos, tebc.getBlobStateReference(), new VoxelBlobStateReference(0, 0));
+            } catch (final ExceptionNoTileEntity e) {
+                Log.noTileError(e);
             }
         }
 
-        return super.onDestroyedByPlayer( state, world, pos, player, willHarvest, fluid );
+        return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
     }
 
     @Override
-    public boolean shouldCheckWeakPower(final BlockState state, final LevelReader world, final BlockPos pos, final Direction side)
-    {
-        return isFullCube( state );
+    public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side) {
+        return isFullCube(state);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public float getShadeBrightness(final BlockState state, final BlockGetter worldIn, final BlockPos pos)
-    {
-        return isFullCube( state ) ? 0.2F : 1F;
+    public float getShadeBrightness(final BlockState state, final BlockGetter worldIn, final BlockPos pos) {
+        return isFullCube(state) ? 0.2F : 1F;
     }
 
     @Override
-    public boolean canBeReplaced(final BlockState state, final BlockPlaceContext useContext)
-    {
-        try
-        {
+    public boolean canBeReplaced(final BlockState state, final BlockPlaceContext useContext) {
+        try {
             BlockPos target = useContext.getClickedPos();
             if (!(useContext instanceof DirectionalPlaceContext) && !useContext.replacingClickedOnBlock()) {
                 target = target.relative(useContext.getClickedFace().getOpposite());
             }
 
-            return getTileEntity( useContext.getLevel(), target ).getBlob().filled() == 0;
-        }
-        catch ( final ExceptionNoTileEntity e )
-        {
-            Log.noTileError( e );
-            return super.canBeReplaced( state, useContext );
+            return getTileEntity(useContext.getLevel(), target).getBlob().filled() == 0;
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
+            return super.canBeReplaced(state, useContext);
         }
     }
 
@@ -147,95 +133,76 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
 //        return super.getSlipperiness( state, world, pos, entity );
 //    }
 
-	static ExceptionNoTileEntity noTileEntity = new ExceptionNoTileEntity();
+    static ExceptionNoTileEntity noTileEntity = new ExceptionNoTileEntity();
 
-	public static @Nonnull
+    public static @Nonnull
     BlockEntityChiseledBlock getTileEntity(
-			final BlockEntity te ) throws ExceptionNoTileEntity
-	{
-		if ( te == null )
-		{
-			throw noTileEntity;
-		}
+            final BlockEntity te) throws ExceptionNoTileEntity {
+        if (te == null) {
+            throw noTileEntity;
+        }
 
-		try
-		{
-			return (BlockEntityChiseledBlock) te;
-		}
-		catch ( final ClassCastException e )
-		{
-			throw noTileEntity;
-		}
-	}
-
-	public static @Nonnull
-    BlockEntityChiseledBlock getTileEntity(
-			final @Nonnull BlockGetter world,
-			final @Nonnull BlockPos pos ) throws ExceptionNoTileEntity
-	{
-		final BlockEntity te = ModUtil.getTileEntitySafely( world, pos );
-        return getTileEntity(te);
-	}
-
-    @Override
-    public int getLightBlock(final BlockState state, final BlockGetter worldIn, final BlockPos pos)
-    {
-        return isFullCube( state ) ? 0 : 1;
+        try {
+            return (BlockEntityChiseledBlock) te;
+        } catch (final ClassCastException e) {
+            throw noTileEntity;
+        }
     }
 
-	public static boolean isFullCube(
-			final BlockState state )
-	{
-		return state.getValue(FULL_BLOCK);
-	}
-
-	@Override
-	public void playerDestroy(
-			final Level worldIn,
-			final Player player,
-			final BlockPos pos,
-			final BlockState state,
-			final BlockEntity te,
-			final ItemStack stack )
-	{
-		try
-		{
-			popResource( worldIn, pos, getTileEntity( te ).getItemStack( player ) );
-		}
-		catch ( final ExceptionNoTileEntity e )
-		{
-			Log.noTileError( e );
-			super.playerDestroy( worldIn, player, pos, state, (BlockEntity) null, stack );
-		}
-	}
+    public static @Nonnull
+    BlockEntityChiseledBlock getTileEntity(
+            final @Nonnull BlockGetter world,
+            final @Nonnull BlockPos pos) throws ExceptionNoTileEntity {
+        final BlockEntity te = ModUtil.getTileEntitySafely(world, pos);
+        return getTileEntity(te);
+    }
 
     @Override
-    public void setPlacedBy(final Level worldIn, final BlockPos pos, final BlockState state, @Nullable final LivingEntity placer, final ItemStack stack)
-    {
-        try
-        {
-            if ( stack == null || placer == null || !stack.hasTag() )
-            {
+    public int getLightBlock(final BlockState state, final BlockGetter worldIn, final BlockPos pos) {
+        return isFullCube(state) ? 0 : 1;
+    }
+
+    public static boolean isFullCube(
+            final BlockState state) {
+        return state.getValue(FULL_BLOCK);
+    }
+
+    @Override
+    public void playerDestroy(
+            final Level worldIn,
+            final Player player,
+            final BlockPos pos,
+            final BlockState state,
+            final BlockEntity te,
+            final ItemStack stack) {
+        try {
+            popResource(worldIn, pos, getTileEntity(te).getItemStack(player));
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
+            super.playerDestroy(worldIn, player, pos, state, (BlockEntity) null, stack);
+        }
+    }
+
+    @Override
+    public void setPlacedBy(final Level worldIn, final BlockPos pos, final BlockState state, @Nullable final LivingEntity placer, final ItemStack stack) {
+        try {
+            if (stack == null || placer == null || !stack.hasTag()) {
                 return;
             }
 
-            final BlockEntityChiseledBlock bc = getTileEntity( worldIn, pos );
-            if (worldIn.isClientSide)
-            {
+            final BlockEntityChiseledBlock bc = getTileEntity(worldIn, pos);
+            if (worldIn.isClientSide) {
                 bc.getState();
             }
-            int rotations = ModUtil.getRotations( placer, ModUtil.getSide( stack ) );
+            int rotations = ModUtil.getRotations(placer, ModUtil.getSide(stack));
 
             VoxelBlob blob = bc.getBlob();
-            while ( rotations-- > 0 )
-            {
-                blob = blob.spin( Axis.Y );
+            while (rotations-- > 0) {
+                blob = blob.spin(Axis.Y);
             }
-            bc.setBlob( blob );
-        }
-        catch ( final ExceptionNoTileEntity e )
-        {
-            Log.noTileError( e );
+            bc.setBlob(blob);
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
         }
     }
 
@@ -245,56 +212,47 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         if (!(target instanceof BlockHitResult))
             return ItemStack.EMPTY;
 
-        try
-        {
-            return getPickBlock((BlockHitResult) target, pos, getTileEntity( level, pos ) );
-        }
-        catch ( final ExceptionNoTileEntity e )
-        {
-            Log.noTileError( e );
+        try {
+            return getPickBlock((BlockHitResult) target, pos, getTileEntity(level, pos));
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
             return ModUtil.getEmptyStack();
         }
     }
 
-	/**
-	 * Client side method.
-	 */
-	private ChiselToolType getClientHeldTool()
-	{
-		return ClientSide.instance.getHeldToolType( InteractionHand.MAIN_HAND );
-	}
+    /**
+     * Client side method.
+     */
+    private ChiselToolType getClientHeldTool() {
+        return ClientSide.instance.getHeldToolType(InteractionHand.MAIN_HAND);
+    }
 
-	public ItemStack getPickBlock(
-			final BlockHitResult target,
-			final BlockPos pos,
-			final BlockEntityChiseledBlock te )
-	{
-		if ( te.getLevel().isClientSide )
-		{
-			if ( getClientHeldTool() != null )
-			{
-				final VoxelBlob vb = te.getBlob();
+    public ItemStack getPickBlock(
+            final BlockHitResult target,
+            final BlockPos pos,
+            final BlockEntityChiseledBlock te) {
+        if (te.getLevel().isClientSide) {
+            if (getClientHeldTool() != null) {
+                final VoxelBlob vb = te.getBlob();
 
-				final BitLocation bitLoc = new BitLocation( target, BitOperation.CHISEL );
+                final BitLocation bitLoc = new BitLocation(target, BitOperation.CHISEL);
 
-				final int itemBlock = vb.get( bitLoc.bitX, bitLoc.bitY, bitLoc.bitZ );
-				if ( itemBlock == 0 )
-				{
-					return ModUtil.getEmptyStack();
-				}
+                final int itemBlock = vb.get(bitLoc.bitX, bitLoc.bitY, bitLoc.bitZ);
+                if (itemBlock == 0) {
+                    return ModUtil.getEmptyStack();
+                }
 
-				return ItemChiseledBit.createStack( itemBlock, 1, false );
-			}
+                return ItemChiseledBit.createStack(itemBlock, 1, false);
+            }
 
-			return te.getItemStack( ClientSide.instance.getPlayer() );
-		}
+            return te.getItemStack(ClientSide.instance.getPlayer());
+        }
 
-		return te.getItemStack( null );
-	}
+        return te.getItemStack(null);
+    }
 
     @Override
-    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(FULL_BLOCK);
     }
@@ -341,57 +299,46 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
 //	}
 
     @Override
-    public VoxelShape getShape(final BlockState state, final BlockGetter reader, final BlockPos pos, final CollisionContext context)
-    {
-        try
-        {
+    public VoxelShape getShape(final BlockState state, final BlockGetter reader, final BlockPos pos, final CollisionContext context) {
+        try {
             final VoxelBlob blob = getTileEntity(reader, pos).getBlob();
             if (blob == null)
                 return Shapes.empty();
 
             return VoxelShapeCache.getInstance().get(blob, BoxType.OCCLUSION);
-        }
-        catch (ExceptionNoTileEntity exceptionNoTileEntity)
-        {
+        } catch (ExceptionNoTileEntity exceptionNoTileEntity) {
             return Shapes.empty();
         }
     }
 
     @Deprecated
     public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        try
-        {
+        try {
             final VoxelBlob blob = getTileEntity(worldIn, pos).getBlob();
             if (blob == null)
                 return Shapes.empty();
 
             return VoxelShapeCache.getInstance().get(blob, BoxType.COLLISION);
-        }
-        catch (ExceptionNoTileEntity exceptionNoTileEntity)
-        {
+        } catch (ExceptionNoTileEntity exceptionNoTileEntity) {
             return Shapes.empty();
         }
     }
 
     @Deprecated
     public VoxelShape getVisualShape(BlockState state, BlockGetter reader, BlockPos pos, CollisionContext context) {
-        try
-        {
+        try {
             final VoxelBlob blob = getTileEntity(reader, pos).getBlob();
             if (blob == null)
                 return Shapes.empty();
 
             return VoxelShapeCache.getInstance().get(blob, BoxType.OCCLUSION);
-        }
-        catch (ExceptionNoTileEntity exceptionNoTileEntity)
-        {
+        } catch (ExceptionNoTileEntity exceptionNoTileEntity) {
             return Shapes.empty();
         }
     }
 
     @Override
-    public boolean hasDynamicShape()
-    {
+    public boolean hasDynamicShape() {
         return true;
     }
 
@@ -399,26 +346,21 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         return true;
     }
 
-	public static boolean replaceWithChiseled(
-			final Level world,
-			final BlockPos pos,
-			final BlockState originalState,
-			final boolean triggerUpdate )
-	{
-		return replaceWithChiseled( world, pos, originalState, 0, triggerUpdate ).success;
-	}
+    public static boolean replaceWithChiseled(
+            final Level world,
+            final BlockPos pos,
+            final BlockState originalState,
+            final boolean triggerUpdate) {
+        return replaceWithChiseled(world, pos, originalState, 0, triggerUpdate).success;
+    }
 
     @Override
-    public BlockState rotate(final BlockState state, final LevelAccessor world, final BlockPos pos, final Rotation direction)
-    {
-        try
-        {
-            getTileEntity( world, pos ).rotateBlock();
+    public BlockState rotate(final BlockState state, final LevelAccessor world, final BlockPos pos, final Rotation direction) {
+        try {
+            getTileEntity(world, pos).rotateBlock();
             return state;
-        }
-        catch ( final ExceptionNoTileEntity e )
-        {
-            Log.noTileError( e );
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
             return state;
         }
     }
@@ -429,177 +371,150 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         return new BlockEntityChiseledBlock(p_153215_, p_153216_);
     }
 
-    public static class ReplaceWithChiseledValue
-    {
-		public boolean success = false;
-		public BlockEntityChiseledBlock te = null;
-	};
+    public static class ReplaceWithChiseledValue {
+        public boolean success = false;
+        public BlockEntityChiseledBlock te = null;
+    }
+
+    ;
 
     public static ReplaceWithChiseledValue replaceWithChiseled(
-			final @Nonnull Level world,
-			final @Nonnull BlockPos pos,
-			final BlockState originalState,
-			final int fragmentBlockStateID,
-			final boolean triggerUpdate )
-	{
-		BlockState actingState = originalState;
-		Block target = originalState.getBlock();
-		final boolean isAir = world.isEmptyBlock( pos ) || actingState.canBeReplaced( new DirectionalPlaceContext(world, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP) );
-		ReplaceWithChiseledValue rv = new ReplaceWithChiseledValue();
-		
-		if ( BlockBitInfo.canChisel( actingState ) || isAir )
-		{
-			BlockChiseled blk = ModBlocks.convertGivenStateToChiseledBlock( originalState );
+            final @Nonnull Level world,
+            final @Nonnull BlockPos pos,
+            final BlockState originalState,
+            final int fragmentBlockStateID,
+            final boolean triggerUpdate) {
+        BlockState actingState = originalState;
+        Block target = originalState.getBlock();
+        final boolean isAir = world.isEmptyBlock(pos) || actingState.canBeReplaced(new DirectionalPlaceContext(world, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
+        ReplaceWithChiseledValue rv = new ReplaceWithChiseledValue();
 
-			int BlockID = ModUtil.getStateId( actingState );
+        if (BlockBitInfo.canChisel(actingState) || isAir) {
+            BlockChiseled blk = ModBlocks.convertGivenStateToChiseledBlock(originalState);
 
-			if ( isAir )
-			{
-				actingState = ModUtil.getStateById( fragmentBlockStateID );
-				target = actingState.getBlock();
-				BlockID = ModUtil.getStateId( actingState );
-				blk = ModBlocks.convertGivenStateToChiseledBlock( actingState );
-				// its still air tho..
-				actingState = Blocks.AIR.defaultBlockState();
-			}
+            int BlockID = ModUtil.getStateId(actingState);
 
-			if ( BlockID == 0 )
-			{
-				return rv;
-			}
+            if (isAir) {
+                actingState = ModUtil.getStateById(fragmentBlockStateID);
+                target = actingState.getBlock();
+                BlockID = ModUtil.getStateId(actingState);
+                blk = ModBlocks.convertGivenStateToChiseledBlock(actingState);
+                // its still air tho..
+                actingState = Blocks.AIR.defaultBlockState();
+            }
 
-			if ( blk != null && blk != target )
-			{
-				BlockEntityChiseledBlock.setLightFromBlock( actingState );
-				world.setBlock( pos, blk.defaultBlockState(), triggerUpdate ? 3 : 0 );
-				BlockEntityChiseledBlock.setLightFromBlock( null );
-				final BlockEntity te = world.getBlockEntity( pos );
+            if (BlockID == 0) {
+                return rv;
+            }
 
-				BlockEntityChiseledBlock tec;
-				if ( !( te instanceof BlockEntityChiseledBlock) )
-				{
-					tec = (BlockEntityChiseledBlock) blk.newBlockEntity( pos, blk.defaultBlockState() );
-					world.setBlockEntity( tec );
-				}
-				else
-				{
-					tec = (BlockEntityChiseledBlock) te;
-				}
+            if (blk != null && blk != target) {
+                BlockEntityChiseledBlock.setLightFromBlock(actingState);
+                world.setBlock(pos, blk.defaultBlockState(), triggerUpdate ? 3 : 0);
+                BlockEntityChiseledBlock.setLightFromBlock(null);
+                final BlockEntity te = world.getBlockEntity(pos);
 
-				if ( tec != null )
-				{
-					tec.fillWith( actingState );
-					tec.setPrimaryBlockStateId(BlockID);
-					tec.setState( tec.getState(), tec.getBlobStateReference() );
-				}
+                BlockEntityChiseledBlock tec;
+                if (!(te instanceof BlockEntityChiseledBlock)) {
+                    tec = (BlockEntityChiseledBlock) blk.newBlockEntity(pos, blk.defaultBlockState());
+                    world.setBlockEntity(tec);
+                } else {
+                    tec = (BlockEntityChiseledBlock) te;
+                }
 
-				rv.success = true;
-				rv.te = tec;
-				
-				return rv;
-			}
-		}
+                if (tec != null) {
+                    tec.fillWith(actingState);
+                    tec.setPrimaryBlockStateId(BlockID);
+                    tec.setState(tec.getState(), tec.getBlobStateReference());
+                }
 
-		return rv;
-	}
+                rv.success = true;
+                rv.te = tec;
 
-	public BlockState getCommonState(
-            final BlockEntityChiseledBlock te)
-	{
-		final VoxelBlobStateReference data = te.getBlobStateReference();
+                return rv;
+            }
+        }
 
-		if ( data != null )
-		{
-			final VoxelBlob vb = data.getVoxelBlob();
-			if ( vb != null )
-			{
-				return ModUtil.getStateById( vb.getVoxelStats().mostCommonState );
-			}
-		}
+        return rv;
+    }
 
-		return null;
-	}
+    public BlockState getCommonState(
+            final BlockEntityChiseledBlock te) {
+        final VoxelBlobStateReference data = te.getBlobStateReference();
+
+        if (data != null) {
+            final VoxelBlob vb = data.getVoxelBlob();
+            if (vb != null) {
+                return ModUtil.getStateById(vb.getVoxelStats().mostCommonState);
+            }
+        }
+
+        return null;
+    }
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
         // is this the right block?
-        final BlockState realState = level.getBlockState( pos );
+        final BlockState realState = level.getBlockState(pos);
         final Block realBlock = realState.getBlock();
-        if ( realBlock != this )
-        {
-            return realBlock.getLightEmission( realState, level, pos );
+        if (realBlock != this) {
+            return realBlock.getLightEmission(realState, level, pos);
         }
 
         // enabled?
-        if ( ChiselsAndBits.getConfig().getServer().enableBitLightSource.get() )
-        {
-            try
-            {
-                return getTileEntity( level, pos ).getLightValue();
-            }
-            catch ( final ExceptionNoTileEntity e )
-            {
-                Log.noTileError( e );
+        if (ChiselsAndBits.getConfig().getServer().enableBitLightSource.get()) {
+            try {
+                return getTileEntity(level, pos).getLightValue();
+            } catch (final ExceptionNoTileEntity e) {
+                Log.noTileError(e);
             }
         }
 
         return 0;
     }
 
-	public static void setActingAs(
-			final BlockState state )
-	{
-		actingAs.set( state );
-	}
+    public static void setActingAs(
+            final BlockState state) {
+        actingAs.set(state);
+    }
 
     @Override
-    public boolean canHarvestBlock(final BlockState state, final BlockGetter world, final BlockPos pos, final Player player)
-    {
-        if ( ChiselsAndBits.getConfig().getServer().enableToolHarvestLevels.get() )
-        {
+    public boolean canHarvestBlock(final BlockState state, final BlockGetter world, final BlockPos pos, final Player player) {
+        if (ChiselsAndBits.getConfig().getServer().enableToolHarvestLevels.get()) {
             BlockState activeState = actingAs.get();
 
-            if ( activeState == null )
-            {
-                activeState = getPrimaryState( world, pos );
+            if (activeState == null) {
+                activeState = getPrimaryState(world, pos);
             }
 
-            return activeState.canHarvestBlock( new SingleBlockBlockReader( activeState ), pos, player );
+            return activeState.canHarvestBlock(new SingleBlockBlockReader(activeState), pos, player);
         }
 
         return true;
     }
 
     @Override
-    public float getDestroyProgress(final BlockState state, final Player player, final BlockGetter worldIn, final BlockPos pos)
-    {
-        if ( ChiselsAndBits.getConfig().getServer().enableToolHarvestLevels.get() )
-        {
+    public float getDestroyProgress(final BlockState state, final Player player, final BlockGetter worldIn, final BlockPos pos) {
+        if (ChiselsAndBits.getConfig().getServer().enableToolHarvestLevels.get()) {
             BlockState actingState = actingAs.get();
 
-            if ( actingState == null )
-            {
-                actingState = getPrimaryState( worldIn, pos );
+            if (actingState == null) {
+                actingState = getPrimaryState(worldIn, pos);
             }
 
             final float hardness = state.getDestroySpeed(worldIn, pos);
-            if ( hardness < 0.0F )
-            {
+            if (hardness < 0.0F) {
                 return 0.0F;
             }
 
             // since we can't call getDigSpeed on the acting state, we can just
             // do some math to try and roughly estimate it.
-            float denom = player.getInventory().getDestroySpeed( actingState );
-            float numer = player.getInventory().getDestroySpeed( state );
+            float denom = player.getInventory().getDestroySpeed(actingState);
+            float numer = player.getInventory().getDestroySpeed(state);
 
-            if ( !state.canHarvestBlock( new SingleBlockBlockReader( state ), ZERO, player ) )
-            {
-                return player.getDigSpeed( actingState, pos ) / hardness / 100F * ( numer / denom );
-            }
-            else
-            {
-                return player.getDigSpeed( actingState, pos ) / hardness / 30F * ( numer / denom );
+            if (!state.canHarvestBlock(new SingleBlockBlockReader(state), ZERO, player)) {
+                return player.getDigSpeed(actingState, pos) / hardness / 100F * (numer / denom);
+            } else {
+                return player.getDigSpeed(actingState, pos) / hardness / 30F * (numer / denom);
             }
         }
 
@@ -612,44 +527,31 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
 //        return Blocks.STONE.isToolEffective( Blocks.STONE.defaultBlockState(), tool );
 //    }
 
-	public ResourceLocation getModel()
-	{
-		return new ResourceLocation( ChiselsAndBits.MODID, name );
-	}
-
-    @Override
-    public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items)
-    {
-        //No items
+    public ResourceLocation getModel() {
+        return new ResourceLocation(ChiselsAndBits.MODID, name);
     }
 
-	@Override
-	public BlockState getPrimaryState(
-			final BlockGetter world,
-			final BlockPos pos )
-	{
-		try
-		{
-			return getTileEntity( world, pos ).getBlockState( Blocks.STONE );
-		}
-		catch ( final ExceptionNoTileEntity e )
-		{
-			Log.noTileError( e );
-			return Blocks.STONE.defaultBlockState();
-		}
-	}
+    @Override
+    public BlockState getPrimaryState(
+            final BlockGetter world,
+            final BlockPos pos) {
+        try {
+            return getTileEntity(world, pos).getBlockState(Blocks.STONE);
+        } catch (final ExceptionNoTileEntity e) {
+            Log.noTileError(e);
+            return Blocks.STONE.defaultBlockState();
+        }
+    }
 
-	public boolean basicHarvestBlockTest(
-			Level world,
-			BlockPos pos,
-			Player player )
-	{
-		return super.canHarvestBlock(world.getBlockState(pos), world, pos, player );
-	}
+    public boolean basicHarvestBlockTest(
+            Level world,
+            BlockPos pos,
+            Player player) {
+        return super.canHarvestBlock(world.getBlockState(pos), world, pos, player);
+    }
 
     @Override
-    public PushReaction getPistonPushReaction(final BlockState state)
-    {
+    public PushReaction getPistonPushReaction(final BlockState state) {
         return PushReaction.BLOCK;
     }
 }

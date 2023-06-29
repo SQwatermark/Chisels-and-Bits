@@ -3,25 +3,24 @@ package mod.chiselsandbits.items;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.LocalStrings;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 
 import java.util.List;
 
-import net.minecraft.world.item.Item.Properties;
-
+/**
+ * 放大镜
+ */
 public class ItemMagnifyingGlass extends Item
 {
 
@@ -43,10 +42,10 @@ public class ItemMagnifyingGlass extends Item
         final BlockHitResult rayTraceResult = (BlockHitResult) Minecraft.getInstance().hitResult;
         final BlockState state = Minecraft.getInstance().level.getBlockState(rayTraceResult.getBlockPos());
         final BlockBitInfo.SupportsAnalysisResult result = BlockBitInfo.doSupportAnalysis(state);
-        return new TextComponent(
-          result.isSupported() ?
-            ChatFormatting.GREEN + result.getSupportedReason().getLocal() + ChatFormatting.RESET :
-            ChatFormatting.RED + result.getUnsupportedReason().getLocal() + ChatFormatting.RESET
+        return Component.literal(
+          result.supported() ?
+            ChatFormatting.GREEN + result.supportedReason().getLocal() + ChatFormatting.RESET :
+            ChatFormatting.RED + result.unsupportedReason().getLocal() + ChatFormatting.RESET
         );
     }
 

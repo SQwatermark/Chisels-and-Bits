@@ -1,8 +1,10 @@
 package mod.chiselsandbits.client;
 
-public class NoPlayerException extends Exception
-{
+import java.io.Serial;
 
-	private static final long serialVersionUID = 8453518040687712916L;
+public class NoPlayerException extends Exception {
+
+    @Serial
+    private static final long serialVersionUID = 8453518040687712916L;
 
 }

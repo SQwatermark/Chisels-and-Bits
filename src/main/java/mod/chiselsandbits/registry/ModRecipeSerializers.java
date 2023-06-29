@@ -3,14 +3,12 @@ package mod.chiselsandbits.registry;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.crafting.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-public final class ModRecipeSerializers
-{
+public final class ModRecipeSerializers {
 
     private static final DeferredRegister<RecipeSerializer<?>> REGISTRAR = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, ChiselsAndBits.MODID);
 

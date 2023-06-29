@@ -17,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.IFluidBlock;
@@ -84,7 +86,7 @@ public class ModUtil
 
 		if ( playerIn instanceof ServerPlayer )
 		{
-			reachDistance = playerIn.getAttributeValue(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get());
+			reachDistance = playerIn.getAttributeValue(ForgeMod.BLOCK_REACH.get());
 		}
 
 		final Vec3 from = new Vec3( x, y, z );
@@ -680,7 +682,7 @@ public class ModUtil
 
 	public static void damageItem(
 			@Nonnull final ItemStack is,
-			@Nonnull final Random r )
+			@Nonnull final RandomSource r )
 	{
 		if ( is.isDamageableItem() )
 		{

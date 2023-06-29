@@ -3,7 +3,6 @@ package mod.chiselsandbits.render.chiseledblock;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import com.mojang.math.Vector3f;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob.VisibleFace;
 import mod.chiselsandbits.client.culling.ICullTest;
@@ -14,6 +13,7 @@ import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.render.helpers.ModelQuadLayer;
 import mod.chiselsandbits.render.helpers.ModelUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -21,11 +21,13 @@ import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -624,16 +626,14 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         result[2] = (toZ + leftZ * d + upZ * d) / 2;
     }
 
-    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final Random rand, @NotNull final IModelData extraData) {
-        return getList(side);
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
+        return super.getQuads(state, side, rand, data, renderType);
     }
 
-    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, final Random rand) {
-        return getList(side);
+    public List<BakedQuad> getQuads(@Nullable BlockState pState, @Nullable Direction pDirection, RandomSource pRandom) {
+        return getList(pDirection);
     }
 
     @Override

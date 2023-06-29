@@ -35,6 +35,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
+/**
+ * 卷尺
+ */
 public class ItemTapeMeasure extends Item implements IChiselModeItem, IItemScrollWheel
 {
 	public ItemTapeMeasure(Item.Properties properties)

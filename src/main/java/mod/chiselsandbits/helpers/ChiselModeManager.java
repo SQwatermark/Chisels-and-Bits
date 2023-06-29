@@ -8,11 +8,10 @@ import mod.chiselsandbits.modes.IToolMode;
 import mod.chiselsandbits.modes.PositivePatternMode;
 import mod.chiselsandbits.network.packets.PacketSetChiselMode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.Util;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class ChiselModeManager
 {
@@ -51,7 +50,7 @@ public class ChiselModeManager
 
 			if ( originalMode != newClientChiselMode && chatNotification )
 			{
-				Minecraft.getInstance().player.sendMessage( new TranslatableComponent( newClientChiselMode.getName().toString() ), Util.NIL_UUID );
+				Minecraft.getInstance().player.sendSystemMessage( Component.translatable( newClientChiselMode.getName().toString() ) );
 			}
 
 			ReflectionWrapper.instance.clearHighlightedStack();

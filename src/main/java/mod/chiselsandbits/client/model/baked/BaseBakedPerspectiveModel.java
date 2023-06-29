@@ -1,11 +1,14 @@
 package mod.chiselsandbits.client.model.baked;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraftforge.common.util.TransformationHelper;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.Random;
 
@@ -14,7 +17,7 @@ import java.util.Random;
  */
 public abstract class BaseBakedPerspectiveModel implements BakedModel {
 
-    protected static final Random RANDOM = new Random();
+    protected static final RandomSource RANDOM = RandomSource.create();
 
 	private static final Transformation ground;
 	private static final Transformation gui;
@@ -24,8 +27,7 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel {
 	private static final Transformation thirdPerson_righthand;
 	private static final Transformation thirdPerson_lefthand;
 
-	static
-	{
+	static {
 		gui = getMatrix( 0, 0, 0, 30, 225, 0, 0.625f );
 		ground = getMatrix( 0, 3 / 16.0f, 0, 0, 0, 0, 0.25f );
 		fixed = getMatrix( 0, 0, 0, 0, 0, 0, 0.5f );
@@ -36,36 +38,37 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel {
 	private static Transformation getMatrix(float transX, float transY, float transZ, float rotX, float rotY, float rotZ, float scaleXYZ) {
 		final Vector3f translation = new Vector3f( transX, transY, transZ );
 		final Vector3f scale = new Vector3f( scaleXYZ, scaleXYZ, scaleXYZ );
-		final Quaternion rotation = new Quaternion(rotX, rotY, rotZ, true);
+
+		final Quaternionf rotation = TransformationHelper.quatFromXYZ(rotX, rotY, rotZ, true);
 		return new Transformation(translation, rotation, scale, null);
 	}
 
     @Override
-    public BakedModel handlePerspective(final ItemTransforms.TransformType cameraTransformType, final PoseStack mat) {
-        switch ( cameraTransformType ) {
+    public @NotNull BakedModel applyTransform(@NotNull ItemDisplayContext transformType, @NotNull PoseStack poseStack, boolean applyLeftHandTransform) {
+        switch ( transformType ) {
             case FIRST_PERSON_LEFT_HAND:
-                firstPerson_lefthand.push(mat);
+                poseStack.pushTransformation(firstPerson_lefthand);
                 return this;
             case FIRST_PERSON_RIGHT_HAND:
-                firstPerson_righthand.push(mat);
+                poseStack.pushTransformation(firstPerson_righthand);
                 return this;
             case THIRD_PERSON_LEFT_HAND:
-                thirdPerson_lefthand.push(mat);
+                poseStack.pushTransformation(thirdPerson_lefthand);
                 return this;
             case THIRD_PERSON_RIGHT_HAND:
-                thirdPerson_righthand.push(mat);
+                poseStack.pushTransformation(thirdPerson_righthand);
             case FIXED:
-                fixed.push(mat);
+                poseStack.pushTransformation(fixed);
                 return this;
             case GROUND:
-                ground.push(mat);
+                poseStack.pushTransformation(ground);
                 return this;
             case GUI:
-                gui.push(mat);
+                poseStack.pushTransformation(gui);
                 return this;
             default:
         }
-        fixed.push(mat);
+        poseStack.pushTransformation(fixed);
         return this;
     }
 }

@@ -1,24 +1,14 @@
 package mod.chiselsandbits.items;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
 import mod.chiselsandbits.api.IBitAccess;
 import mod.chiselsandbits.api.VoxelStats;
 import mod.chiselsandbits.chiseledblock.BlockChiseled;
-import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
+import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
-import mod.chiselsandbits.helpers.ActingPlayer;
-import mod.chiselsandbits.helpers.BitInventoryFeeder;
-import mod.chiselsandbits.helpers.ContinousChisels;
-import mod.chiselsandbits.helpers.IContinuousInventory;
-import mod.chiselsandbits.helpers.LocalStrings;
-import mod.chiselsandbits.helpers.ModUtil;
+import mod.chiselsandbits.helpers.*;
 import mod.chiselsandbits.interfaces.IItemScrollWheel;
 import mod.chiselsandbits.interfaces.IPatternItem;
 import mod.chiselsandbits.interfaces.IVoxelBlobItem;
@@ -26,28 +16,34 @@ import mod.chiselsandbits.network.packets.PacketRotateVoxelBlob;
 import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModItems;
 import mod.chiselsandbits.render.helpers.SimpleInstanceCache;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Direction.Axis;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 负型图纸
+ */
 public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScrollWheel, IPatternItem
 {
 
@@ -99,12 +95,12 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 
 					if ( solid > 0 )
 					{
-                        details.add( new TextComponent(Integer.valueOf(solid).toString()).append(" ").append(new TextComponent(LocalStrings.Filled.getLocal()) ));
+                        details.add( Component.literal(Integer.valueOf(solid).toString()).append(" ").append(Component.literal(LocalStrings.Filled.getLocal()) ));
 					}
 
 					if ( air > 0 )
 					{
-						details.add( new TextComponent(Integer.valueOf(air).toString()).append(" ").append(new TextComponent(LocalStrings.Empty.getLocal()) ));
+						details.add( Component.literal(Integer.valueOf(air).toString()).append(" ").append(Component.literal(LocalStrings.Empty.getLocal()) ));
 					}
 				}
 
@@ -112,7 +108,7 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
 			}
 			else
 			{
-				tooltip.add( new TextComponent(LocalStrings.ShiftDetails.getLocal()) );
+				tooltip.add( Component.literal(LocalStrings.ShiftDetails.getLocal()) );
 			}
 		}
 	}
@@ -172,7 +168,7 @@ public class ItemNegativePrint extends Item implements IVoxelBlobItem, IItemScro
                 ItemEntity itementity = player.drop(newStack, false);
                 if (itementity != null) {
                     itementity.setNoPickUpDelay();
-                    itementity.setOwner(player.getUUID());
+                    itementity.setTarget(player.getUUID());
                 }
                 return InteractionResult.SUCCESS;
             }

@@ -1,9 +1,9 @@
 package mod.chiselsandbits.utils;
 
 import net.minecraft.core.Direction;
-import com.mojang.math.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3f;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ public final class FluidCuboid {
      */
     public Vector3f getFromScaled() {
         if (fromScaled == null) {
-            fromScaled = from.copy();
+            fromScaled = new Vector3f(from);
             fromScaled.mul(1 / 16f);
         }
         return fromScaled;
@@ -64,7 +64,7 @@ public final class FluidCuboid {
      */
     public Vector3f getToScaled() {
         if (toScaled == null) {
-            toScaled = to.copy();
+            toScaled = new Vector3f(to);
             toScaled.mul(1 / 16f);
         }
         return toScaled;

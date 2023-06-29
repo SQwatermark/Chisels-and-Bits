@@ -19,7 +19,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -41,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * 正型图纸
+ */
 public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeItem, IItemBlockAccurate
 {
 
@@ -83,7 +85,7 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 			}
 			else
 			{
-				tooltip.add( new TextComponent(LocalStrings.ShiftDetails.getLocal()) );
+				tooltip.add( Component.literal(LocalStrings.ShiftDetails.getLocal()) );
 			}
 		}
 	}

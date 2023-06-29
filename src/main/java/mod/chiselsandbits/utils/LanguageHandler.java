@@ -46,12 +46,12 @@ public final class LanguageHandler
      */
     public static void sendPlayerMessage(@NotNull final Player player, final String key, final Object... message)
     {
-        player.sendMessage(buildChatComponent(key.toLowerCase(Locale.US), message), Util.NIL_UUID);
+        player.sendSystemMessage(buildChatComponent(key.toLowerCase(Locale.US), message));
     }
 
     public static Component buildChatComponent(final String key, final Object... message)
     {
-        TranslatableComponent translation = null;
+        Component translation = null;
 
         int onlyArgsUntil = 0;
         for (final Object object : message)
@@ -72,7 +72,7 @@ public final class LanguageHandler
             final Object[] args = new Object[onlyArgsUntil];
             System.arraycopy(message, 0, args, 0, onlyArgsUntil);
 
-            translation = new TranslatableComponent(key, args);
+            translation = Component.translatable(key, args);
         }
 
         for (final Object object : message)
@@ -81,18 +81,18 @@ public final class LanguageHandler
             {
                 if (object instanceof Component)
                 {
-                    translation = new TranslatableComponent(key);
+                    translation = Component.translatable(key);
                 }
                 else
                 {
-                    translation = new TranslatableComponent(key, object);
+                    translation = Component.translatable(key, object);
                     continue;
                 }
             }
 
             if (object instanceof Component)
             {
-                translation.append(new TextComponent(" "));
+                translation.append(Component.literal(" "));
                 translation.append((Component) object);
             }
             else if (object instanceof String)
@@ -116,7 +116,7 @@ public final class LanguageHandler
 
         if (translation == null)
         {
-            translation = new TranslatableComponent(key);
+            translation = Component.translatable(key);
         }
 
         return translation;
@@ -135,11 +135,11 @@ public final class LanguageHandler
         final String result;
         if (args.length == 0)
         {
-            result = new TranslatableComponent(key).getContents();
+            result = Component.translatable(key).getContents();
         }
         else
         {
-            result = new TranslatableComponent(key, args).getContents();
+            result = Component.translatable(key, args).getContents();
         }
         return result.isEmpty() ? key : result;
     }
@@ -162,13 +162,13 @@ public final class LanguageHandler
 
         for (final Player player : players)
         {
-            player.sendMessage(textComponent, Util.NIL_UUID);
+            player.sendSystemMessage(textComponent);
         }
     }
 
     public static void sendMessageToPlayer(final Player player, final String key, final Object... format)
     {
-        player.sendMessage(new TextComponent(translateKeyWithFormat(key, format)), Util.NIL_UUID);
+        player.sendSystemMessage(Component.literal(translateKeyWithFormat(key, format)));
     }
 
     /**

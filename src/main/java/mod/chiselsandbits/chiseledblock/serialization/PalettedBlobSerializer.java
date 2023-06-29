@@ -16,28 +16,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class PalettedBlobSerializer extends BlobSerializer implements PaletteResize<BlockState>
-{
+public class PalettedBlobSerializer extends BlobSerializer implements PaletteResize<BlockState> {
     private final IdMapper<BlockState> registry = GameData.getBlockStateIDMap();
-    private       Palette<BlockState>    registryPalette = new GlobalPalette<>(GameData.getBlockStateIDMap());
-    private       Palette<BlockState>    palette = new GlobalPalette<>(GameData.getBlockStateIDMap());
+    private Palette<BlockState> registryPalette = new GlobalPalette<>(GameData.getBlockStateIDMap());
+    private Palette<BlockState> palette = new GlobalPalette<>(GameData.getBlockStateIDMap());
     private int bits = 0;
 
-    public PalettedBlobSerializer(final VoxelBlob toDeflate)
-    {
+    public PalettedBlobSerializer(final VoxelBlob toDeflate) {
         super(toDeflate);
         this.setBits(4);
 
         //Setup the palette ids.
         final Map<Integer, Integer> entries = toDeflate.getBlockSums();
-        for ( final Map.Entry<Integer, Integer> o : entries.entrySet() )
-        {
+        for (final Map.Entry<Integer, Integer> o : entries.entrySet()) {
             this.palette.idFor(ModUtil.getStateById(o.getKey()));
         }
     }
 
-    public PalettedBlobSerializer(final FriendlyByteBuf toInflate)
-    {
+    public PalettedBlobSerializer(final FriendlyByteBuf toInflate) {
         super();
         this.setBits(4);
 
@@ -75,46 +71,39 @@ public class PalettedBlobSerializer extends BlobSerializer implements PaletteRes
 
 
     @Override
-    public void write(final FriendlyByteBuf to)
-    {
+    public void write(final FriendlyByteBuf to) {
         to.writeVarInt(this.bits);
         this.palette.write(to);
     }
 
     @Override
-    protected int readStateID(final FriendlyByteBuf buffer)
-    {
+    protected int readStateID(final FriendlyByteBuf buffer) {
         //Not needed because of different palette system.
         return 0;
     }
 
     @Override
-    protected void writeStateID(final FriendlyByteBuf buffer, final int key)
-    {
+    protected void writeStateID(final FriendlyByteBuf buffer, final int key) {
         //Noop
     }
 
     @Override
-    protected int getIndex(final int stateID)
-    {
+    protected int getIndex(final int stateID) {
         return this.palette.idFor(ModUtil.getStateById(stateID));
     }
 
     @Override
-    protected int getStateID(final int indexID)
-    {
+    protected int getStateID(final int indexID) {
         return ModUtil.getStateId(this.palette.valueFor(indexID));
     }
 
     @Override
-    public int getVersion()
-    {
+    public int getVersion() {
         return VoxelBlob.VERSION_COMPACT_PALLETED;
     }
 
     @Override
-    public int onResize(final int newBitSize, final BlockState violatingBlockState)
-    {
+    public int onResize(final int newBitSize, final BlockState violatingBlockState) {
         final Palette<BlockState> currentPalette = this.palette;
         this.setBits(newBitSize);
 

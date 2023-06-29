@@ -4,13 +4,12 @@ import mod.chiselsandbits.helpers.ChiselToolType;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.IChiselModeItem;
 import mod.chiselsandbits.network.ModPacket;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.Util;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class PacketSetColor extends ModPacket
 {
@@ -43,7 +42,7 @@ public class PacketSetColor extends ModPacket
 
 			if ( originalMode != newColor && chatNotification )
 			{
-				player.sendMessage( new TranslatableComponent( "chiselsandbits.color." + newColor.getName() ), Util.NIL_UUID );
+				player.sendSystemMessage( Component.translatable( "chiselsandbits.color." + newColor.getName() ) );
 			}
 		}
 	}

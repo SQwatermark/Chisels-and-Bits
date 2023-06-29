@@ -17,6 +17,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Random;
 
-public class DataAwareChiseledBlockBakedModel extends BaseSmartModel
-{
+public class DataAwareChiseledBlockBakedModel extends BaseSmartModel {
     private final ModelProperty<BakedModel> MODEL_PROP = new ModelProperty<>();
 
     @Override
@@ -35,19 +35,17 @@ public class DataAwareChiseledBlockBakedModel extends BaseSmartModel
     }
 
     @Override
-    public BakedModel handleBlockState(final BlockState state, final Random random, final IModelData modelData)
+    public BakedModel handleBlockState(final BlockState state, final Random random, final ModelData modelData)
     {
-        if (!modelData.hasProperty(MODEL_PROP))
+        if (!modelData.has(MODEL_PROP))
             return NullBakedModel.instance;
 
-        return modelData.getData(MODEL_PROP);
+        return modelData.get(MODEL_PROP);
     }
 
     @NotNull
     @Override
-    public IModelData getModelData(
-      @NotNull final BlockAndTintGetter world, @NotNull final BlockPos pos, @NotNull final BlockState state, @NotNull final IModelData modelData)
-    {
+    public ModelData getModelData(@NotNull BlockAndTintGetter world, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
 /*        final ChiseledBlockBaked model = ChiseledBlockSmartModel.getCachedModel(
           (TileEntityBlockChiseled) Objects.requireNonNull(world.getTileEntity(pos)),
           ChiselRenderType.fromLayer(
@@ -56,14 +54,13 @@ public class DataAwareChiseledBlockBakedModel extends BaseSmartModel
           )
         );*/
 
-        if (state == null || world.getBlockEntity(pos) == null)
-        {
-            return new ModelDataMap.Builder().build();
+        if (world.getBlockEntity(pos) == null) {
+            return ModelData.builder().build();
         }
 
         // This seems silly, but it proves to be faster in practice.
-        VoxelBlobStateReference data = modelData.getData(BlockEntityChiseledBlock.MP_VBSR);
-        Integer blockP = modelData.getData(BlockEntityChiseledBlock.MP_PBSI);
+        VoxelBlobStateReference data = modelData.get(BlockEntityChiseledBlock.MP_VBSR);
+        Integer blockP = modelData.get(BlockEntityChiseledBlock.MP_PBSI);
         blockP = blockP == null ? 0 : blockP;
 
         final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
@@ -80,7 +77,7 @@ public class DataAwareChiseledBlockBakedModel extends BaseSmartModel
                   l);
             }
 
-            return new ModelDataMap.Builder().withInitial(MODEL_PROP, new ModelCombined(models)).build();
+            return ModelData.builder().with(MODEL_PROP, new ModelCombined(models)).build();
         }
 
         BakedModel baked;
@@ -113,7 +110,7 @@ public class DataAwareChiseledBlockBakedModel extends BaseSmartModel
               ChiselRenderType.fromLayer(layer, false));
         }
 
-        return new ModelDataMap.Builder().withInitial(MODEL_PROP, baked).build();
+        return ModelData.builder().with(MODEL_PROP, baked).build();
     }
 
     @Override

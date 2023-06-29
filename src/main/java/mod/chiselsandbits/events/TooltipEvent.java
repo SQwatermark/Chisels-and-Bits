@@ -3,12 +3,12 @@ package mod.chiselsandbits.events;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.items.ItemMagnifyingGlass;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.ChatFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -27,10 +27,10 @@ public class TooltipEvent {
                     BlockBitInfo.SupportsAnalysisResult result = BlockBitInfo.doSupportAnalysis(blockState);
 
                     event.getToolTip().add(
-                        new TextComponent(
-                          result.isSupported() ?
-                            ChatFormatting.GREEN + result.getSupportedReason().getLocal() + ChatFormatting.RESET :
-                                  ChatFormatting.RED + result.getUnsupportedReason().getLocal() + ChatFormatting.RESET
+                        Component.literal(
+                          result.supported() ?
+                            ChatFormatting.GREEN + result.supportedReason().getLocal() + ChatFormatting.RESET :
+                                  ChatFormatting.RED + result.unsupportedReason().getLocal() + ChatFormatting.RESET
                         )
                     );
                 }

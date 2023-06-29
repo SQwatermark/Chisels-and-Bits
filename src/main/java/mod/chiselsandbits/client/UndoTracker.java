@@ -7,7 +7,7 @@ import mod.chiselsandbits.helpers.ActingPlayer;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.network.packets.PacketUndo;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -81,13 +81,13 @@ public class UndoTracker implements ICacheClearable
 			if ( grouping && hasCreatedGroup )
 			{
 				final UndoStep current = undoLevels.get( undoLevels.size() - 1 );
-				final UndoStep newest = new UndoStep( world.dimension().getRegistryName(), pos, before, after );
+				final UndoStep newest = new UndoStep( world.dimension().registry(), pos, before, after );
 				undoLevels.set( undoLevels.size() - 1, newest );
 				newest.next = current;
 				return;
 			}
 
-			undoLevels.add( new UndoStep( world.dimension().getRegistryName(), pos, before, after ) );
+			undoLevels.add( new UndoStep( world.dimension().registry(), pos, before, after ) );
 			hasCreatedGroup = true;
 			level = undoLevels.size() - 1;
 		}
@@ -119,7 +119,7 @@ public class UndoTracker implements ICacheClearable
 		}
 		else
 		{
-            ClientSide.instance.getPlayer().sendMessage( new TranslatableComponent( "mod.chiselsandbits.result.nothing_to_undo" ) , null);
+            ClientSide.instance.getPlayer().sendSystemMessage( Component.translatable( "mod.chiselsandbits.result.nothing_to_undo" ) );
 		}
 	}
 
@@ -149,7 +149,7 @@ public class UndoTracker implements ICacheClearable
 		}
 		else
 		{
-			ClientSide.instance.getPlayer().sendMessage( new TranslatableComponent( "mod.chiselsandbits.result.nothing_to_redo" ) , null);
+			ClientSide.instance.getPlayer().sendSystemMessage( Component.translatable( "mod.chiselsandbits.result.nothing_to_redo" ) );
 		}
 	}
 
@@ -177,7 +177,7 @@ public class UndoTracker implements ICacheClearable
 			final Player player,
 			final UndoStep step )
 	{
-		return player.getCommandSenderWorld().dimension().getRegistryName().equals(step.dimensionId);
+		return player.getCommandSenderWorld().dimension().registry().equals(step.dimensionId);
 	}
 
 	private boolean replaySingleAction(
@@ -256,7 +256,7 @@ public class UndoTracker implements ICacheClearable
 	{
 		for ( final String err : errors )
 		{
-			ClientSide.instance.getPlayer().sendMessage( new TranslatableComponent( err ), null );
+			ClientSide.instance.getPlayer().sendSystemMessage( Component.translatable( err ) );
 		}
 
 		errors.clear();

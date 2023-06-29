@@ -12,7 +12,7 @@ import mod.chiselsandbits.utils.Constants;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -92,24 +92,18 @@ public class SmartModelManager
 		models.put( new ModelResourceLocation( second, "multipart" ), modelGen );
 	}
 
-	public void textureStichEvent(
-			final TextureStitchEvent.Post stitch )
-	{
+	public void textureStichEvent(TextureStitchEvent.Post stitch) {
 		ChiselsAndBits.getInstance().clearCache();
 	}
 
-	public void onModelBakeEvent(
-			final ModelBakeEvent event )
-	{
+	public void onModelBakeEvent(ModelEvent.ModifyBakingResult event) {
 	    setup();
-		for ( final ICacheClearable c : clearable )
-		{
+		for (ICacheClearable c : clearable) {
 			c.clearCache();
 		}
 
-		for ( final ModelResourceLocation rl : res )
-		{
-			event.getModelRegistry().put( rl, getModel( rl ) );
+		for (ModelResourceLocation rl : res) {
+			event.getModels().put(rl, getModel(rl));
 		}
 	}
 

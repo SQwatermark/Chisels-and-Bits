@@ -10,8 +10,8 @@ import mod.chiselsandbits.core.api.BitAccess;
 import mod.chiselsandbits.helpers.DeprecationHelper;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.IChiseledTileContainer;
-import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.registry.ModBlockEntityTypes;
+import mod.chiselsandbits.registry.ModBlocks;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.utils.SingleBlockBlockReader;
 import net.minecraft.core.BlockPos;
@@ -31,8 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
@@ -43,8 +42,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTileContainer, IChiseledBlockTileEntity
-{
+public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTileContainer, IChiseledBlockTileEntity {
+
     public static final ModelProperty<VoxelBlobStateReference>    MP_VBSR = new ModelProperty<>();
     public static final ModelProperty<Integer> MP_PBSI = new ModelProperty<>();
 
@@ -404,10 +403,7 @@ public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTi
         return voxelRef == null || !voxelRef.equals(originalRef);
     }
 
-    public void setBlob(
-      final VoxelBlob vb,
-      final boolean triggerUpdates)
-    {
+    public void setBlob(VoxelBlob vb, boolean triggerUpdates) {
         final int olv = getLightValue();
         final boolean oldNC = isNormalCube();
 
@@ -436,22 +432,18 @@ public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTi
             return;
         }
 
-        if (common.isFullBlock)
-        {
+        // 如果是完整方块
+        if (common.isFullBlock) {
             setBlobStateReference(new VoxelBlobStateReference(common.mostCommonState, getPositionRandom(worldPosition)));
             setState(getState(), getBlobStateReference());
-
+            // 将完整的雕刻方块变回普通方块
             final BlockState newState = ModUtil.getStateById(common.mostCommonState);
-            if (ChiselsAndBits.getConfig().getServer().canRevertToBlock(newState))
-            {
-                if (!MinecraftForge.EVENT_BUS.post(new EventFullBlockRestoration(Objects.requireNonNull(level), worldPosition, newState)))
-                {
+            if (ChiselsAndBits.getConfig().getServer().canRevertToBlock(newState)) {
+                if (!MinecraftForge.EVENT_BUS.post(new EventFullBlockRestoration(Objects.requireNonNull(level), worldPosition, newState))) {
                     level.setBlock(worldPosition, newState, triggerUpdates ? 3 : 0);
                 }
             }
-        }
-        else if (common.mostCommonState != 0)
-        {
+        } else if (common.mostCommonState != 0) {
             sideState = sideFlags;
             lightLevel = lv;
             isNormalCube = nc;
@@ -709,11 +701,11 @@ public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTi
     }
 
     @Override
-    public IModelData getModelData()
+    public @NotNull ModelData getModelData()
     {
-        return new ModelDataMap.Builder().withInitial(
+        return ModelData.builder().with(
           MP_PBSI, getPrimaryBlockStateId()
-        ).withInitial(
+        ).with(
           MP_VBSR, getBlobStateReference()
         ).build();
     }
