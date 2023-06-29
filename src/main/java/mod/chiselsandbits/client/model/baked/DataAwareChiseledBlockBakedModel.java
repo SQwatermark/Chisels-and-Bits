@@ -7,6 +7,7 @@ import mod.chiselsandbits.render.NullBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiselRenderType;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
@@ -35,7 +36,7 @@ public class DataAwareChiseledBlockBakedModel extends BaseSmartModel {
     }
 
     @Override
-    public BakedModel handleBlockState(final BlockState state, final Random random, final ModelData modelData)
+    public BakedModel handleBlockState(final BlockState state, final RandomSource random, final ModelData modelData)
     {
         if (!modelData.has(MODEL_PROP))
             return NullBakedModel.instance;

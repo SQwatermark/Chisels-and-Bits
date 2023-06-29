@@ -191,7 +191,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel
         }
     }
 
-    public static ChiseledBlockBakedModel breakingParticleModel(final ChiselRenderType layer, final Integer blockStateID, final Random random) {
+    public static ChiseledBlockBakedModel breakingParticleModel(final ChiselRenderType layer, final Integer blockStateID, final RandomSource random) {
         return ModelUtil.getBreakingModel(layer, blockStateID, random);
     }
 

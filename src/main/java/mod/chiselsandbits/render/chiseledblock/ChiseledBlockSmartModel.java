@@ -19,12 +19,14 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -77,7 +79,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
 
     public static ChiseledBlockBakedModel getCachedModel(final ItemStack stack, final ChiselRenderType layer) {
         Integer blockP = 0;
-        return getCachedModel(blockP, ModUtil.getBlobFromStack(stack, null), layer, getModelFormat(), new Random());
+        return getCachedModel(blockP, ModUtil.getBlobFromStack(stack, null), layer, getModelFormat(), RandomSource.create());
     }
 
     private static VertexFormat getModelFormat()
@@ -89,7 +91,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         return !ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get() || ChiselsAndBits.getConfig().getClient().disableCustomVertexFormats.get();
     }
 
-    public static ChiseledBlockBakedModel getCachedModel(final Integer blockP, final VoxelBlob data, final ChiselRenderType layer, final VertexFormat format, final Random random) {
+    public static ChiseledBlockBakedModel getCachedModel(final Integer blockP, final VoxelBlob data, final ChiselRenderType layer, final VertexFormat format, final RandomSource random) {
         if (data == null) {
             return new ChiseledBlockBakedModel(blockP, layer, null, format);
         }
@@ -118,7 +120,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
     }
 
     @Override
-    public BakedModel handleBlockState(final BlockState state, final Random rand, final IModelData modelData)
+    public BakedModel handleBlockState(final BlockState state, final RandomSource rand, final ModelData modelData)
     {
         if (state == null)
         {
@@ -126,9 +128,9 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         }
 
         // This seems silly, but it proves to be faster in practice.
-        VoxelBlobStateReference data = modelData.getData(BlockEntityChiseledBlock.MP_VBSR);
+        VoxelBlobStateReference data = modelData.get(BlockEntityChiseledBlock.MP_VBSR);
         final VoxelBlob blob = data == null ? null : data.getVoxelBlob();
-        Integer blockP = modelData.getData(BlockEntityChiseledBlock.MP_PBSI);
+        Integer blockP = modelData.get(BlockEntityChiseledBlock.MP_PBSI);
         blockP = blockP == null ? 0 : blockP;
 
         final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
@@ -214,7 +216,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         final BakedModel[] models = new BakedModel[ChiselRenderType.values().length];
         for (final ChiselRenderType l : ChiselRenderType.values())
         {
-            models[l.ordinal()] = getCachedModel(blockP, new VoxelBlobStateReference(vdata, 0L).getVoxelBlob(), l, DefaultVertexFormat.BLOCK, new Random());
+            models[l.ordinal()] = getCachedModel(blockP, new VoxelBlobStateReference(vdata, 0L).getVoxelBlob(), l, DefaultVertexFormat.BLOCK, RandomSource.create());
         }
 
         mdl = new ModelCombined(models);
@@ -231,12 +233,14 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
         ITEM_TO_MODEL_CACHE.clear();
 
         FLUID_RENDER_TYPES.clear();
+
         final List<RenderType> blockRenderTypes = RenderType.chunkBufferLayers();
         for (int i = 0; i < blockRenderTypes.size(); i++)
         {
             final RenderType renderType = blockRenderTypes.get(i);
             for (final Fluid fluid : ForgeRegistries.FLUIDS)
             {
+                RenderType renderLayer = ItemBlockRenderTypes.getRenderLayer(fluid.defaultFluidState());
                 if (ItemBlockRenderTypes.canRenderInLayer(fluid.defaultFluidState(), renderType))
                 {
                     FLUID_RENDER_TYPES.set(i);

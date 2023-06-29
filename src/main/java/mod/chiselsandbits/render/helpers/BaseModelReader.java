@@ -2,7 +2,7 @@ package mod.chiselsandbits.render.helpers;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-public abstract class BaseModelReader implements IForgeVertexConsumer
+public abstract class BaseModelReader implements VertexConsumer
 {
 
 //	@Override

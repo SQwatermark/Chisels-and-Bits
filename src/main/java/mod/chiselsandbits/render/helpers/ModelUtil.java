@@ -87,10 +87,11 @@ public class ModelUtil implements ICacheClearable {
 
         final Fluid fluid = BlockBitInfo.getFluidFromBlock(state.getBlock());
         if (fluid != null) {
+            var clientFluid = IClientFluidTypeExtensions.of(fluid);
             for (final Direction xf : Direction.values()) {
                 final ModelQuadLayer[] mp = new ModelQuadLayer[1];
                 mp[0] = new ModelQuadLayer();
-                mp[0].color = IClientFluidTypeExtensions.of(fluid).getTintColor();
+                mp[0].color = clientFluid.getTintColor();
                 mp[0].light = lv;
 
                 final float V = 0.5f;
@@ -99,13 +100,13 @@ public class ModelUtil implements ICacheClearable {
                 final float Vf = 1.0f;
 
                 if (xf.getAxis() == Axis.Y) {
-                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getStillTexture());
+                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(clientFluid.getStillTexture());
                     mp[0].uvs = new float[]{Uf, Vf, 0, Vf, Uf, 0, 0, 0};
                 } else if (xf.getAxis() == Axis.X) {
-                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getFlowingTexture());
+                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(clientFluid.getFlowingTexture());
                     mp[0].uvs = new float[]{U, 0, U, V, 0, 0, 0, V};
                 } else {
-                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getFlowingTexture());
+                    mp[0].sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(clientFluid.getFlowingTexture());
                     mp[0].uvs = new float[]{U, 0, 0, 0, U, V, 0, V};
                 }
 
@@ -257,7 +258,7 @@ public class ModelUtil implements ICacheClearable {
 
     public static BakedModel solveModel(
             final BlockState state,
-            final Random weight,
+            final RandomSource weight,
             final BakedModel originalModel,
             final RenderType layer) {
         boolean hasFaces = false;
@@ -305,7 +306,7 @@ public class ModelUtil implements ICacheClearable {
             final BakedModel model,
             final BlockState state,
             final Direction f,
-            final Random weight) {
+            final RandomSource weight) {
         final List<BakedQuad> l = getModelQuads(model, state, f, weight);
         if (l == null || l.isEmpty()) {
             return false;
@@ -315,7 +316,7 @@ public class ModelUtil implements ICacheClearable {
 
         try {
             texture = findTexture(null, l, f);
-        } catch (final Exception e) {
+        } catch (final Exception ignored) {
         }
 
         final ModelVertexRange mvr = new ModelVertexRange();
@@ -424,7 +425,7 @@ public class ModelUtil implements ICacheClearable {
         return Minecraft.getInstance().getItemColors().getColor(target, tint);
     }
 
-    public static ChiseledBlockBakedModel getBreakingModel(ChiselRenderType layer, Integer blockStateID, Random random) {
+    public static ChiseledBlockBakedModel getBreakingModel(ChiselRenderType layer, Integer blockStateID, RandomSource random) {
         Pair<RenderType, Integer> key = Pair.of(layer.layer, blockStateID);
         ChiseledBlockBakedModel out = breakCache.get(key);
 

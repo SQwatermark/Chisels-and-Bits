@@ -106,7 +106,7 @@ public abstract class BaseSmartModel implements BakedModel
 
 	public BakedModel handleBlockState(
 	  final BlockState state,
-      final Random random,
+      final RandomSource random,
       final ModelData modelData
     )
     {
