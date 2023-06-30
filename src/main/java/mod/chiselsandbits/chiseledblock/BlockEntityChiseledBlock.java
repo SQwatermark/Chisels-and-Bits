@@ -701,12 +701,10 @@ public class BlockEntityChiseledBlock extends BlockEntity implements IChiseledTi
     }
 
     @Override
-    public @NotNull ModelData getModelData()
-    {
-        return ModelData.builder().with(
-          MP_PBSI, getPrimaryBlockStateId()
-        ).with(
-          MP_VBSR, getBlobStateReference()
-        ).build();
+    public @NotNull ModelData getModelData() {
+        return ModelData.builder()
+                .with(MP_PBSI, getPrimaryBlockStateId())
+                .with(MP_VBSR, getBlobStateReference())
+                .build();
     }
 }

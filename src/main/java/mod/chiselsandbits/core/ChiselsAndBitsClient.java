@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -39,6 +40,11 @@ public class ChiselsAndBitsClient {
     @OnlyIn(Dist.CLIENT)
     public static void onModelRegistry(ModelEvent.RegisterGeometryLoaders event) {
         event.register("chiseled_block", ChiseledBlockModelLoader.getInstance());
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void registerReloadListener(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(ChiseledBlockModelLoader.getInstance());
     }
 
 //    @SubscribeEvent

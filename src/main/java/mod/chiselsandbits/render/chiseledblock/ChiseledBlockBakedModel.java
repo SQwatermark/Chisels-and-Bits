@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -150,6 +149,9 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
     private ChiseledBlockBakedModel() {
     }
 
+
+    // TODO 用一个ChiseledBlockBakedModel的数组表示一个合并的模型
+    // 此处开始根据体素数据构建模型面片
     public ChiseledBlockBakedModel(int stateId, ChiselRenderType layer, VoxelBlob data, VertexFormat format) {
         myLayer = layer;
         BlockState state = ModUtil.getStateById(stateId);
@@ -199,78 +201,93 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         return new ChiselsAndBitsBakedQuad.Builder(format);
     }
 
-    private void generateFaces(final ChiseledModelBuilder builder, final VoxelBlob blob, final RandomSource weight) {
-
-        final ArrayList<ArrayList<FaceRegion>> rset = new ArrayList<>();
-        final VisibleFace visFace = new VisibleFace();
-
+    /**
+     * 重中之重的根据体素构建片面
+     * @param builder
+     * @param blob
+     * @param random
+     */
+    private void generateFaces(ChiseledModelBuilder builder, VoxelBlob blob, RandomSource random) {
+        // 缓存面片信息
+        ArrayList<ArrayList<FaceRegion>> rset = new ArrayList<>();
+        // 一个用于记录返回值的对象，节省反复new返回值的开销
+        VisibleFace visFace = new VisibleFace();
+        // 将体素信息转换为面片信息
         processXFaces(blob, visFace, rset);
         processYFaces(blob, visFace, rset);
         processZFaces(blob, visFace, rset);
 
         // re-usable float[]'s to minimize garbage cleanup.
-        final int[] to = new int[3];
-        final int[] from = new int[3];
-        final float[] uvs = new float[8];
-        final float[] pos = new float[3];
+        int[] to = new int[3];
+        int[] from = new int[3];
+        float[] uvs = new float[8];
+        float[] pos = new float[3];
 
+        // TODO FaceBuilder很可能需要完全重写，参考FaceBakery
+        // TODO 步骤：构建顶点数据：FaceBakery.fillVertex
+        //           光照：QuadTransformers.applyingLightmap(data.blockLight(), data.skyLight()).processInPlace(quad);
+        //           颜色：QuadTransformers.applyingColor(data.color()).processInPlace(quad);
         // single reusable face builder.
-        final IFaceBuilder darkBuilder = getBuilder(DefaultVertexFormat.BLOCK);
-        final IFaceBuilder litBuilder = darkBuilder;
+        IFaceBuilder darkBuilder = getBuilder(DefaultVertexFormat.BLOCK);
+        IFaceBuilder litBuilder = darkBuilder; // TODO 为什么是一样的？
 
-        for (final ArrayList<FaceRegion> src : rset) {
+        for (ArrayList<FaceRegion> src : rset) {
+            // 尽可能合并同一平面上的面 TODO 为什么不在processXFaces的时候就合并？
             mergeFaces(src);
 
-            for (final FaceRegion region : src) {
-                final Direction myFace = region.face;
+            for (FaceRegion region : src) {
+                Direction direction = region.direction;
 
                 // keep integers up until the last moment... ( note I tested
                 // snapping the floats after this stage, it made no
                 // difference. )
-                offsetVec(to, region.getMaxX(), region.getMaxY(), region.getMaxZ(), myFace, 1);
-                offsetVec(from, region.getMinX(), region.getMinY(), region.getMinZ(), myFace, -1);
-                final ModelQuadLayer[] mpc = ModelUtil.getCachedFace(region.blockStateID, weight, myFace, myLayer.layer);
+                // 之前处理面的时候，FaceRegion的最大最小值都是边缘小块的中心，现在将其修正为真正的边缘，返回值存储至to和from
+                offsetVec(to, region.getMaxX(), region.getMaxY(), region.getMaxZ(), direction, 1);
+                offsetVec(from, region.getMinX(), region.getMinY(), region.getMinZ(), direction, -1);
+                // 获取相应方块ID在相应方向的相应渲染类型的面
+                ModelQuadLayer[] mpc = ModelUtil.getCachedFace(region.blockStateID, random, direction, myLayer.layer);
 
                 if (mpc != null) {
-                    for (final ModelQuadLayer pc : mpc) {
-                        final IFaceBuilder faceBuilder = pc.light > 0 ? litBuilder : darkBuilder;
+                    for (ModelQuadLayer pc : mpc) {
+                        // 将ModelQuadLayer和FaceRegion转换为BakedQuad
+                        IFaceBuilder faceBuilder = pc.light > 0 ? litBuilder : darkBuilder;
                         VertexFormat builderFormat = faceBuilder.getFormat();
 
                         faceBuilder.begin();
-                        faceBuilder.setFace(myFace, pc.tint);
+                        faceBuilder.setFace(direction, pc.tint);
 
-                        final float maxLightmap = 32.0f / 0xffff;
-                        getFaceUvs(uvs, myFace, from, to, pc.uvs);
+                        float maxLightmap = 32.0f / 0xffff;
+                        getFaceUvs(uvs, direction, from, to, pc.uvs);
 
                         // build it.
                         for (int vertNum = 0; vertNum < 4; vertNum++) {
                             for (int elementIndex = 0; elementIndex < builderFormat.getElements().size(); elementIndex++) {
-                                final VertexFormatElement element = builderFormat.getElements().get(elementIndex);
+                                VertexFormatElement element = builderFormat.getElements().get(elementIndex);
                                 switch (element.getUsage()) {
                                     case POSITION:
-                                        getVertexPos(pos, myFace, vertNum, to, from);
+                                        getVertexPos(pos, direction, vertNum, to, from);
                                         faceBuilder.put(elementIndex, pos[0], pos[1], pos[2]);
                                         break;
 
                                     case COLOR:
-                                        final int cb = pc.color;
+                                        int cb = pc.color;
                                         faceBuilder.put(elementIndex, byteToFloat(cb >> 16), byteToFloat(cb >> 8), byteToFloat(cb), NotZero(byteToFloat(cb >> 24)));
                                         break;
 
                                     case NORMAL:
                                         // this fixes a bug with Forge AO?? and
                                         // solid blocks.. I have no idea why...
-                                        final float normalShift = 0.999f;
-                                        faceBuilder.put(elementIndex, normalShift * myFace.getStepX(), normalShift * myFace.getStepY(), normalShift * myFace.getStepZ());
+                                        float normalShift = 0.999f;
+                                        faceBuilder.put(elementIndex, normalShift * direction.getStepX(), normalShift * direction.getStepY(), normalShift * direction.getStepZ());
                                         break;
 
                                     case UV:
                                         if (element.getIndex() == 2) {
-                                            final float v = maxLightmap * Math.max(0, Math.min(15, pc.light));
+                                            float v = maxLightmap * Math.max(0, Math.min(15, pc.light));
                                             faceBuilder.put(elementIndex, v, v);
                                         } else {
-                                            final float u = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 0];
-                                            final float v = uvs[faceVertMap[myFace.get3DDataValue()][vertNum] * 2 + 1];
+                                            float u = uvs[faceVertMap[direction.get3DDataValue()][vertNum] * 2 + 0];
+                                            float v = uvs[faceVertMap[direction.get3DDataValue()][vertNum] * 2 + 1];
                                             faceBuilder.put(elementIndex, pc.sprite.getU(u), pc.sprite.getV(v));
                                         }
                                         break;
@@ -283,7 +300,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
                         }
 
                         if (region.isEdge) {
-                            builder.getList(myFace).add(faceBuilder.create(pc.sprite));
+                            builder.getList(direction).add(faceBuilder.create(pc.sprite));
                         } else {
                             builder.getList(null).add(faceBuilder.create(pc.sprite));
                         }
@@ -333,28 +350,39 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         while (restart);
     }
 
-    private void processXFaces(final VoxelBlob blob, final VisibleFace visFace, final ArrayList<ArrayList<FaceRegion>> rset) {
+    /**
+     * 根据二进制信息获取X方向的所有面片区域
+     * @param blob 体素二进制信息
+     * @param visFace 工具对象，用于传参
+     * @param rset 返回值，X方向的所有面片
+     */
+    private void processXFaces(VoxelBlob blob, VisibleFace visFace, ArrayList<ArrayList<FaceRegion>> rset) {
         ArrayList<FaceRegion> regions = null;
-        final ICullTest test = myLayer.getTest();
+        ICullTest test = myLayer.getTest();
 
-        for (final Direction myFace : X_Faces) {
+        // 东侧和西侧
+        for (Direction direction : X_Faces) {
+            // blob.detail === 16
+            // 一层一层遍历
             for (int x = 0; x < blob.detail; x++) {
                 if (regions == null) {
-                    regions = new ArrayList<FaceRegion>(16);
+                    regions = new ArrayList<>(16);
                 }
 
+                // 遍历整个面
                 for (int z = 0; z < blob.detail; z++) {
                     FaceRegion currentFace = null;
 
                     for (int y = 0; y < blob.detail; y++) {
-                        final FaceRegion region = getRegion(blob, myFace, x, y, z, visFace, test);
-
+                        FaceRegion region = getRegion(blob, direction, x, y, z, visFace, test);
+                        // 如果面不可见，返回值就是null
                         if (region == null) {
                             currentFace = null;
                             continue;
                         }
 
                         if (currentFace != null) {
+                            // 合并
                             if (currentFace.extend(region)) {
                                 continue;
                             }
@@ -453,16 +481,16 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         }
     }
 
-    private FaceRegion getRegion(final VoxelBlob blob, final Direction myFace, final int x, final int y, final int z, final VisibleFace visFace, final ICullTest test) {
-        blob.visibleFace(myFace, x, y, z, visFace, test);
+    private FaceRegion getRegion(VoxelBlob blob, Direction direction, int x, int y, int z, VisibleFace visFace, ICullTest test) {
+        // 判断该坐标的小方块在这个方向上是否可见，获取stateId，以及是否在边缘，返回值在visFace中
+        blob.visibleFace(direction, x, y, z, visFace, test);
 
         if (visFace.visibleFace) {
-            final Vec3i off = myFace.getNormal();
-
-            return new FaceRegion(myFace,
-                    x * 2 + 1 + off.getX(),
-                    y * 2 + 1 + off.getY(),
-                    z * 2 + 1 + off.getZ(),
+            // 坐标范围是0-32，表示面的中心点在什么位置
+            return new FaceRegion(direction,
+                    x * 2 + 1 + direction.getStepX(),
+                    y * 2 + 1 + direction.getStepY(),
+                    z * 2 + 1 + direction.getStepZ(),
                     visFace.state,
                     visFace.isEdge);
         }
@@ -486,43 +514,26 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         float from_v = 0;
 
         switch (face) {
-            case UP:
+            case UP, DOWN -> {
                 to_u = to[0] / 16.0f;
                 to_v = to[2] / 16.0f;
                 from_u = from[0] / 16.0f;
                 from_v = from[2] / 16.0f;
-                break;
-            case DOWN:
-                to_u = to[0] / 16.0f;
-                to_v = to[2] / 16.0f;
-                from_u = from[0] / 16.0f;
-                from_v = from[2] / 16.0f;
-                break;
-            case SOUTH:
+            }
+            case SOUTH, NORTH -> {
                 to_u = to[0] / 16.0f;
                 to_v = to[1] / 16.0f;
                 from_u = from[0] / 16.0f;
                 from_v = from[1] / 16.0f;
-                break;
-            case NORTH:
-                to_u = to[0] / 16.0f;
-                to_v = to[1] / 16.0f;
-                from_u = from[0] / 16.0f;
-                from_v = from[1] / 16.0f;
-                break;
-            case EAST:
+            }
+            case EAST, WEST -> {
                 to_u = to[1] / 16.0f;
                 to_v = to[2] / 16.0f;
                 from_u = from[1] / 16.0f;
                 from_v = from[2] / 16.0f;
-                break;
-            case WEST:
-                to_u = to[1] / 16.0f;
-                to_v = to[2] / 16.0f;
-                from_u = from[1] / 16.0f;
-                from_v = from[2] / 16.0f;
-                break;
-            default:
+            }
+            default -> {
+            }
         }
 
         uvs[0] = 16.0f * u(quadsUV, to_u, to_v); // 0
@@ -563,28 +574,16 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         int upZ = 0;
 
         switch (f) {
-            case DOWN -> {
+            case DOWN, UP -> {
                 leftX = 1;
                 upZ = 1;
             }
-            case EAST -> {
+            case EAST, WEST -> {
                 leftZ = 1;
                 upY = 1;
             }
-            case NORTH -> {
+            case NORTH, SOUTH -> {
                 leftX = 1;
-                upY = 1;
-            }
-            case SOUTH -> {
-                leftX = 1;
-                upY = 1;
-            }
-            case UP -> {
-                leftX = 1;
-                upZ = 1;
-            }
-            case WEST -> {
-                leftZ = 1;
                 upY = 1;
             }
             default -> {
@@ -603,7 +602,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-        return getQuads(state, side, rand, ModelData.EMPTY, null);
+        return getList(side);
     }
 
     @Override

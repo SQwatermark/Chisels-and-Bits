@@ -1,6 +1,5 @@
 package mod.chiselsandbits.client.model.baked;
 
-import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.render.NullBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -22,110 +21,80 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 
-public abstract class BaseSmartModel implements BakedModel
-{
+public abstract class BaseSmartModel implements BakedModel {
 
-	private final ItemOverrides overrides;
+    private final ItemOverrides overrides;
 
-	private static class OverrideHelper extends ItemOverrides {
-		final BaseSmartModel parent;
+    private static class OverrideHelper extends ItemOverrides {
+        final BaseSmartModel parent;
 
-		public OverrideHelper(final BaseSmartModel p) {
-			super();
-			parent = p;
-		}
+        public OverrideHelper(final BaseSmartModel p) {
+            super();
+            parent = p;
+        }
 
+        // TODO 这里的seed是什么
         @Nullable
         @Override
-        public BakedModel resolve(final BakedModel p_239290_1_, final ItemStack p_239290_2_, @Nullable final ClientLevel p_239290_3_, @Nullable final LivingEntity p_239290_4_, int p_173469_) {
-            return parent.resolve( p_239290_1_, p_239290_2_, p_239290_3_, p_239290_4_ );
+        public BakedModel resolve(@NotNull BakedModel pModel, @NotNull ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed) {
+            return parent.resolve(pModel, pStack, pLevel, pEntity);
         }
-	}
-
-	public BaseSmartModel()
-	{
-		overrides = new OverrideHelper(this);
-	}
-
-	@Override
-	public boolean useAmbientOcclusion()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean isGui3d()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean isCustomRenderer()
-	{
-		return false;
-	}
-
-	@NotNull
-	@Override
-	public TextureAtlasSprite getParticleIcon() {
-		final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.STONE.defaultBlockState());
-
-		if (sprite == null) {
-			return ClientSide.instance.getMissingIcon();
-		}
-
-		return sprite;
-	}
-
-	@NotNull
-	@Override
-	public ItemTransforms getTransforms()
-	{
-		return ItemTransforms.NO_TRANSFORMS;
-	}
-
-	@Override
-	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-		final BakedModel model = handleBlockState( state, rand, data );
-		return model.getQuads( state, side, rand, data, renderType );
-	}
-
-	@Override
-	public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-		return getQuads(state, side, rand, ModelData.EMPTY, null);
-	}
-
-	public BakedModel handleBlockState(
-			final BlockState state,
-			final RandomSource rand )
-	{
-		return NullBakedModel.instance;
-	}
-
-	public BakedModel handleBlockState(
-	  final BlockState state,
-      final RandomSource random,
-      final ModelData modelData
-    )
-    {
-        return NullBakedModel.instance;
     }
 
-	@Override
-	public ItemOverrides getOverrides()
-	{
-		return overrides;
-	}
+    public BaseSmartModel() {
+        overrides = new OverrideHelper(this);
+    }
 
-	public BakedModel resolve(
-			final BakedModel originalModel,
-			final ItemStack stack,
-			final Level world,
-			final LivingEntity entity )
-	{
-		return originalModel;
-	}
+    @Override
+    public boolean useAmbientOcclusion() {
+        return true;
+    }
+
+    @Override
+    public boolean isGui3d() {
+        return true;
+    }
+
+    @Override
+    public boolean isCustomRenderer() {
+        return false;
+    }
+
+    @NotNull
+    @Override
+    public TextureAtlasSprite getParticleIcon() {
+        return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.STONE.defaultBlockState());
+    }
+
+    @NotNull
+    @Override
+    public ItemTransforms getTransforms() {
+        return ItemTransforms.NO_TRANSFORMS;
+    }
+
+    @Override
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
+        final BakedModel model = handleBlockState(state, rand, data, renderType);
+        return model.getQuads(state, side, rand, data, renderType);
+    }
+
+    @Override
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
+        return getQuads(state, side, rand, ModelData.EMPTY, null);
+    }
+
+    public BakedModel handleBlockState(BlockState state, RandomSource random, ModelData modelData, RenderType renderType) {
+        return NullBakedModel.INSTANCE;
+    }
+
+    @Override
+    public @NotNull ItemOverrides getOverrides() {
+        return overrides;
+    }
+
+    public BakedModel resolve(BakedModel originalModel, ItemStack stack, Level world, LivingEntity entity) {
+        return originalModel;
+    }
 
 }

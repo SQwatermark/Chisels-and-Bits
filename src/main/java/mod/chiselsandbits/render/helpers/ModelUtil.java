@@ -27,6 +27,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.client.model.data.ModelData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -54,7 +55,7 @@ public class ModelUtil implements ICacheClearable {
             return null;
         }
 
-        final Triple<Integer, RenderType, Direction> cacheVal = Triple.of(stateID, layer, face);
+        var cacheVal = Triple.of(stateID, layer, face);
 
         // 先从缓存中获取
         final ModelQuadLayer[] mpc = cache.get(cacheVal);
@@ -84,8 +85,8 @@ public class ModelUtil implements ICacheClearable {
         Fluid fluid = BlockBitInfo.getFluidFromBlock(state.getBlock());
         if (fluid != null) {
             var clientFluid = IClientFluidTypeExtensions.of(fluid);
-            for (final Direction xf : Direction.values()) {
-                final ModelQuadLayer[] mp = new ModelQuadLayer[1];
+            for (Direction xf : Direction.values()) {
+                ModelQuadLayer[] mp = new ModelQuadLayer[1];
                 mp[0] = new ModelQuadLayer();
                 mp[0].color = clientFluid.getTintColor();
                 mp[0].light = lv;
@@ -118,17 +119,15 @@ public class ModelUtil implements ICacheClearable {
         final HashMap<Direction, ArrayList<ModelQuadLayerBuilder>> tmp = new HashMap<>();
         final int color = BlockBitInfo.getColorFor(state, 0);
 
-        for (final Direction f : Direction.values()) {
-            tmp.put(f, new ArrayList<>());
+        for (Direction direction : Direction.values()) {
+            tmp.put(direction, new ArrayList<>());
         }
 
         if (model != null) {
-            for (final Direction f : Direction.values()) {
-                final List<BakedQuad> quads = ModelUtil.getModelQuads(model, state, f, MODEL_RANDOM);
-                processFaces(tmp, quads, state);
+            for (Direction direction : Direction.values()) {
+                processFaces(tmp, ModelUtil.getModelQuads(model, state, direction, MODEL_RANDOM, layer), state);
             }
-
-            processFaces(tmp, ModelUtil.getModelQuads(model, state, null, MODEL_RANDOM), state);
+            processFaces(tmp, ModelUtil.getModelQuads(model, state, null, MODEL_RANDOM, layer), state);
         }
 
         for (final Direction f : Direction.values()) {
@@ -146,32 +145,30 @@ public class ModelUtil implements ICacheClearable {
         return cache.get(cacheVal);
     }
 
-    private static List<BakedQuad> getModelQuads(
-            final BakedModel model,
-            final BlockState state,
-            final Direction f,
-            final RandomSource rand) {
+    // 获取一个普通模型的quads
+    private static List<BakedQuad> getModelQuads(BakedModel model, BlockState state, Direction direction, RandomSource rand, RenderType renderType) {
         try {
             // try to get block model...
-            return model.getQuads(state, f, rand);
+            return model.getQuads(state, direction, rand, ModelData.EMPTY, renderType);
         } catch (final Throwable ignored) {
 
         }
 
         try {
             // try to get item model?
-            return model.getQuads(null, f, rand);
+            return model.getQuads(null, direction, rand, ModelData.EMPTY, renderType);
         } catch (final Throwable ignored) {
 
         }
 
-        final ItemStack is = ModUtil.getItemStackFromBlockState(state);
-        if (!ModUtil.isEmpty(is)) {
-            final BakedModel secondModel = getOverrides(model).resolve(model, is, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
+        ItemStack itemStack = ModUtil.getItemStackFromBlockState(state); // TODO 意义何在？
+        if (!ModUtil.isEmpty(itemStack)) {
+            BakedModel secondModel = getOverrides(model)
+                    .resolve(model, itemStack, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
             if (secondModel != null) {
                 try {
-                    return secondModel.getQuads(null, f, rand);
+                    return secondModel.getQuads(null, direction, rand, ModelData.EMPTY, renderType);
                 } catch (final Throwable ignored) {
 
                 }
@@ -252,6 +249,7 @@ public class ModelUtil implements ICacheClearable {
         return q.getSprite();
     }
 
+    // TODO 这个方法的意图？把原本的普通方块模型进行某种转换？
     public static BakedModel solveModel(
             final BlockState state,
             final RandomSource weight,
@@ -260,10 +258,10 @@ public class ModelUtil implements ICacheClearable {
         boolean hasFaces = false;
 
         try {
-            hasFaces = hasFaces(originalModel, state, null, weight);
+            hasFaces = hasFaces(originalModel, state, null, weight, layer);
 
             for (final Direction f : Direction.values()) {
-                hasFaces = hasFaces || hasFaces(originalModel, state, f, weight);
+                hasFaces = hasFaces || hasFaces(originalModel, state, f, weight, layer);
             }
         } catch (final Exception e) {
             // an exception was thrown.. use the item model and hope...
@@ -277,10 +275,10 @@ public class ModelUtil implements ICacheClearable {
                 final BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(is, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
                 try {
-                    hasFaces = hasFaces(originalModel, state, null, weight);
+                    hasFaces = hasFaces(originalModel, state, null, weight, layer);
 
                     for (final Direction f : Direction.values()) {
-                        hasFaces = hasFaces || hasFaces(originalModel, state, f, weight);
+                        hasFaces = hasFaces || hasFaces(originalModel, state, f, weight, layer);
                     }
                 } catch (final Exception e) {
                     // an exception was thrown.. use the item model and hope...
@@ -298,12 +296,8 @@ public class ModelUtil implements ICacheClearable {
         return originalModel;
     }
 
-    private static boolean hasFaces(
-            final BakedModel model,
-            final BlockState state,
-            final Direction f,
-            final RandomSource weight) {
-        final List<BakedQuad> l = getModelQuads(model, state, f, weight);
+    private static boolean hasFaces(BakedModel model, BlockState state, Direction f, RandomSource weight, RenderType renderType) {
+        List<BakedQuad> l = getModelQuads(model, state, f, weight, renderType);
         if (l == null || l.isEmpty()) {
             return false;
         }
@@ -346,14 +340,14 @@ public class ModelUtil implements ICacheClearable {
 
         if (model != null) {
             try {
-                texture = findTexture(texture, getModelQuads(model, state, myFace, random), myFace);
+                texture = findTexture(texture, getModelQuads(model, state, myFace, random, layer), myFace);
 
                 if (texture == null) {
                     for (final Direction side : Direction.values()) {
-                        texture = findTexture(texture, getModelQuads(model, state, side, random), side);
+                        texture = findTexture(texture, getModelQuads(model, state, side, random, layer), side);
                     }
 
-                    texture = findTexture(texture, getModelQuads(model, state, null, random), null);
+                    texture = findTexture(texture, getModelQuads(model, state, null, random, layer), null);
                 }
             } catch (final Exception errr) {
             }

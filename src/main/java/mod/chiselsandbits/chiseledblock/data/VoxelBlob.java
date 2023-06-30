@@ -464,7 +464,7 @@ public final class VoxelBlob implements IVoxelSrc {
         return p;
     }
 
-    protected int getBit(
+    int getBit(
             final int offset) {
         if (offset < 0 || offset >= values.length)
             return 0;
@@ -472,17 +472,14 @@ public final class VoxelBlob implements IVoxelSrc {
         return values[offset];
     }
 
-    protected void putBit(
+    void putBit(
             final int offset,
             final int newValue) {
         values[offset] = newValue;
         noneAir.set(offset, newValue > 0);
     }
 
-    public int get(
-            final int x,
-            final int y,
-            final int z) {
+    public int get(int x, int y, int z) {
         return getBit(getDataIndex(x, y, z));
     }
 
@@ -591,22 +588,16 @@ public final class VoxelBlob implements IVoxelSrc {
         public int state;
     }
 
-    ;
-
-    public void visibleFace(
-            final Direction face,
-            int x,
-            int y,
-            int z,
-            final VisibleFace dest,
-            final ICullTest cullVisTest) {
-        final int mySpot = get(x, y, z);
+    public void visibleFace(Direction direction, int x, int y, int z, VisibleFace dest, ICullTest cullVisTest) {
+        // 这个小方块的stateId
+        int mySpot = get(x, y, z);
         dest.state = mySpot;
 
-        x += face.getStepX();
-        y += face.getStepY();
-        z += face.getStepZ();
+        x += direction.getStepX();
+        y += direction.getStepY();
+        z += direction.getStepZ();
 
+        // 是否小方块是否在边缘，以及是否在这个方向上可见
         if (x >= 0 && x < dim && y >= 0 && y < dim && z >= 0 && z < dim) {
             dest.isEdge = false;
             dest.visibleFace = cullVisTest.isVisible(mySpot, get(x, y, z));

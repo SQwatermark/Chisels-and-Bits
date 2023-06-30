@@ -17,9 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+// TODO 换成 EmptyModel.BAKED
 public class NullBakedModel implements BakedModel {
 
-    public static final NullBakedModel instance = new NullBakedModel();
+    public static final NullBakedModel INSTANCE = new NullBakedModel();
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
@@ -28,7 +29,7 @@ public class NullBakedModel implements BakedModel {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-        return getQuads(state, side, rand, ModelData.EMPTY, null);
+        return Collections.emptyList();
     }
 
     @Override

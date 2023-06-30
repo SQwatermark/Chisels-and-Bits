@@ -51,6 +51,7 @@ public class ChiselsAndBits {
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::onClientInit));
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::onModelRegistry));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::registerReloadListener));
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(ClientSide.instance));
 //        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::registerIconTextures));
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::retrieveRegisteredIconSprites));
@@ -87,7 +88,8 @@ public class ChiselsAndBits {
     }
 
     public void clientSetup(final FMLClientSetupEvent event) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Mod.EventBusSubscriber.Bus.MOD.bus().get().addListener(ChiseledBlockSmartModel::onConfigurationReload));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+                Mod.EventBusSubscriber.Bus.MOD.bus().get().addListener(ChiseledBlockSmartModel::onConfigurationReload));
     }
 
     boolean idsHaveBeenMapped = false;

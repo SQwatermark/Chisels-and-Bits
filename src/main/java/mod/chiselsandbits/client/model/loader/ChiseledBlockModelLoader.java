@@ -10,14 +10,16 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import org.jetbrains.annotations.NotNull;
 
-// TODO 监听资源重载事件
-public final class ChiseledBlockModelLoader implements IGeometryLoader<ChiseledBlockModel>, ResourceManagerReloadListener
-{
+/**
+ * 雕刻的几何加载器，用于为雕刻方块使用特殊的模型烘焙方法
+ * <p>
+ * 在模型的资源文件中指定 "loader": "chiselsandbits:chiseled_block"
+ */
+public final class ChiseledBlockModelLoader implements IGeometryLoader<ChiseledBlockModel>, ResourceManagerReloadListener {
 
     private static final ChiseledBlockModelLoader INSTANCE = new ChiseledBlockModelLoader();
 
-    public static ChiseledBlockModelLoader getInstance()
-    {
+    public static ChiseledBlockModelLoader getInstance() {
         return INSTANCE;
     }
 
@@ -25,8 +27,7 @@ public final class ChiseledBlockModelLoader implements IGeometryLoader<ChiseledB
     }
 
     @Override
-    public void onResourceManagerReload(@NotNull ResourceManager resourceManager)
-    {
+    public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {
         ChiselsAndBits.getInstance().clearCache();
     }
 

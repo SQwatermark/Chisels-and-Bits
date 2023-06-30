@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO 这个类只用于临时存取数据，或许不应该叫Builder，改成Container/Holder?
 public class ChiseledModelBuilder {
 
     private final List<BakedQuad> up = new ArrayList<>();
