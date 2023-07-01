@@ -17,7 +17,7 @@ import java.util.Random;
  */
 public abstract class BaseBakedPerspectiveModel implements BakedModel {
 
-    protected static final RandomSource RANDOM = RandomSource.create();
+    protected RandomSource RANDOM = RandomSource.create();
 
 	private static final Transformation ground;
 	private static final Transformation gui;

@@ -45,7 +45,7 @@ public class ModelUtil implements ICacheClearable {
     @SuppressWarnings("unused")
     private static final ModelUtil instance = new ModelUtil();
 
-    public static RandomSource MODEL_RANDOM = RandomSource.create();
+//    public static RandomSource MODEL_RANDOM = RandomSource.create();
 
     @Override
     public void clearCache() {
@@ -54,7 +54,7 @@ public class ModelUtil implements ICacheClearable {
         breakCache.clear();
     }
 
-    public static ModelQuadLayer[] getCachedFace(int stateID, RandomSource weight, Direction face, RenderType layer) {
+    public static ModelQuadLayer[] getCachedFace(int stateID, RandomSource random, Direction face, RenderType layer) {
         if (layer == null) {
             return null;
         }
@@ -71,16 +71,16 @@ public class ModelUtil implements ICacheClearable {
 //        final RenderType original = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
 //        try {
 //            ForgeHooksClient.setRenderType(layer);
-//            return getInnerCachedFace(cacheVal, stateID, weight, face, layer);
+//            return getInnerCachedFace(cacheVal, stateID, randomSource, face, layer);
 //        } finally {
 //            // restore previous layer.
 //            ForgeHooksClient.setRenderType(original);
 //        }
-        return getInnerCachedFace(cacheVal, stateID, weight, face, layer);
+        return getInnerCachedFace(cacheVal, stateID, random, face, layer);
     }
 
     private static ModelQuadLayer[] getInnerCachedFace(Triple<Integer, RenderType, Direction> cacheVal,
-            int stateID, RandomSource weight, Direction face, RenderType layer) {
+            int stateID, RandomSource random, Direction face, RenderType layer) {
 
         BlockState state = ModUtil.getStateById(stateID);
 
@@ -127,11 +127,11 @@ public class ModelUtil implements ICacheClearable {
         }
 
         // 获取方块的模型？
-        BakedModel model = ModelUtil.solveModel(state, weight, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state), layer);
+        BakedModel model = ModelUtil.solveModel(state, random, Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getBlockModel(state), layer);
 
         if (model != null) {
             for (Direction direction : Direction.values()) {
-                processFaces(tmp.get(direction), ModelUtil.getModelQuads(model, state, direction, MODEL_RANDOM, layer), state);
+                processFaces(tmp.get(direction), ModelUtil.getModelQuads(model, state, direction, random, layer), state);
             }
         }
 

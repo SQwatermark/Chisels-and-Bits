@@ -34,7 +34,6 @@ import java.util.*;
  * 雕刻方块的模型
  */
 public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
-    private static final RandomSource RANDOM = RandomSource.create();
 
     public static final float PIXELS_PER_BLOCK = 16.0f;
     private final static int[][] faceVertMap = new int[6][4];
@@ -149,10 +148,10 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
     private ChiseledBlockBakedModel() {
     }
 
-
     // TODO 用一个ChiseledBlockBakedModel的数组表示一个合并的模型
     // 此处开始根据体素数据构建模型面片
     public ChiseledBlockBakedModel(int stateId, ChiselRenderType layer, VoxelBlob data, VertexFormat format) {
+        RandomSource random = RandomSource.create();
         myLayer = layer;
         BlockState state = ModUtil.getStateById(stateId);
 
@@ -165,7 +164,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
         if (originalModel != null && data != null) {
             if (layer.filter(data)) {
                 ChiseledModelBuilder builder = new ChiseledModelBuilder();
-                generateFaces(builder, data, RANDOM);
+                generateFaces(builder, data, random);
 
                 // convert from builder to final storage.
                 up = builder.getSide(Direction.UP);

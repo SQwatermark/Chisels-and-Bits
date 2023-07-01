@@ -137,9 +137,6 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
 //        Integer stateID = modelData.get(BlockEntityChiseledBlock.MP_PBSI);
 //        stateID = stateID == null ? 0 : stateID;
 
-        // TODO 此方法中返回模型含有的所有renderType和相应的模型quad信息
-//        final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
-
         Map<RenderType, BakedModel> layerModels = new Object2ObjectOpenHashMap<>();
 
         for (RenderType layer : RenderType.chunkBufferLayers()) {
@@ -158,7 +155,7 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
 //            }
 
             BakedModel baked;
-            if (RenderType.chunkBufferLayers().contains(layer) && ChiseledBlockSmartModel.FLUID_RENDER_TYPES.get(RenderType.chunkBufferLayers().indexOf(layer))) {
+            if (ChiseledBlockSmartModel.FLUID_RENDER_TYPES.get(RenderType.chunkBufferLayers().indexOf(layer))) {
                 // 分别获取流体和方块的在该渲染层的缓存的模型
                 ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
                         (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),

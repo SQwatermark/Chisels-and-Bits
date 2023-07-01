@@ -19,8 +19,6 @@ import java.util.List;
 
 public class ModelCombined extends BaseBakedBlockModel {
 
-    private static final RandomSource COMBINED_RANDOM_MODEL = RandomSource.create();
-
     BakedModel[] merged;
 
     List<BakedQuad>[] face;
@@ -30,6 +28,7 @@ public class ModelCombined extends BaseBakedBlockModel {
 
     @SuppressWarnings("unchecked")
     public ModelCombined(BakedModel... args) {
+        RandomSource random = RandomSource.create();
         face = new ArrayList[Direction.values().length];
 
         generic = new ArrayList<>();
@@ -40,9 +39,9 @@ public class ModelCombined extends BaseBakedBlockModel {
         merged = args;
 
         for (final BakedModel m : merged) {
-            generic.addAll(m.getQuads(null, null, COMBINED_RANDOM_MODEL));
+            generic.addAll(m.getQuads(null, null, random));
             for (final Direction f : Direction.values()) {
-                face[f.ordinal()].addAll(m.getQuads(null, f, COMBINED_RANDOM_MODEL));
+                face[f.ordinal()].addAll(m.getQuads(null, f, random));
             }
         }
 
