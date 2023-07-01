@@ -441,9 +441,9 @@ public class ItemBlockChiseled extends BlockItem implements IVoxelBlobItem, IIte
                 context.getLevel().playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, DeprecationHelper.getSoundType(this.getBlock()).getPlaceSound(), SoundSource.BLOCKS,
                         (DeprecationHelper.getSoundType(this.getBlock()).getVolume() + 1.0F) / 2.0F,
                         DeprecationHelper.getSoundType(this.getBlock()).getPitch() * 0.8F, false);
-
-                if (!context.getPlayer().isCreative() && context.getItemInHand().getItem() instanceof ItemBlockChiseled)
-                    ModUtil.adjustStackSize(context.getItemInHand(), -1);
+                // TODO 禁止非创造模式使用
+//                if (!context.getPlayer().isCreative() && context.getItemInHand().getItem() instanceof ItemBlockChiseled)
+//                    ModUtil.adjustStackSize(context.getItemInHand(), -1);
 
                 return InteractionResult.SUCCESS;
             }

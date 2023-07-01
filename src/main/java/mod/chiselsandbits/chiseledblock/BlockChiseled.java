@@ -27,20 +27,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.SignalGetter;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -49,11 +45,13 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
-public class BlockChiseled extends Block implements EntityBlock, IMultiStateBlock {
+public class BlockChiseled extends Block implements EntityBlock, IMultiStateBlock, SimpleWaterloggedBlock {
 
     public static final BlockPos ZERO = BlockPos.ZERO;
 
@@ -61,12 +59,23 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
 
     public static final BooleanProperty FULL_BLOCK = BooleanProperty.create("full_block");
 
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+
     public final String name;
 
     public BlockChiseled(final String name, final BlockBehaviour.Properties properties) {
         super(properties);
         this.name = name;
-        this.registerDefaultState(this.stateDefinition.any().setValue(FULL_BLOCK, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FULL_BLOCK, false)
+                .setValue(WATERLOGGED, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(FULL_BLOCK);
+        builder.add(WATERLOGGED);
     }
 
     @Override
@@ -247,12 +256,6 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         return te.getItemStack(null);
     }
 
-    @Override
-    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(FULL_BLOCK);
-    }
-
 //    @Override
 //    public boolean addDestroyEffects(final BlockState state, final Level world, final BlockPos pos, final ParticleEngine manager)
 //    {
@@ -372,14 +375,7 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         public BlockEntityChiseledBlock te = null;
     }
 
-    ;
-
-    public static ReplaceWithChiseledValue replaceWithChiseled(
-            final @Nonnull Level world,
-            final @Nonnull BlockPos pos,
-            final BlockState originalState,
-            final int fragmentBlockStateID,
-            final boolean triggerUpdate) {
+    public static ReplaceWithChiseledValue replaceWithChiseled(@Nonnull Level world, @Nonnull BlockPos pos, BlockState originalState, int fragmentBlockStateID, boolean triggerUpdate) {
         BlockState actingState = originalState;
         Block target = originalState.getBlock();
         final boolean isAir = world.isEmptyBlock(pos) || actingState.canBeReplaced(new DirectionalPlaceContext(world, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
@@ -528,9 +524,7 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
     }
 
     @Override
-    public BlockState getPrimaryState(
-            final BlockGetter world,
-            final BlockPos pos) {
+    public @NotNull BlockState getPrimaryState(@NotNull BlockGetter world, @NotNull BlockPos pos) {
         try {
             return getTileEntity(world, pos).getBlockState(Blocks.STONE);
         } catch (final ExceptionNoTileEntity e) {
@@ -539,15 +533,43 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         }
     }
 
-    public boolean basicHarvestBlockTest(
-            Level world,
-            BlockPos pos,
-            Player player) {
+    public boolean basicHarvestBlockTest(Level world, BlockPos pos, Player player) {
         return super.canHarvestBlock(world.getBlockState(pos), world, pos, player);
     }
 
+    // 不可推动
     @Override
     public PushReaction getPistonPushReaction(final BlockState state) {
         return PushReaction.BLOCK;
     }
+
+    /*============================流水相关============================*/
+
+    @Override
+    public @NotNull FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
+    }
+
+    /**
+     * Update the provided state given the provided neighbor direction and neighbor state, returning a new state.
+     * For example, fences make their connections to the passed in state if possible, and wet concrete powder immediately
+     * returns its solidified counterpart.
+     * Note that this method should ideally consider only the specific direction passed in.
+     */
+    @Override
+    public @NotNull BlockState updateShape(BlockState pState, @NotNull Direction pDirection, @NotNull BlockState pNeighborState, @NotNull LevelAccessor pLevel, @NotNull BlockPos pCurrentPos, @NotNull BlockPos pNeighborPos) {
+        if (pState.getValue(WATERLOGGED)) {
+            pLevel.scheduleTick(pCurrentPos, Fluids.WATER, Fluids.WATER.getTickDelay(pLevel));
+        }
+        return super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos);
+    }
+
+    // TODO 目前这里没作用，因为实际放置方块时用了默认state，见ItemBlockChiseled.placeBlock
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
+        boolean flag = fluidstate.getType() == Fluids.WATER;
+        return Objects.requireNonNull(super.getStateForPlacement(pContext)).setValue(WATERLOGGED, flag);
+    }
+
 }

@@ -569,7 +569,7 @@ public class ClientSide {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void drawHighlight(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             return;
         }
         PoseStack stack = event.getPoseStack();
@@ -798,7 +798,7 @@ public class ClientSide {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void drawLast(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             return;
         }
         // important and used for tesr / block rendering.

@@ -12,6 +12,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+// TODO 流体储罐什么时候被我删了？
 public final class ModBlocks {
 
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, ChiselsAndBits.MODID);
@@ -20,9 +21,8 @@ public final class ModBlocks {
     public static final RegistryObject<BlockChiseled> CHISELED_BLOCK = BLOCKS.register("chiseled_block", () ->
             new BlockChiseled("chiseled_block", BlockBehaviour.Properties
                     .of()
-                    .strength(1.5f, 6f)
-                    .isViewBlocking((p_test_1_, p_test_2_, p_test_3_) -> false)
-                    .isRedstoneConductor((p_test_1_, p_test_2_, p_test_3_) -> false)
+                    .forceSolidOn() // 防止被水冲走
+                    .strength(-1.0F, 3600000.0F) // 基岩同款
                     .noOcclusion()));
 
     public static final RegistryObject<ItemBlockChiseled> CHISELED_BLOCK_ITEM = BLOCK_ITEMS.register("chiseled_block", () ->

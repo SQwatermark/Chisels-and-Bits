@@ -91,8 +91,7 @@ public class BitItemBaked extends BaseBakedBlockModel {
         generic.trimToSize();
     }
 
-    private float[] getFaceUvs(
-            final Direction face) {
+    private float[] getFaceUvs(Direction face) {
         float[] afloat;
 
         final int from_x = 7;
@@ -103,22 +102,11 @@ public class BitItemBaked extends BaseBakedBlockModel {
         final int to_y = 8;
         final int to_z = 8;
 
-        switch (face) {
-            case DOWN:
-            case UP:
-                afloat = new float[]{from_x, from_z, to_x, to_z};
-                break;
-            case NORTH:
-            case SOUTH:
-                afloat = new float[]{from_x, PIXELS_PER_BLOCK - to_y, to_x, PIXELS_PER_BLOCK - from_y};
-                break;
-            case WEST:
-            case EAST:
-                afloat = new float[]{from_z, PIXELS_PER_BLOCK - to_y, to_z, PIXELS_PER_BLOCK - from_y};
-                break;
-            default:
-                throw new NullPointerException();
-        }
+        afloat = switch (face) {
+            case DOWN, UP -> new float[]{from_x, from_z, to_x, to_z};
+            case NORTH, SOUTH -> new float[]{from_x, PIXELS_PER_BLOCK - to_y, to_x, PIXELS_PER_BLOCK - from_y};
+            case WEST, EAST -> new float[]{from_z, PIXELS_PER_BLOCK - to_y, to_z, PIXELS_PER_BLOCK - from_y};
+        };
 
         return afloat;
     }
