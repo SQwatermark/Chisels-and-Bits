@@ -2,6 +2,8 @@ package mod.chiselsandbits.client.model.baked;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
+import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -19,56 +21,55 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel {
 
     protected RandomSource RANDOM = RandomSource.create();
 
-	private static final Transformation ground;
-	private static final Transformation gui;
-	private static final Transformation fixed;
-	private static final Transformation firstPerson_righthand;
-	private static final Transformation firstPerson_lefthand;
-	private static final Transformation thirdPerson_righthand;
-	private static final Transformation thirdPerson_lefthand;
+    private static final ItemTransform ground;
+    private static final ItemTransform gui;
+    private static final ItemTransform fixed;
+    private static final ItemTransform firstPerson_righthand;
+    private static final ItemTransform firstPerson_lefthand;
+    private static final ItemTransform thirdPerson_righthand;
+    private static final ItemTransform thirdPerson_lefthand;
 
-	static {
-		gui = getMatrix( 0, 0, 0, 30, 225, 0, 0.625f );
-		ground = getMatrix( 0, 3 / 16.0f, 0, 0, 0, 0, 0.25f );
-		fixed = getMatrix( 0, 0, 0, 0, 0, 0, 0.5f );
-		thirdPerson_lefthand = thirdPerson_righthand = getMatrix( 0, 2.5f / 16.0f, 0, 75, 45, 0, 0.375f );
-		firstPerson_righthand = firstPerson_lefthand = getMatrix( 0, 0, 0, 0, 45, 0, 0.40f );
-	}
+    static {
+        gui = getMatrix(0, 0, 0, 30, 225, 0, 0.625f);
+        ground = getMatrix(0, 3 / 16.0f, 0, 0, 0, 0, 0.25f);
+        fixed = getMatrix(0, 0, 0, 0, 0, 0, 0.5f);
+        thirdPerson_lefthand = thirdPerson_righthand = getMatrix(0, 2.5f / 16.0f, 0, 75, 45, 0, 0.375f);
+        firstPerson_righthand = firstPerson_lefthand = getMatrix(0, 0, 0, 0, 45, 0, 0.40f);
+    }
 
-	private static Transformation getMatrix(float transX, float transY, float transZ, float rotX, float rotY, float rotZ, float scaleXYZ) {
-		final Vector3f translation = new Vector3f( transX, transY, transZ );
-		final Vector3f scale = new Vector3f( scaleXYZ, scaleXYZ, scaleXYZ );
-
-		final Quaternionf rotation = TransformationHelper.quatFromXYZ(rotX, rotY, rotZ, true);
-		return new Transformation(translation, rotation, scale, null);
-	}
+    private static ItemTransform getMatrix(float transX, float transY, float transZ, float rotX, float rotY, float rotZ, float scaleXYZ) {
+        Vector3f rotation = new Vector3f(rotX, rotY, rotZ);
+        Vector3f translation = new Vector3f(transX, transY, transZ);
+        Vector3f scale = new Vector3f(scaleXYZ, scaleXYZ, scaleXYZ);
+        return new ItemTransform(rotation, translation, scale, new Vector3f());
+    }
 
     @Override
     public @NotNull BakedModel applyTransform(@NotNull ItemDisplayContext transformType, @NotNull PoseStack poseStack, boolean applyLeftHandTransform) {
-        switch ( transformType ) {
+        switch (transformType) {
             case FIRST_PERSON_LEFT_HAND:
-                poseStack.pushTransformation(firstPerson_lefthand);
+                firstPerson_lefthand.apply(applyLeftHandTransform, poseStack);
                 return this;
             case FIRST_PERSON_RIGHT_HAND:
-                poseStack.pushTransformation(firstPerson_righthand);
+                firstPerson_righthand.apply(applyLeftHandTransform, poseStack);
                 return this;
             case THIRD_PERSON_LEFT_HAND:
-                poseStack.pushTransformation(thirdPerson_lefthand);
+                thirdPerson_lefthand.apply(applyLeftHandTransform, poseStack);
                 return this;
             case THIRD_PERSON_RIGHT_HAND:
-                poseStack.pushTransformation(thirdPerson_righthand);
+                thirdPerson_righthand.apply(applyLeftHandTransform, poseStack);
             case FIXED:
-                poseStack.pushTransformation(fixed);
+                fixed.apply(applyLeftHandTransform, poseStack);
                 return this;
             case GROUND:
-                poseStack.pushTransformation(ground);
+                ground.apply(applyLeftHandTransform, poseStack);
                 return this;
             case GUI:
-                poseStack.pushTransformation(gui);
+                gui.apply(applyLeftHandTransform, poseStack);
                 return this;
             default:
         }
-        poseStack.pushTransformation(fixed);
+        fixed.apply(applyLeftHandTransform, poseStack);
         return this;
     }
 }
