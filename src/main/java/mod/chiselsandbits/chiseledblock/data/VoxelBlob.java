@@ -304,21 +304,15 @@ public final class VoxelBlob implements IVoxelSrc {
         while (bi.hasNext()) {
 
             switch (axis) {
-                case X:
-                    d.set(bi.x, dim_minus_one - bi.z, bi.y, bi.getNext(this));
-                    break;
-                case Y:
+                case X -> d.set(bi.x, dim_minus_one - bi.z, bi.y, bi.getNext(this));
+                case Y -> {
                     final int blockStateId = bi.getNext(this);
                     final BlockState blockState = ModUtil.getStateById(blockStateId);
                     final BlockState rotatedBlockState = blockState.rotate(Rotation.COUNTERCLOCKWISE_90);
-
                     d.set(bi.z, bi.y, dim_minus_one - bi.x, ModUtil.getStateId(rotatedBlockState));
-                    break;
-                case Z:
-                    d.set(dim_minus_one - bi.y, bi.x, bi.z, bi.getNext(this));
-                    break;
-                default:
-                    throw new NullPointerException();
+                }
+                case Z -> d.set(dim_minus_one - bi.y, bi.x, bi.z, bi.getNext(this));
+                default -> throw new NullPointerException();
             }
         }
 
