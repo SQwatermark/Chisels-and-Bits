@@ -1,5 +1,6 @@
 package mod.chiselsandbits.client.model.baked;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.render.ModelCombined;
@@ -28,13 +29,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * 雕刻模型烘焙的入口
  */
 public class DataAwareChiseledBlockBakedModel implements BakedModel {
-    private final ModelProperty<BakedModel> MODEL_PROP = new ModelProperty<>();
+    private final ModelProperty<Map<RenderType, BakedModel>> MODEL_PROP = new ModelProperty<>();
 
     private final ItemOverrides overrides = new ItemOverrides() {
         @Override
@@ -92,7 +94,9 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
         BakedModel bakedModel = null;
         if (data.has(MODEL_PROP)) {
-            bakedModel = data.get(MODEL_PROP);
+            Map<RenderType, BakedModel> renderTypeBakedModelMap = data.get(MODEL_PROP);
+            assert renderTypeBakedModelMap != null;
+            bakedModel = renderTypeBakedModelMap.get(renderType);
         }
         if (bakedModel == null) {
             bakedModel = EmptyModel.BAKED;
@@ -129,53 +133,56 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
 
         // 未能理解
         // This seems silly, but it proves to be faster in practice.
-        VoxelBlobStateReference data = modelData.get(BlockEntityChiseledBlock.MP_VBSR);
-        Integer stateID = modelData.get(BlockEntityChiseledBlock.MP_PBSI);
-        stateID = stateID == null ? 0 : stateID;
+//        VoxelBlobStateReference data = modelData.get(BlockEntityChiseledBlock.MP_VBSR);
+//        Integer stateID = modelData.get(BlockEntityChiseledBlock.MP_PBSI);
+//        stateID = stateID == null ? 0 : stateID;
 
         // TODO 此方法中返回模型含有的所有renderType和相应的模型quad信息
 //        final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
 
-        final RenderType layer = RenderType.solid();
+        Map<RenderType, BakedModel> layerModels = new Object2ObjectOpenHashMap<>();
 
-        if (layer == null) {
-            final ChiseledBlockBakedModel[] models = new ChiseledBlockBakedModel[ChiselRenderType.values().length];
-            int o = 0;
+        for (RenderType layer : RenderType.chunkBufferLayers()) {
+//            if (layer == null) {
+//                final ChiseledBlockBakedModel[] models = new ChiseledBlockBakedModel[ChiselRenderType.values().length];
+//                int o = 0;
+//
+//                // 获取每个渲染类型缓存的模型
+//                for (final ChiselRenderType l : ChiselRenderType.values()) {
+//                    models[o++] = ChiseledBlockSmartModel.getOrCreateBakedModel(
+//                            (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
+//                            l);
+//                }
+//                layerModels.put(layer, new ModelCombined(models));
+//                return ModelData.builder().with(MODEL_PROP, new ModelCombined(models)).build();
+//            }
 
-            // 获取每个渲染类型缓存的模型
-            for (final ChiselRenderType l : ChiselRenderType.values()) {
-                models[o++] = ChiseledBlockSmartModel.getOrCreateBakedModel(
+            BakedModel baked;
+            if (RenderType.chunkBufferLayers().contains(layer) && ChiseledBlockSmartModel.FLUID_RENDER_TYPES.get(RenderType.chunkBufferLayers().indexOf(layer))) {
+                // 分别获取流体和方块的在该渲染层的缓存的模型
+                ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
                         (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
-                        l);
-            }
+                        ChiselRenderType.fromLayer(layer, false));
+                ChiseledBlockBakedModel b = ChiseledBlockSmartModel.getOrCreateBakedModel(
+                        (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
+                        ChiselRenderType.fromLayer(layer, true));
 
-            return ModelData.builder().with(MODEL_PROP, new ModelCombined(models)).build();
-        }
-
-        BakedModel baked;
-        if (RenderType.chunkBufferLayers().contains(layer) && ChiseledBlockSmartModel.FLUID_RENDER_TYPES.get(RenderType.chunkBufferLayers().indexOf(layer))) {
-            // 分别获取流体和方块的在该渲染层的缓存的模型
-            ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
-                    (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
-                    ChiselRenderType.fromLayer(layer, false));
-            ChiseledBlockBakedModel b = ChiseledBlockSmartModel.getOrCreateBakedModel(
-                    (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
-                    ChiselRenderType.fromLayer(layer, true));
-
-            if (a.isEmpty()) {
-                baked = b;
-            } else if (b.isEmpty()) {
-                baked = a;
+                if (a.isEmpty()) {
+                    baked = b;
+                } else if (b.isEmpty()) {
+                    baked = a;
+                } else {
+                    baked = new ModelCombined(a, b);
+                }
             } else {
-                baked = new ModelCombined(a, b);
+                baked = ChiseledBlockSmartModel.getOrCreateBakedModel(
+                        (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
+                        ChiselRenderType.fromLayer(layer, false));
             }
-        } else {
-            baked = ChiseledBlockSmartModel.getOrCreateBakedModel(
-                    (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
-                    ChiselRenderType.fromLayer(layer, false));
+            layerModels.put(layer, baked);
         }
 
-        return ModelData.builder().with(MODEL_PROP, baked).build();
+        return ModelData.builder().with(MODEL_PROP, layerModels).build();
     }
 
 }
