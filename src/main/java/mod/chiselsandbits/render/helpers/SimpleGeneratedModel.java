@@ -14,8 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -31,8 +29,12 @@ public class SimpleGeneratedModel implements BakedModel {
 
     final TextureAtlasSprite texture;
 
-    public SimpleGeneratedModel(
-            final TextureAtlasSprite texture) {
+    /**
+     * 六面纹理相同的正方体模型
+     *
+     * @param texture 纹理
+     */
+    public SimpleGeneratedModel(TextureAtlasSprite texture) {
         // create lists...
         face[0] = new ArrayList<>();
         face[1] = new ArrayList<>();
@@ -43,18 +45,18 @@ public class SimpleGeneratedModel implements BakedModel {
 
         this.texture = texture;
 
-        final float[] afloat = new float[]{0, 0, 16, 16};
-        final BlockFaceUV uv = new BlockFaceUV(afloat, 0);
-        final FaceBakery faceBakery = new FaceBakery();
+        float[] afloat = new float[]{0, 0, 16, 16};
+        BlockFaceUV uv = new BlockFaceUV(afloat, 0);
+        FaceBakery faceBakery = new FaceBakery();
 
-        final Vector3f to = new Vector3f(0.0f, 0.0f, 0.0f);
-        final Vector3f from = new Vector3f(16.0f, 16.0f, 16.0f);
+        Vector3f to = new Vector3f(0.0f, 0.0f, 0.0f);
+        Vector3f from = new Vector3f(16.0f, 16.0f, 16.0f);
 
-        final BlockElementRotation bpr = null;
-        final BlockModelRotation mr = BlockModelRotation.X0_Y0;
+        BlockElementRotation bpr = null;
+        BlockModelRotation mr = BlockModelRotation.X0_Y0;
 
-        for (final Direction side : Direction.values()) {
-            final BlockElementFace bpf = new BlockElementFace(side, 1, "", uv);
+        for (Direction side : Direction.values()) {
+            BlockElementFace bpf = new BlockElementFace(side, 1, "", uv);
 
             Vector3f toB, fromB;
 
@@ -86,60 +88,62 @@ public class SimpleGeneratedModel implements BakedModel {
                 default -> throw new NullPointerException();
             }
 
-            final BakedQuad g = faceBakery.bakeQuad(toB, fromB, bpf, texture, side, mr, bpr, false, new ResourceLocation(ChiselsAndBits.MODID, "simple"));
-            face[side.ordinal()].add(finishFace(g, side, DefaultVertexFormat.BLOCK));
+            BakedQuad g = faceBakery.bakeQuad(toB, fromB, bpf, texture, side, mr, bpr, false, new ResourceLocation(ChiselsAndBits.MODID, "simple"));
+//            face[side.ordinal()].add(finishFace(g, side, DefaultVertexFormat.BLOCK));
+            face[side.ordinal()].add(g);
         }
     }
 
-    private BakedQuad finishFace(
-            final BakedQuad g,
-            final Direction myFace,
-            final VertexFormat format) {
-        final int[] vertData = g.getVertices();
-        final int wrapAt = vertData.length / 4;
-
-        final BakedQuadBuilder b = new BakedQuadBuilder(g.getSprite());
-        b.setQuadOrientation(myFace);
-        b.setQuadTint(1);
-
-        for (int vertNum = 0; vertNum < 4; vertNum++) {
-            for (int elementIndex = 0; elementIndex < format.getElements().size(); elementIndex++) {
-                final VertexFormatElement element = format.getElements().get(elementIndex);
-                switch (element.getUsage()) {
-                    case POSITION:
-                        b.put(elementIndex, Float.intBitsToFloat(vertData[0 + wrapAt * vertNum]), Float.intBitsToFloat(vertData[1 + wrapAt * vertNum]), Float.intBitsToFloat(vertData[2 + wrapAt * vertNum]));
-                        break;
-
-                    case COLOR:
-                        final float light = LightUtil.diffuseLight(myFace);
-                        b.put(elementIndex, light, light, light, 1f);
-                        break;
-
-                    case NORMAL:
-                        b.put(elementIndex, myFace.getStepX(), myFace.getStepY(), myFace.getStepZ());
-                        break;
-
-                    case UV:
-
-                        if (element.getIndex() == 1) {
-                            b.put(elementIndex, 0, 0);
-                        } else {
-                            final float u = Float.intBitsToFloat(vertData[4 + wrapAt * vertNum]);
-                            final float v = Float.intBitsToFloat(vertData[5 + wrapAt * vertNum]);
-                            b.put(elementIndex, u, v);
-                        }
-
-                        break;
-
-                    default:
-                        b.put(elementIndex);
-                        break;
-                }
-            }
-        }
-
-        return b.build();
-    }
+    // TODO 这是什么
+//    private BakedQuad finishFace(
+//            final BakedQuad g,
+//            final Direction myFace,
+//            final VertexFormat format) {
+//        final int[] vertData = g.getVertices();
+//        final int wrapAt = vertData.length / 4;
+//
+//        final BakedQuadBuilder b = new BakedQuadBuilder(g.getSprite());
+//        b.setQuadOrientation(myFace);
+//        b.setQuadTint(1);
+//
+//        for (int vertNum = 0; vertNum < 4; vertNum++) {
+//            for (int elementIndex = 0; elementIndex < format.getElements().size(); elementIndex++) {
+//                final VertexFormatElement element = format.getElements().get(elementIndex);
+//                switch (element.getUsage()) {
+//                    case POSITION:
+//                        b.put(elementIndex, Float.intBitsToFloat(vertData[0 + wrapAt * vertNum]), Float.intBitsToFloat(vertData[1 + wrapAt * vertNum]), Float.intBitsToFloat(vertData[2 + wrapAt * vertNum]));
+//                        break;
+//
+//                    case COLOR:
+//                        final float light = LightUtil.diffuseLight(myFace);
+//                        b.put(elementIndex, light, light, light, 1f);
+//                        break;
+//
+//                    case NORMAL:
+//                        b.put(elementIndex, myFace.getStepX(), myFace.getStepY(), myFace.getStepZ());
+//                        break;
+//
+//                    case UV:
+//
+//                        if (element.getIndex() == 1) {
+//                            b.put(elementIndex, 0, 0);
+//                        } else {
+//                            final float u = Float.intBitsToFloat(vertData[4 + wrapAt * vertNum]);
+//                            final float v = Float.intBitsToFloat(vertData[5 + wrapAt * vertNum]);
+//                            b.put(elementIndex, u, v);
+//                        }
+//
+//                        break;
+//
+//                    default:
+//                        b.put(elementIndex);
+//                        break;
+//                }
+//            }
+//        }
+//
+//        return b.build();
+//    }
 
     public List<BakedQuad>[] getFace() {
         return face;

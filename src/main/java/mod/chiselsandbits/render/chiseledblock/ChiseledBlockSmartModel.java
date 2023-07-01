@@ -12,7 +12,6 @@ import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.render.ModelCombined;
-import mod.chiselsandbits.render.NullBakedModel;
 import mod.chiselsandbits.render.cache.CacheMap;
 import mod.chiselsandbits.utils.SimpleMaxSizedCache;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -25,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.model.EmptyModel;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -138,7 +138,7 @@ public class ChiseledBlockSmartModel extends BaseSmartModel implements ICacheCle
     @Override
     public BakedModel handleBlockState(BlockState state, RandomSource rand, ModelData modelData, RenderType renderType) {
         if (state == null) {
-            return NullBakedModel.INSTANCE;
+            return EmptyModel.BAKED;
         }
 
         // 似曾相识的结构，但这里有用到

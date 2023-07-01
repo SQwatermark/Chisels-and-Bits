@@ -140,6 +140,11 @@ public class ClientSide {
     }
 
     @SubscribeEvent
+    public static void registerBindingsStatic(RegisterKeyMappingsEvent event) {
+        instance.registerBindings(event); // TODO 怪
+    }
+
+
     public void registerBindings(RegisterKeyMappingsEvent event) {
         for (ChiselMode mode : ChiselMode.values()) {
             mode.binding = registerBind(event, mode.string.toString(), InputConstants.UNKNOWN, "itemGroup.chiselsandbits", ModConflictContext.HOLDING_CHISEL);
@@ -299,7 +304,7 @@ public class ClientSide {
                     final IBitAccess access = ChiselsAndBits.getApi().getBitAccess(mc.level, rayTraceResult.getBlockPos());
                     final ItemStack is = access.getBitsAsItem(null, ItemType.CHISLED_BLOCK, false);
 
-                    CreativeClipboardTab.addItem(is);
+//                    CreativeClipboardTab.addItem(is);
                 } catch (final CannotBeChiseled e) {
                     // nope.
                 }
@@ -479,8 +484,8 @@ public class ClientSide {
     }
 
     @SubscribeEvent
-    public void interaction(final TickEvent.ClientTickEvent event) {
-        if (!readyState.isReady()) {
+    public void interaction(final TickEvent.PlayerTickEvent event) {
+        if (event.type != TickEvent.Type.CLIENT || event.phase != TickEvent.Phase.END) { // TODO 这样判断是否正确
             return;
         }
 

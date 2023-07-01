@@ -19,7 +19,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.client.model.EmptyModel;
 
+// TODO 这是什么
 public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable {
     static private final HashMap<Integer, BakedModel> modelCache = new HashMap<>();
     static private final HashMap<Integer, BakedModel> largeModelCache = new HashMap<>();
@@ -30,8 +32,10 @@ public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable
         if (stateID == 0) {
             //We are running an empty bit, for display purposes.
             //Lets loop:
-            if (alternativeStacks.isEmpty())
-                ModItems.ITEM_BLOCK_BIT.get().fillItemCategory(Objects.requireNonNull(ModItems.ITEM_BLOCK_BIT.get().getItemCategory()), alternativeStacks);
+            if (alternativeStacks.isEmpty()) {
+                return EmptyModel.BAKED;
+//                ModItems.ITEM_BLOCK_BIT.get().fillItemCategory(Objects.requireNonNull(ModItems.ITEM_BLOCK_BIT.get().getItemCategory()), alternativeStacks); TODO
+            }
 
             final int alternativeIndex = (int) ((Math.floor(TickHandler.getClientTicks() / 20d)) % alternativeStacks.size());
 

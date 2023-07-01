@@ -1,85 +1,50 @@
 package mod.chiselsandbits.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Mod root configuration.
  */
-public class Configuration
-{
+public class Configuration {
     private final ClientConfiguration clientConfig;
     private final ServerConfiguration serverConfig;
     private final CommonConfiguration commonConfig;
 
-    private final ForgeConfigSpec clientConfigSpec;
-    private final ForgeConfigSpec commonConfigSpec;
-    private final ForgeConfigSpec serverConfigSpec;
-
     /**
      * Builds configuration tree.
      *
-     * @param modContainer from event
      */
-    public Configuration(final ModContainer modContainer)
-    {
-        final Pair<ClientConfiguration, ForgeConfigSpec> cli = new ForgeConfigSpec.Builder().configure(ClientConfiguration::new);
-        final Pair<ServerConfiguration, ForgeConfigSpec> ser = new ForgeConfigSpec.Builder().configure(ServerConfiguration::new);
-        final Pair<CommonConfiguration, ForgeConfigSpec> com = new ForgeConfigSpec.Builder().configure(CommonConfiguration::new);
-        /**
-         * Loaded clientside, not synced
-         */
-        final ModConfig client = new ModConfig(ModConfig.Type.CLIENT, cli.getRight(), modContainer);
-        /**
-         * Loaded serverside, synced on connection
-         */
-        final ModConfig server = new ModConfig(ModConfig.Type.SERVER, ser.getRight(), modContainer);
-        /**
-         * Loaded on both sides, not synced. Values might differ.
-         */
-        final ModConfig common = new ModConfig(ModConfig.Type.COMMON, com.getRight(), modContainer);
+    public Configuration() {
+        var cli = new ForgeConfigSpec.Builder().configure(ClientConfiguration::new);
+        var  ser = new ForgeConfigSpec.Builder().configure(ServerConfiguration::new);
+        var  com = new ForgeConfigSpec.Builder().configure(CommonConfiguration::new);
         clientConfig = cli.getLeft();
         serverConfig = ser.getLeft();
         commonConfig = com.getLeft();
 
-        clientConfigSpec = cli.getRight();
-        serverConfigSpec = ser.getRight();
-        commonConfigSpec = com.getRight();
+        ForgeConfigSpec clientConfigSpec = cli.getRight();
+        ForgeConfigSpec serverConfigSpec = ser.getRight();
+        ForgeConfigSpec commonConfigSpec = com.getRight();
 
-        modContainer.addConfig(client);
-        modContainer.addConfig(server);
-        modContainer.addConfig(common);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfigSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverConfigSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonConfigSpec);
     }
 
-    public ClientConfiguration getClient()
-    {
+    public ClientConfiguration getClient() {
         return clientConfig;
     }
 
-    public ServerConfiguration getServer()
-    {
+    public ServerConfiguration getServer() {
         return serverConfig;
     }
 
-    public CommonConfiguration getCommon()
-    {
+    public CommonConfiguration getCommon() {
         return commonConfig;
     }
 
-    public ForgeConfigSpec getClientConfigSpec()
-    {
-        return clientConfigSpec;
-    }
 
-    public ForgeConfigSpec getCommonConfigSpec()
-    {
-        return commonConfigSpec;
-    }
-
-    public ForgeConfigSpec getServerConfigSpec()
-    {
-        return serverConfigSpec;
-    }
 }

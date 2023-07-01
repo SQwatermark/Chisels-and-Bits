@@ -12,8 +12,7 @@ import java.util.Objects;
  * Mod server configuration.
  * Loaded serverside, synced on connection.
  */
-public class ServerConfiguration extends AbstractConfiguration
-{
+public class ServerConfiguration extends AbstractConfiguration {
     public ForgeConfigSpec.BooleanValue logTileErrors;
     public ForgeConfigSpec.BooleanValue logEligibilityErrors;
     public ForgeConfigSpec.BooleanValue blackListRandomTickingBlocks;
@@ -34,13 +33,12 @@ public class ServerConfiguration extends AbstractConfiguration
     public ForgeConfigSpec.BooleanValue fullBlockCrafting;
     public ForgeConfigSpec.BooleanValue requireBagSpace;
     public ForgeConfigSpec.BooleanValue voidExcessBits;
-    public ForgeConfigSpec.IntValue                            creativeClipboardSize;
+    public ForgeConfigSpec.IntValue creativeClipboardSize;
     public ForgeConfigSpec.ConfigValue<List<? extends String>> revertibleBlocks;
 
     public ForgeConfigSpec.BooleanValue lowMemoryMode;
 
-    protected ServerConfiguration(final ForgeConfigSpec.Builder builder)
-    {
+    protected ServerConfiguration(final ForgeConfigSpec.Builder builder) {
         createCategory(builder, "server.troubleshooting");
 
         logTileErrors = defineBoolean(builder, "server.troubleshooting.logging.tile-errors", true);
@@ -81,6 +79,7 @@ public class ServerConfiguration extends AbstractConfiguration
     /**
      * <p> 通过配置文件判断完整的雕刻方块是否可以变回普通方块
      * <p> 如果配置为*，则所有方块都可变回普通方块
+     *
      * @param newState
      * @return
      */

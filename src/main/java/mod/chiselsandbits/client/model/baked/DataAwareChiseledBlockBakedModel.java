@@ -3,7 +3,6 @@ package mod.chiselsandbits.client.model.baked;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.render.ModelCombined;
-import mod.chiselsandbits.render.NullBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiselRenderType;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
@@ -22,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.EmptyModel;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
@@ -97,7 +95,7 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
             bakedModel = data.get(MODEL_PROP);
         }
         if (bakedModel == null) {
-            bakedModel = NullBakedModel.INSTANCE;
+            bakedModel = EmptyModel.BAKED;
         }
         return bakedModel.getQuads(state, side, rand, data, renderType);
     }
@@ -136,7 +134,9 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
         stateID = stateID == null ? 0 : stateID;
 
         // TODO 此方法中返回模型含有的所有renderType和相应的模型quad信息
-        final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
+//        final RenderType layer = net.minecraftforge.client.MinecraftForgeClient.getRenderType();
+
+        final RenderType layer = RenderType.solid();
 
         if (layer == null) {
             final ChiseledBlockBakedModel[] models = new ChiseledBlockBakedModel[ChiselRenderType.values().length];

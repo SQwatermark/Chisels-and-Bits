@@ -6,7 +6,6 @@ import mod.chiselsandbits.chiseledblock.data.BitLocation;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.chiseledblock.data.VoxelShapeCache;
-import mod.chiselsandbits.client.CreativeClipboardTab;
 import mod.chiselsandbits.client.UndoTracker;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.core.ClientSide;
@@ -76,7 +75,7 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
 
             try {
                 final BlockEntityChiseledBlock tebc = getTileEntity(world, pos);
-                CreativeClipboardTab.addItem(tebc.getItemStack(player));
+//                CreativeClipboardTab.addItem(tebc.getItemStack(player));
 
                 UndoTracker.getInstance().add(world, pos, tebc.getBlobStateReference(), new VoxelBlobStateReference(0, 0));
             } catch (final ExceptionNoTileEntity e) {

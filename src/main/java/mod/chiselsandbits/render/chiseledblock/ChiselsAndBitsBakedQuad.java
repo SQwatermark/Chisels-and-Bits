@@ -6,7 +6,6 @@ import mod.chiselsandbits.render.cache.FormatInfo;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -153,7 +152,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
                 for (int e = 0; e < DefaultVertexFormat.BLOCK.getElements().size(); e++) {
                     float[] rawPart = formatData.get(DefaultVertexFormat.BLOCK).unpack(unLighted, v, e);
                     // TODO 亮度从哪弄的？
-                    LightUtil.pack(rawPart, packed, DefaultVertexFormat.BLOCK, v, e);
+//                    LightUtil.pack(rawPart, packed, DefaultVertexFormat.BLOCK, v, e);
                 }
             }
 

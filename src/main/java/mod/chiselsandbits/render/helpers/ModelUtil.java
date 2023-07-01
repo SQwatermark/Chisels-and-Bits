@@ -1,6 +1,8 @@
 package mod.chiselsandbits.render.helpers;
 
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.chiseledblock.BlockBitInfo;
 import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.DeprecationHelper;
@@ -26,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.pipeline.RemappingVertexPipeline;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -189,6 +192,7 @@ public class ModelUtil implements ICacheClearable {
     }
 
     private static void processFaces(ArrayList<ModelQuadLayerBuilder> list, List<BakedQuad> quads, BlockState state) {
+        PoseStack.Pose pose = new PoseStack().last();
         for (BakedQuad q : quads) {
             Direction face = q.getDirection();
             try {
@@ -225,7 +229,8 @@ public class ModelUtil implements ICacheClearable {
                     list.add(b);
                 }
 
-                q.pipe(b.uvReader);
+                var pipeline = new RemappingVertexPipeline(b.uvReader, DefaultVertexFormat.BLOCK);
+                pipeline.putBulkData(pose, q, 1.0f, 1.0f, 1.0f, 0, 0);
 
 //                if (ChiselsAndBits.getConfig().getClient().enableFaceLightmapExtraction.get()) {
 //                    //TODO: Check if this works.
@@ -269,7 +274,7 @@ public class ModelUtil implements ICacheClearable {
                         hasFaces = hasFaces || hasFaces(originalModel, state, f, weight, layer);
                     }
                 } catch (final Exception e) {
-                    // an exception was thrown.. use the item model and hope...
+                    // an exception was thrown... use the item model and hope...
                     hasFaces = false;
                 }
 
@@ -293,14 +298,16 @@ public class ModelUtil implements ICacheClearable {
         // 这个方向上是否有纹理？
         TextureAtlasSprite texture = quads.get(0).getSprite();
 
-//        ModelVertexRange mvr = new ModelVertexRange();
-//
-//        for (BakedQuad q : quads) {
-//            q.pipe(mvr);
-//        }
+        ModelVertexRange mvr = new ModelVertexRange();
 
-//        return mvr.getLargestRange() > 0 && !isMissing(texture);
-        return !isMissing(texture);
+        PoseStack.Pose pose = new PoseStack().last();
+        for (BakedQuad q : quads) {
+            var pipeline = new RemappingVertexPipeline(mvr, DefaultVertexFormat.BLOCK);
+            pipeline.putBulkData(pose, q, 1.0f, 1.0f, 1.0f, 0, 0);
+//             TODO 这里是否为了检测异常？
+        }
+
+        return mvr.getLargestRange() > 0 && !isMissing(texture);
     }
 
     private static boolean isMissing(TextureAtlasSprite texture) {
@@ -324,7 +331,7 @@ public class ModelUtil implements ICacheClearable {
 
         if (model != null) {
             try {
-                texture = findTexture(texture, getModelQuads(model, state, myFace, random, layer), myFace);
+                texture = findTexture(null, getModelQuads(model, state, myFace, random, layer), myFace);
 
                 if (texture == null) {
                     for (final Direction side : Direction.values()) {
@@ -360,7 +367,7 @@ public class ModelUtil implements ICacheClearable {
 
         blockToTexture.remove(Pair.of(layer, myFace), null);
         blockToTexture.putIfAbsent(Pair.of(layer, myFace), Maps.newHashMap());
-        blockToTexture.get(Pair.of(layer, myFace)).put(BlockRef, texture.getName().toString());
+        blockToTexture.get(Pair.of(layer, myFace)).put(BlockRef, texture.atlasLocation().toString());
         return texture;
     }
 

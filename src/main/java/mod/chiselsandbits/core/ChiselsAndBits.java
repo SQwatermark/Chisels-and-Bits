@@ -10,10 +10,7 @@ import mod.chiselsandbits.events.EventPlayerInteract;
 import mod.chiselsandbits.events.VaporizeWater;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.network.NetworkChannel;
-import mod.chiselsandbits.registry.ModBlockEntityTypes;
-import mod.chiselsandbits.registry.ModBlocks;
-import mod.chiselsandbits.registry.ModItems;
-import mod.chiselsandbits.registry.ModRecipeSerializers;
+import mod.chiselsandbits.registry.*;
 import mod.chiselsandbits.render.SmartModelManager;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import mod.chiselsandbits.utils.Constants;
@@ -47,7 +44,7 @@ public class ChiselsAndBits {
         instance = this;
 
         LanguageHandler.loadLangPath("assets/chiselsandbits/lang/%s.json"); // hotfix config comments, it's ugly bcs it's gonna be replaced
-        config = new Configuration(ModLoadingContext.get().getActiveContainer());
+        config = new Configuration();
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::onClientInit));
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(ChiselsAndBitsClient::onModelRegistry));
@@ -65,6 +62,7 @@ public class ChiselsAndBits {
 
         ModBlocks.onModConstruction();
         ModItems.onModConstruction();
+        ModItemGroups.onModConstruction();
         ModRecipeSerializers.onModConstruction();
         ModBlockEntityTypes.onModConstruction();
 

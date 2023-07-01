@@ -1,59 +1,78 @@
 package mod.chiselsandbits.render.helpers;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import org.jetbrains.annotations.NotNull;
 
-public class ModelLightMapReader extends BaseModelReader
-{
-	public int lv = 0;
-	final float maxLightmap = 32.0f / 0xffff;
-	private VertexFormat format = DefaultVertexFormat.BLOCK;
-	boolean hasLightMap = false;
+public class ModelLightMapReader implements VertexConsumer {
+    public int lv = 0;
+    final float maxLightmap = 32.0f / 0xffff;
+    private VertexFormat format = DefaultVertexFormat.BLOCK;
+    boolean hasLightMap = false;
 
-	public ModelLightMapReader()
-	{
-	}
+    public ModelLightMapReader() {
+    }
 
-	public void setVertexFormat(
-			VertexFormat format )
-	{
-		hasLightMap = false;
+//    public void setVertexFormat(
+//            VertexFormat format) {
+//        hasLightMap = false;
+//
+//        int eCount = format.getVertexSize();
+//        for (int x = 0; x < eCount; x++) {
+//            VertexFormatElement e = format.getElements().get(x);
+//            if (e.getUsage() == VertexFormatElement.Usage.UV && e.getIndex() == 1 && e.getType() == VertexFormatElement.Type.SHORT) {
+//                hasLightMap = true;
+//            }
+//        }
+//
+//        this.format = format;
+//    }
 
-		int eCount = format.getVertexSize();
-		for ( int x = 0; x < eCount; x++ )
-		{
-			VertexFormatElement e = format.getElements().get(x);
-			if ( e.getUsage() == VertexFormatElement.Usage.UV && e.getIndex() == 1 && e.getType() == VertexFormatElement.Type.SHORT )
-			{
-				hasLightMap = true;
-			}
-		}
+    @Override
+    public @NotNull VertexConsumer vertex(double pX, double pY, double pZ) {
+        return this;
+    }
 
-		this.format = format;
-	}
+    @Override
+    public @NotNull VertexConsumer color(int pRed, int pGreen, int pBlue, int pAlpha) {
+        return this;
+    }
 
-	@Override
-	public VertexFormat getVertexFormat()
-	{
-		return format;
-	}
+    @Override
+    public @NotNull VertexConsumer uv(float pU, float pV) {
+        return this;
+    }
 
-	@Override
-	public void put(
-			final int element,
-			final float... data )
-	{
-		final VertexFormatElement e = getVertexFormat().getElements().get(element);
+    @Override
+    public @NotNull VertexConsumer overlayCoords(int pU, int pV) {
+        return this;
+    }
 
-		if ( e.getUsage() == VertexFormatElement.Usage.UV && e.getIndex() == 1 && e.getType() == VertexFormatElement.Type.SHORT && data.length >= 2 && hasLightMap )
-		{
-			final int lvFromData_sky = (int) ( data[0] / maxLightmap ) & 0xf;
-			final int lvFromData_block = (int) ( data[1] / maxLightmap ) & 0xf;
+    @Override
+    public @NotNull VertexConsumer uv2(int pU, int pV) {
+        lv = Math.max(pU, lv);
+        lv = Math.max(pV, lv);
+        return this;
+    }
 
-			lv = Math.max( lvFromData_sky, lv );
-			lv = Math.max( lvFromData_block, lv );
-		}
-	}
+    @Override
+    public @NotNull VertexConsumer normal(float pX, float pY, float pZ) {
+        return this;
+    }
 
+    @Override
+    public void endVertex() {
+
+    }
+
+    @Override
+    public void defaultColor(int pDefaultR, int pDefaultG, int pDefaultB, int pDefaultA) {
+
+    }
+
+    @Override
+    public void unsetDefaultColor() {
+
+    }
 }

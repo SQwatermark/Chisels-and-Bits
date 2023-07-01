@@ -3,19 +3,17 @@ package mod.chiselsandbits.api;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 
@@ -206,7 +204,7 @@ public interface IChiselAndBitsAPI {
      *
      * @param modKeyBinding the {@link ModKeyBinding} value that denotes the C&B key
      *                      binding to return.
-     * @return a C&B {@link KeyBinding}.
+     * @return a C&B {@link KeyMapping}.
      */
     @OnlyIn(Dist.CLIENT)
     KeyMapping getKeyBinding(ModKeyBinding modKeyBinding);

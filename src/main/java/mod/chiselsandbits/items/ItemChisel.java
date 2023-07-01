@@ -61,19 +61,20 @@ public class ItemChisel extends DiggerItem implements IItemScrollWheel, IChiselM
 
     private static Item.Properties setupDamageStack(Tier tier, Item.Properties properties) {
         long uses = 1;
-        if (DIAMOND.equals(tier)) {
-            uses = ChiselsAndBits.getConfig().getServer().diamondChiselUses.get();
-        } else if (GOLD.equals(tier)) {
-            uses = ChiselsAndBits.getConfig().getServer().goldChiselUses.get();
-        } else if (IRON.equals(tier)) {
-            uses = ChiselsAndBits.getConfig().getServer().ironChiselUses.get();
-        } else if (STONE.equals(tier)) {
-            uses = ChiselsAndBits.getConfig().getServer().stoneChiselUses.get();
-        } else if (NETHERITE.equals(tier)) {
-            uses = ChiselsAndBits.getConfig().getServer().netheriteChiselUses.get();
-        }
+//        if (DIAMOND.equals(tier)) { TODO
+//            uses = ChiselsAndBits.getConfig().getServer().diamondChiselUses.get();
+//        } else if (GOLD.equals(tier)) {
+//            uses = ChiselsAndBits.getConfig().getServer().goldChiselUses.get();
+//        } else if (IRON.equals(tier)) {
+//            uses = ChiselsAndBits.getConfig().getServer().ironChiselUses.get();
+//        } else if (STONE.equals(tier)) {
+//            uses = ChiselsAndBits.getConfig().getServer().stoneChiselUses.get();
+//        } else if (NETHERITE.equals(tier)) {
+//            uses = ChiselsAndBits.getConfig().getServer().netheriteChiselUses.get();
+//        }
 
-        return properties.durability(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max(0, uses) : 0);
+//        return properties.durability(ChiselsAndBits.getConfig().getServer().damageTools.get() ? (int) Math.max(0, uses) : 0);
+        return properties.durability(100);
     }
 
     @OnlyIn(Dist.CLIENT)

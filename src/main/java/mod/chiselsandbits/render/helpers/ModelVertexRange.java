@@ -1,8 +1,9 @@
 package mod.chiselsandbits.render.helpers;
 
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import org.jetbrains.annotations.NotNull;
 
-public class ModelVertexRange extends BaseModelReader {
+public class ModelVertexRange implements VertexConsumer {
     private float minSumX = 1;
     private float minSumY = 1;
     private float minSumZ = 1;
@@ -23,29 +24,64 @@ public class ModelVertexRange extends BaseModelReader {
     }
 
     @Override
-    public void put(
-            final int element,
-            final float... data) {
-        final VertexFormatElement e = getVertexFormat().getElements().get(element);
-        if (e.getUsage() == VertexFormatElement.Usage.POSITION) {
-            if (vertCount == 0) {
-                minSumX = data[0];
-                minSumY = data[1];
-                minSumZ = data[2];
-                maxSumX = data[0];
-                maxSumY = data[1];
-                maxSumZ = data[2];
-            } else {
-                minSumX = Math.min(data[0], minSumX);
-                minSumY = Math.min(data[1], minSumY);
-                minSumZ = Math.min(data[2], minSumZ);
-                maxSumX = Math.max(data[0], maxSumX);
-                maxSumY = Math.max(data[1], maxSumY);
-                maxSumZ = Math.max(data[2], maxSumZ);
-            }
-
-            ++vertCount;
+    public @NotNull VertexConsumer vertex(double pX, double pY, double pZ) {
+        if (vertCount == 0) {
+            minSumX = (float) pX;
+            minSumY = (float) pY;
+            minSumZ = (float) pZ;
+            maxSumX = (float) pX;
+            maxSumY = (float) pY;
+            maxSumZ = (float) pZ;
+        } else {
+            minSumX = Math.min((float) pX, minSumX);
+            minSumY = Math.min((float) pY, minSumY);
+            minSumZ = Math.min((float) pZ, minSumZ);
+            maxSumX = Math.max((float) pX, maxSumX);
+            maxSumY = Math.max((float) pY, maxSumY);
+            maxSumZ = Math.max((float) pZ, maxSumZ);
         }
+
+        ++vertCount;
+        return this;
     }
 
+    @Override
+    public @NotNull VertexConsumer color(int pRed, int pGreen, int pBlue, int pAlpha) {
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer uv(float pU, float pV) {
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer overlayCoords(int pU, int pV) {
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer uv2(int pU, int pV) {
+        return this;
+    }
+
+    @Override
+    public @NotNull VertexConsumer normal(float pX, float pY, float pZ) {
+        return this;
+    }
+
+    @Override
+    public void endVertex() {
+
+    }
+
+    @Override
+    public void defaultColor(int pDefaultR, int pDefaultG, int pDefaultB, int pDefaultA) {
+
+    }
+
+    @Override
+    public void unsetDefaultColor() {
+
+    }
 }

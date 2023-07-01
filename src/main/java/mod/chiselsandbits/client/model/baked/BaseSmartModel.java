@@ -1,6 +1,5 @@
 package mod.chiselsandbits.client.model.baked;
 
-import mod.chiselsandbits.render.NullBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
@@ -16,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.EmptyModel;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +85,7 @@ public abstract class BaseSmartModel implements BakedModel {
     }
 
     public BakedModel handleBlockState(BlockState state, RandomSource random, ModelData modelData, RenderType renderType) {
-        return NullBakedModel.INSTANCE;
+        return EmptyModel.BAKED;
     }
 
     @Override

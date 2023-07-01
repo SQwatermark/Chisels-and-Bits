@@ -140,7 +140,7 @@ public class StackableCrafting extends CustomRecipe {
 
         for (int i = 0; i < aitemstack.size(); ++i) {
             final ItemStack itemstack = ModUtil.nonNull(inv.getItem(i));
-            aitemstack.set(i, net.minecraftforge.common.ForgeHooks.getContainerItem(itemstack));
+            aitemstack.set(i, itemstack.getCraftingRemainingItem());
         }
 
         return aitemstack;

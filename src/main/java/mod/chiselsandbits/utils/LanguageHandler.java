@@ -1,5 +1,18 @@
 package mod.chiselsandbits.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import mod.chiselsandbits.core.Log;
+import net.minecraft.client.Minecraft;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,31 +22,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import mod.chiselsandbits.core.Log;
-import net.minecraft.Util;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.TranslatableComponent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-
 /**
  * Helper class for localization and sending player messages.
  */
-public final class LanguageHandler
-{
+public final class LanguageHandler {
     /**
      * Private constructor to hide implicit one.
      */
-    private LanguageHandler()
-    {
+    private LanguageHandler() {
         // Intentionally left empty.
     }
 
@@ -44,22 +40,17 @@ public final class LanguageHandler
      * @param key     the key of the message.
      * @param message the message to send.
      */
-    public static void sendPlayerMessage(@NotNull final Player player, final String key, final Object... message)
-    {
+    public static void sendPlayerMessage(@NotNull final Player player, final String key, final Object... message) {
         player.sendSystemMessage(buildChatComponent(key.toLowerCase(Locale.US), message));
     }
 
-    public static Component buildChatComponent(final String key, final Object... message)
-    {
-        Component translation = null;
+    public static Component buildChatComponent(final String key, final Object... message) {
+        MutableComponent translation = null;
 
         int onlyArgsUntil = 0;
-        for (final Object object : message)
-        {
-            if (object instanceof Component)
-            {
-                if (onlyArgsUntil == 0)
-                {
+        for (final Object object : message) {
+            if (object instanceof Component) {
+                if (onlyArgsUntil == 0) {
                     onlyArgsUntil = -1;
                 }
                 break;
@@ -67,55 +58,43 @@ public final class LanguageHandler
             onlyArgsUntil++;
         }
 
-        if (onlyArgsUntil >= 0)
-        {
+        if (onlyArgsUntil >= 0) {
             final Object[] args = new Object[onlyArgsUntil];
             System.arraycopy(message, 0, args, 0, onlyArgsUntil);
 
             translation = Component.translatable(key, args);
         }
 
-        for (final Object object : message)
-        {
-            if (translation == null)
-            {
-                if (object instanceof Component)
-                {
+        for (final Object object : message) {
+            if (translation == null) {
+                if (object instanceof Component) {
                     translation = Component.translatable(key);
-                }
-                else
-                {
+                } else {
                     translation = Component.translatable(key, object);
                     continue;
                 }
             }
 
-            if (object instanceof Component)
-            {
+            if (object instanceof Component) {
                 translation.append(Component.literal(" "));
                 translation.append((Component) object);
-            }
-            else if (object instanceof String)
-            {
+            } else if (object instanceof String) {
                 boolean isInArgs = false;
-                for (final Object obj : translation.getArgs())
-                {
-                    if (obj.equals(object))
-                    {
-                        isInArgs = true;
-                        break;
-                    }
-                }
+                // TODO
+//                for (final Object obj : translation.getArgs()) {
+//                    if (obj.equals(object)) {
+//                        isInArgs = true;
+//                        break;
+//                    }
+//                }
 
-                if (!isInArgs)
-                {
+                if (!isInArgs) {
                     translation.append(" " + object);
                 }
             }
         }
 
-        if (translation == null)
-        {
+        if (translation == null) {
             translation = Component.translatable(key);
         }
 
@@ -129,17 +108,13 @@ public final class LanguageHandler
      * @param args     Objects for String.format().
      * @return Localized string.
      */
-    public static String format(final String inputKey, final Object... args)
-    {
+    public static String format(final String inputKey, final Object... args) {
         final String key = inputKey.toLowerCase(Locale.US);
         final String result;
-        if (args.length == 0)
-        {
-            result = Component.translatable(key).getContents();
-        }
-        else
-        {
-            result = Component.translatable(key, args).getContents();
+        if (args.length == 0) {
+            result = Component.translatable(key).getString();
+        } else {
+            result = Component.translatable(key, args).getString();
         }
         return result.isEmpty() ? key : result;
     }
@@ -151,23 +126,19 @@ public final class LanguageHandler
      * @param key     key of the message.
      * @param message the message.
      */
-    public static void sendPlayersMessage(@Nullable final List<Player> players, final String key, final Object... message)
-    {
-        if (players == null || players.isEmpty())
-        {
+    public static void sendPlayersMessage(@Nullable final List<Player> players, final String key, final Object... message) {
+        if (players == null || players.isEmpty()) {
             return;
         }
 
         final Component textComponent = buildChatComponent(key.toLowerCase(Locale.US), message);
 
-        for (final Player player : players)
-        {
+        for (final Player player : players) {
             player.sendSystemMessage(textComponent);
         }
     }
 
-    public static void sendMessageToPlayer(final Player player, final String key, final Object... format)
-    {
+    public static void sendMessageToPlayer(final Player player, final String key, final Object... format) {
         player.sendSystemMessage(Component.literal(translateKeyWithFormat(key, format)));
     }
 
@@ -178,8 +149,7 @@ public final class LanguageHandler
      * @param format String.format() attributes
      * @return formatted string
      */
-    public static String translateKeyWithFormat(final String key, final Object... format)
-    {
+    public static String translateKeyWithFormat(final String key, final Object... format) {
         return String.format(translateKey(key.toLowerCase(Locale.US)), format);
     }
 
@@ -189,82 +159,66 @@ public final class LanguageHandler
      * @param key translation key
      * @return readable string
      */
-    public static String translateKey(final String key)
-    {
+    public static String translateKey(final String key) {
         return LanguageCache.getInstance().translateKey(key.toLowerCase(Locale.US));
     }
 
     /**
      * Sets our cache to use mc default one.
      */
-    public static void setMClanguageLoaded()
-    {
+    public static void setMClanguageLoaded() {
         LanguageCache.getInstance().isMCloaded = true;
         LanguageCache.getInstance().languageMap = null;
     }
 
-    public static void loadLangPath(final String path)
-    {
+    public static void loadLangPath(final String path) {
         LanguageCache.getInstance().load(path);
     }
 
-    private static class LanguageCache
-    {
+    private static class LanguageCache {
         private static LanguageCache instance;
         private boolean isMCloaded = false;
         private Map<String, String> languageMap;
 
-        private LanguageCache()
-        {
+        private LanguageCache() {
             final String fileLoc = "assets/" + Constants.MOD_ID + "/lang/%s.json";
             load(fileLoc);
         }
 
-        private void load(final String path)
-        {
+        private void load(final String path) {
             final String defaultLocale = "en_us";
 
             //noinspection ConstantConditions Trust me, Minecraft.getInstance() can be null, when you run Data Generators!
             String locale = DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
-              () -> () -> Minecraft.getInstance() == null ? null : Minecraft.getInstance().options.languageCode);
+                    () -> () -> Minecraft.getInstance() == null ? null : Minecraft.getInstance().options.languageCode);
 
-            if (locale == null)
-            {
+            if (locale == null) {
                 locale = defaultLocale;
             }
 
             InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format(path, locale));
-            if (is == null)
-            {
+            if (is == null) {
                 is = Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format(path, defaultLocale));
             }
 
 
-            try
-            {
-                languageMap = new Gson().fromJson(new InputStreamReader(Objects.requireNonNull(is), StandardCharsets.UTF_8), new TypeToken<Map<String, String>>()
-                {}.getType());
+            try {
+                languageMap = new Gson().fromJson(new InputStreamReader(Objects.requireNonNull(is), StandardCharsets.UTF_8), new TypeToken<Map<String, String>>() {
+                }.getType());
                 is.close();
-            }
-            catch (IOException | NullPointerException e)
-            {
+            } catch (IOException | NullPointerException e) {
                 Log.logError("Could not load langauge.", e);
             }
         }
 
-        private static LanguageCache getInstance()
-        {
+        private static LanguageCache getInstance() {
             return instance == null ? instance = new LanguageCache() : instance;
         }
 
-        private String translateKey(final String key)
-        {
-            if (isMCloaded)
-            {
+        private String translateKey(final String key) {
+            if (isMCloaded) {
                 return Language.getInstance().getOrDefault(key);
-            }
-            else
-            {
+            } else {
                 final String res = languageMap.get(key);
                 return res == null ? key : res;
             }
