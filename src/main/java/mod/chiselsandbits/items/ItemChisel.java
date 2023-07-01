@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 import static net.minecraft.world.item.Tiers.*;
 
 /**
- * 凿子
+ * 凿子 TODO 移除为生存模式设计的行为
  */
 public class ItemChisel extends DiggerItem implements IItemScrollWheel, IChiselModeItem {
 

@@ -1,6 +1,8 @@
 package mod.chiselsandbits.registry;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import mod.chiselsandbits.core.ChiselsAndBits;
+import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.utils.Constants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -9,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+
+import java.util.List;
 
 public final class ModItemGroups {
 
@@ -31,7 +35,12 @@ public final class ModItemGroups {
                         output.accept(ModItems.ITEM_WRENCH.get());
                         output.accept(ModItems.ITEM_TAPE_MEASURE.get());
                         output.accept(ModItems.ITEM_MAGNIFYING_GLASS.get());
-                        // TODO
+                        ItemChiseledBit itemChiseledBit = ModItems.ITEM_BLOCK_BIT.get();
+                        List<ItemStack> list = new ObjectArrayList<>();
+                        itemChiseledBit.fillItemCategory(list);
+                        for (ItemStack itemStack : list) {
+                            output.accept(itemStack);
+                        }
 //                        output.accept(ModItems.ITEM_BLOCK_BIT.get());
                     })
                     .backgroundSuffix("item_search.png")

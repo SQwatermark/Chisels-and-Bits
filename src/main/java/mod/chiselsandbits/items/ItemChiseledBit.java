@@ -51,7 +51,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
- * 碎屑
+ * 碎屑 TODO 移除为生存模式设计的行为
  */
 public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselModeItem, ICacheClearable {
 
@@ -136,8 +136,10 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
             Log.logError("Unable to get Item Details for Bit.", e);
         }
 
-        if (target == null || target.getItem() == null) {
+        if (target == null) {
             return null;
+        } else {
+            target.getItem();
         }
 
         try {
@@ -224,19 +226,15 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
         final Vec3 ray_to = PlayerRay.getRight();
         final ClipContext rtc = new ClipContext(ray_from, ray_to, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, context.getPlayer());
 
-        final HitResult mop = context.getLevel().clip(rtc);
-        if (mop != null) {
-            final BlockHitResult rayTraceResult = (BlockHitResult) mop;
-            return onItemUseInternal(
-                    context.getPlayer(),
-                    context.getLevel(),
-                    context.getClickedPos(),
-                    context.getHand(),
-                    rayTraceResult
-            );
-        }
+        final BlockHitResult mop = context.getLevel().clip(rtc);
+        return onItemUseInternal(
+                context.getPlayer(),
+                context.getLevel(),
+                context.getClickedPos(),
+                context.getHand(),
+                mop
+        );
 
-        return InteractionResult.FAIL;
     }
 
     public InteractionResult onItemUseInternal(
@@ -270,9 +268,7 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
             if (tebc != null) {
                 PacketChisel pc = null;
                 if (mode == ChiselMode.DRAWN_REGION) {
-                    if (world.isClientSide) {
-                        ClientSide.instance.pointAt(getBitOperation(player, hand, stack).getToolType(), bitLocation, hand);
-                    }
+                    ClientSide.instance.pointAt(getBitOperation(player, hand, stack).getToolType(), bitLocation, hand);
                     return InteractionResult.FAIL;
                 } else {
                     pc = new PacketChisel(getBitOperation(player, hand, stack), bitLocation, rayTraceResult.getDirection(), ChiselMode.castMode(mode), hand);
@@ -315,34 +311,27 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
         bits = null;
     }
 
-    // TODO
-//    @Override
-//    public void fillItemCategory(final CreativeModeTab tab, final NonNullList<ItemStack> items) {
-//        if (!this.allowdedIn(tab)) // is this my creative tab?
-//        {
-//            return;
-//        }
-//
-//        if (bits == null) {
-//            bits = new ArrayList<>();
-//
-//            final NonNullList<ItemStack> List = NonNullList.create();
-//            final BitSet used = new BitSet(4096);
-//
-//            for (final Object obj : ForgeRegistries.ITEMS) {
-//                if (!(obj instanceof BlockItem)) {
-//                    continue;
-//                }
-//
-//                try {
+
+    public void fillItemCategory(List<ItemStack> items) {
+        if (bits == null) {
+            bits = new ArrayList<>();
+
+            final NonNullList<ItemStack> itemList = NonNullList.create();
+            final BitSet used = new BitSet(4096);
+
+            for (Item item : ForgeRegistries.ITEMS) {
+                if (!(item instanceof BlockItem)) {
+                    continue;
+                }
+
+                try {
 //                    Item it = (Item) obj;
 //                    final CreativeModeTab ctab = it.getItemCategory();
 //
 //                    if (ctab != null) {
-//                        it.fillItemCategory(ctab, List);
+//                        it.fillItemCategory(ctab, itemList);
 //                    }
-//
-//                    for (final ItemStack out : List) {
+//                    for (ItemStack out : itemList) {
 //                        it = out.getItem();
 //
 //                        if (!(it instanceof BlockItem)) {
@@ -355,26 +344,32 @@ public class ItemChiseledBit extends Item implements IItemScrollWheel, IChiselMo
 //                            bits.add(ItemChiseledBit.createStack(ModUtil.getStateId(state), 1, false));
 //                        }
 //                    }
-//
-//                } catch (final Throwable t) {
-//                    // a mod did something that isn't acceptable, let them crash
-//                    // in their own code...
-//                }
-//
-//                List.clear();
-//            }
-//
-//            for (final Fluid o : ForgeRegistries.FLUIDS) {
-//                if (!o.defaultFluidState().isSource()) {
-//                    continue;
-//                }
-//
-//                bits.add(ItemChiseledBit.createStack(Block.getId(o.defaultFluidState().createLegacyBlock()), 1, false));
-//            }
-//        }
-//
-//        items.addAll(bits);
-//    }
+                    ItemStack out = new ItemStack(item);
+                    final BlockState state = DeprecationHelper.getStateFromItem(out);
+                    if (state != null && BlockBitInfo.canChisel(state) && !(state.getBlock() instanceof BlockChiseled)) { // 需要排除雕刻方块自己
+                        used.set(ModUtil.getStateId(state));
+                        bits.add(ItemChiseledBit.createStack(ModUtil.getStateId(state), 1, false));
+                    }
+
+                } catch (final Throwable t) {
+                    // a mod did something that isn't acceptable, let them crash
+                    // in their own code...
+                }
+
+                itemList.clear();
+            }
+
+            for (final Fluid o : ForgeRegistries.FLUIDS) {
+                if (!o.defaultFluidState().isSource()) {
+                    continue;
+                }
+
+                bits.add(ItemChiseledBit.createStack(Block.getId(o.defaultFluidState().createLegacyBlock()), 1, false));
+            }
+        }
+
+        items.addAll(bits);
+    }
 
     public static boolean sameBit(
             final ItemStack output,
