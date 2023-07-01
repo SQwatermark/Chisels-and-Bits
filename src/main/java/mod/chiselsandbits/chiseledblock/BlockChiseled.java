@@ -457,7 +457,7 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
             try {
                 return getTileEntity(level, pos).getLightValue();
             } catch (final ExceptionNoTileEntity e) {
-                Log.noTileError(e); // TODO 为什么雕刻树叶这里会报错
+                Log.noTileError(e);
             }
         }
 

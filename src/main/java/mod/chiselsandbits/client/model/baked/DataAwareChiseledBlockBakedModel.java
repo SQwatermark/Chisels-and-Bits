@@ -1,6 +1,7 @@
 package mod.chiselsandbits.client.model.baked;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.render.ModelCombined;
@@ -41,21 +42,18 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
     private final ItemOverrides overrides = new ItemOverrides() {
         @Override
         public @NotNull BakedModel resolve(@NotNull BakedModel pModel, @NotNull ItemStack stack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed) {
-//            ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
-//                    stack,
-//                    ChiselRenderType.fromLayer(MinecraftForgeClient.getRenderType(), false));
-//            ChiseledBlockBakedModel b = ChiseledBlockSmartModel.getOrCreateBakedModel(
-//                    stack,
-//                    ChiselRenderType.fromLayer(MinecraftForgeClient.getRenderType(), true));
-//
-//            if (a.isEmpty()) {
-//                return b;
-//            } else if (b.isEmpty()) {
-//                return a;
-//            } else {
-//                return new ModelCombined(a, b);
-//            }
-            return EmptyModel.BAKED;
+            List<BakedModel> models = new ObjectArrayList<>(); //TODO 应该有优化空间
+            for (RenderType layer : RenderType.chunkBufferLayers()) {
+                ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
+                        stack,
+                        ChiselRenderType.fromLayer(layer, false));
+                ChiseledBlockBakedModel b = ChiseledBlockSmartModel.getOrCreateBakedModel(
+                        stack,
+                        ChiselRenderType.fromLayer(layer, true));
+                models.add(a);
+                models.add(b);
+            }
+            return new ModelCombined(models.toArray(new BakedModel[0]));
         }
     };
 
@@ -156,7 +154,7 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
 
             BakedModel baked;
             if (ChiseledBlockSmartModel.FLUID_RENDER_TYPES.get(RenderType.chunkBufferLayers().indexOf(layer))) {
-                // 分别获取流体和方块的在该渲染层的缓存的模型
+                // 分别获取流体和方块的在该渲染层的缓存的模型 TODO 似乎可能获取到一样的东西
                 ChiseledBlockBakedModel a = ChiseledBlockSmartModel.getOrCreateBakedModel(
                         (BlockEntityChiseledBlock) Objects.requireNonNull(world.getBlockEntity(pos)),
                         ChiselRenderType.fromLayer(layer, false));
