@@ -148,11 +148,8 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
         }
     }
 
-    public static @Nonnull
-    BlockEntityChiseledBlock getTileEntity(
-            final @Nonnull BlockGetter world,
-            final @Nonnull BlockPos pos) throws ExceptionNoTileEntity {
-        final BlockEntity te = ModUtil.getTileEntitySafely(world, pos);
+    public static @Nonnull BlockEntityChiseledBlock getTileEntity(@Nonnull BlockGetter world, @Nonnull BlockPos pos) throws ExceptionNoTileEntity {
+        BlockEntity te = ModUtil.getTileEntitySafely(world, pos);
         return getTileEntity(te);
     }
 
@@ -464,7 +461,7 @@ public class BlockChiseled extends Block implements EntityBlock, IMultiStateBloc
             try {
                 return getTileEntity(level, pos).getLightValue();
             } catch (final ExceptionNoTileEntity e) {
-                Log.noTileError(e);
+                Log.noTileError(e); // TODO 为什么雕刻树叶这里会报错
             }
         }
 

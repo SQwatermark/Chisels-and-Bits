@@ -276,7 +276,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
 
                                     case NORMAL:
                                         // this fixes a bug with Forge AO?? and
-                                        // solid blocks.. I have no idea why...
+                                        // solid blocks... I have no idea why...
                                         float normalShift = 0.999f;
                                         faceBuilder.put(elementIndex, normalShift * direction.getStepX(), normalShift * direction.getStepY(), normalShift * direction.getStepZ());
                                         break;

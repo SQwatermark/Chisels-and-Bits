@@ -511,10 +511,11 @@ public class ModUtil {
     }
 
     public static void cacheFastStates() {
-        if (!ChiselsAndBits.getConfig().getServer().lowMemoryMode.get()) {
-            // cache id -> state table as an array for faster rendering lookups.
-            IDRelay = new CachedStateLookup();
-        }
+//        if (!ChiselsAndBits.getConfig().getServer().lowMemoryMode.get()) { TODO
+//            // cache id -> state table as an array for faster rendering lookups.
+//
+//        }
+        IDRelay = new CachedStateLookup();
     }
 
     public static int getStackSize(

@@ -2,6 +2,7 @@ package mod.chiselsandbits.render.chiseledblock;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import mod.chiselsandbits.render.cache.FormatInfo;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -55,9 +56,9 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
 //		}
 //	}
 
-    private float[] getRawPart(int v, int i) {
-        return formatData.get(DefaultVertexFormat.BLOCK).unpack(raw, v, i);
-    }
+//    private float[] getRawPart(int v, int i) {
+//        return formatData.get(DefaultVertexFormat.BLOCK).unpack(raw, v, i);
+//    }
 
     public ChiselsAndBitsBakedQuad(
             final int[] raw,
@@ -98,8 +99,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
             return format;
         }
 
-        public void setQuadTint(
-                final int tint) {
+        public void setQuadTint(int tint) {
             this.tint = tint;
         }
 
@@ -108,9 +108,7 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
         }
 
         @Override
-        public void put(
-                final int element,
-                final float... data) {
+        public void put(int element, float... data) {
             for (int i = 0; i < 4; i++) {
                 if (i < data.length) {
                     unpackedData[vertices][element][i] = data[i];
@@ -146,13 +144,13 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
 
             int[] unLighted = packData(DefaultVertexFormat.BLOCK, unpackedData);
 
-            int[] packed = new int[DefaultVertexFormat.BLOCK.getIntegerSize() * 4];
+            int[] packed = new int[DefaultVertexFormat.BLOCK.getVertexSize()];
 
             for (int v = 0; v < 4; v++) {
                 for (int e = 0; e < DefaultVertexFormat.BLOCK.getElements().size(); e++) {
                     float[] rawPart = formatData.get(DefaultVertexFormat.BLOCK).unpack(unLighted, v, e);
                     // TODO 亮度从哪弄的？
-//                    LightUtil.pack(rawPart, packed, DefaultVertexFormat.BLOCK, v, e);
+                    pack(rawPart, packed, DefaultVertexFormat.BLOCK, v, e);
                 }
             }
 
@@ -162,6 +160,46 @@ public class ChiselsAndBitsBakedQuad extends BakedQuad {
             }
 
             return new ChiselsAndBitsBakedQuad(unLighted, packed, tint, orientation, sprite);
+        }
+
+        public static void pack(float[] from, int[] to, VertexFormat formatTo, int v, int e)
+        {
+            VertexFormatElement element = formatTo.getElements().get(e);
+            int vertexStart = v * formatTo.getVertexSize() + formatTo.getOffset(e);
+            int count = element.getElementCount();
+            VertexFormatElement.Type type = element.getType();
+            int size = type.getSize();
+            int mask = (256 << (8 * (size - 1))) - 1;
+            for(int i = 0; i < 4; i++)
+            {
+                if(i < count)
+                {
+                    int pos = vertexStart + size * i;
+                    int index = pos >> 2;
+                    int offset = pos & 3;
+                    int bits = 0;
+                    float f = i < from.length ? from[i] : 0;
+                    if(type == VertexFormatElement.Type.FLOAT)
+                    {
+                        bits = Float.floatToRawIntBits(f);
+                    }
+                    else if(
+                            type == VertexFormatElement.Type.UBYTE ||
+                                    type == VertexFormatElement.Type.USHORT ||
+                                    type == VertexFormatElement.Type.UINT
+                    )
+                    {
+                        bits = Math.round(f * mask);
+                    }
+                    else
+                    {
+                        bits = Math.round(f * (mask >> 1));
+                    }
+                    to[index] &= ~(mask << (offset * 8));
+                    to[index] |= (((bits & mask) << (offset * 8)));
+                    // TODO handle overflow into to[index + 1]
+                }
+            }
         }
 
         @Override
