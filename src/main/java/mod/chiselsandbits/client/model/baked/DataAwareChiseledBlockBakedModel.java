@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import mod.chiselsandbits.chiseledblock.BlockEntityChiseledBlock;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlobStateReference;
 import mod.chiselsandbits.render.ModelCombined;
+import mod.chiselsandbits.render.NullBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiselRenderType;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
@@ -97,7 +98,7 @@ public class DataAwareChiseledBlockBakedModel implements BakedModel {
             bakedModel = renderTypeBakedModelMap.get(renderType);
         }
         if (bakedModel == null) {
-            bakedModel = EmptyModel.BAKED;
+            bakedModel = NullBakedModel.INSTANCE;
         }
         return bakedModel.getQuads(state, side, rand, data, renderType);
     }

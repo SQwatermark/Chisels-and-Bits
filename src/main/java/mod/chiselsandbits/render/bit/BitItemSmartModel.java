@@ -9,6 +9,7 @@ import mod.chiselsandbits.events.TickHandler;
 import mod.chiselsandbits.interfaces.ICacheClearable;
 import mod.chiselsandbits.items.ItemChiseledBit;
 import mod.chiselsandbits.render.ModelCombined;
+import mod.chiselsandbits.render.NullBakedModel;
 import mod.chiselsandbits.render.chiseledblock.ChiselRenderType;
 import mod.chiselsandbits.render.chiseledblock.ChiseledBlockSmartModel;
 import net.minecraft.client.renderer.RenderType;
@@ -44,7 +45,7 @@ public class BitItemSmartModel extends BaseSmartModel implements ICacheClearable
             //We are running an empty bit, for display purposes.
             //Lets loop:
             if (alternativeStacks.isEmpty()) {
-                return EmptyModel.BAKED;
+                return NullBakedModel.INSTANCE;
 //                ModItems.ITEM_BLOCK_BIT.get().fillItemCategory(Objects.requireNonNull(ModItems.ITEM_BLOCK_BIT.get().getItemCategory()), alternativeStacks); TODO
             }
 
