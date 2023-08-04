@@ -602,7 +602,7 @@ public final class VoxelBlob implements IVoxelSrc {
     }
 
     public Map<Integer, Integer> getBlockSums() {
-        final Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
+        final Map<Integer, Integer> counts = new HashMap<>();
 
         int lastType = values[0];
         int firstOfType = 0;
@@ -640,7 +640,7 @@ public final class VoxelBlob implements IVoxelSrc {
         final Map<Integer, Integer> count = getBlockSums();
 
         final List<StateCount> out;
-        out = new ArrayList<StateCount>(count.size());
+        out = new ArrayList<>(count.size());
 
         for (final Entry<Integer, Integer> o : count.entrySet()) {
             out.add(new StateCount(o.getKey(), o.getValue()));

@@ -105,7 +105,7 @@ public class ItemPositivePrint extends ItemNegativePrint implements IChiselModeI
 
 			tmp.fillWith( state );
 			final CompoundTag comp = new CompoundTag();
-			tmp.writeChisleData( comp, false );
+			tmp.writeChiselData( comp, false );
 
 			comp.putByte( ModUtil.NBT_SIDE, (byte) ModUtil.getPlaceFace( player ).ordinal() );
 			return comp;

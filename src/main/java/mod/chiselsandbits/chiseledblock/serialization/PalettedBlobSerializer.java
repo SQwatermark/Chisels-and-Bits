@@ -55,9 +55,9 @@ public class PalettedBlobSerializer extends BlobSerializer implements PaletteRes
             if (this.bits <= 8) {
                 this.bits = 4;
                 // TODO
-                this.palette = LinearPalette.create(this.bits, this.registry, this, Arrays.asList());
+                this.palette = LinearPalette.create(this.bits, this.registry, this, List.of());
             } else if (this.bits < 17) {
-                this.palette = new HashMapPalette<BlockState>(this.registry, this.bits, this, Arrays.asList());
+                this.palette = new HashMapPalette<>(this.registry, this.bits, this, List.of());
             } else {
                 this.palette = this.registryPalette;
                 this.bits = Mth.ceillog2(this.registry.size());

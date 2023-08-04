@@ -2,7 +2,6 @@ package mod.chiselsandbits.crafting;
 
 import mod.chiselsandbits.chiseledblock.NBTBlobConverter;
 import mod.chiselsandbits.chiseledblock.data.VoxelBlob;
-import mod.chiselsandbits.core.ChiselsAndBits;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.items.ItemMirrorPrint;
 import mod.chiselsandbits.items.ItemNegativePrint;
@@ -102,7 +101,7 @@ public class MirrorTransferCrafting extends CustomRecipe {
             tmp.setBlob(bestBlob);
 
             final CompoundTag comp = ModUtil.getTagCompound(targetA).copy();
-            tmp.writeChisleData(comp, false);
+            tmp.writeChiselData(comp, false);
 
             final ItemStack outputPattern = new ItemStack(targetB.getItem());
             outputPattern.setTag(comp);

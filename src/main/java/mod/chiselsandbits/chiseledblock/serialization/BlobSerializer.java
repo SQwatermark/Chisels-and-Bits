@@ -22,7 +22,7 @@ public class BlobSerializer
 	{
 		final Map<Integer, Integer> entries = toDeflate.getBlockSums();
 
-		index = new HashMap<Integer, Integer>( types = entries.size() );
+		index = new HashMap<>(types = entries.size());
 		palette = new int[types];
 
 		int offset = 0;
