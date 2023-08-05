@@ -140,7 +140,7 @@ public class NBTBlobConverter {
 
         if (compound.get(NBT_PRIMARY_STATE) instanceof StringTag) {
             primaryBlockState = StringStates.getStateIDFromName(compound.getString(NBT_PRIMARY_STATE));
-        }
+        } else
         {
             primaryBlockState = compound.getInt(NBT_PRIMARY_STATE);
         }

@@ -16,7 +16,7 @@ public class BlockColorChiseled implements BlockColor {
 
     @Override
     public int getColor(@NotNull BlockState pState, @Nullable BlockAndTintGetter pLevel, @Nullable BlockPos pPos, int pTintIndex) {
-        // 一点hack
+        // 一点hack，利用tintindex存取方块id数据，可存24位（但也导致tintindex的值超过8位会出问题）
         BlockState tstate = ModUtil.getStateById(pTintIndex >> TINT_BITS);
         int tintValue = pTintIndex & TINT_MASK;
         return Minecraft.getInstance().getBlockColors().getColor(tstate, pLevel, pPos, tintValue);
